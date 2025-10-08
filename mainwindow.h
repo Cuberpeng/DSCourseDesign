@@ -22,6 +22,7 @@
 #include "canvas.h"
 #include "seqlist.h"
 #include "linklist.h"
+#include "stack.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -42,6 +43,12 @@ private slots:
     void linklistErase();
     void linklistClear();
 
+    //栈
+    void stackBuild();
+    void stackPush();
+    void stackPop();
+    void stackClear();
+
 private:
     Canvas* view{};
     QTimer timer;
@@ -53,7 +60,7 @@ private:
     // 布局绘制助手
     void drawSeqlist(const ds::Seqlist& sl);
     void drawLinklist(const ds::Linklist& ll);
-    //void drawStack(const ds::Stack& st);
+    void drawStack(const ds::Stack& st);
     //void drawBT(ds::BTNode* root, qreal x, qreal y, qreal xspan, int depth, int highlightKey=-99999);
     //int subtreeWidth(ds::BTNode* root);
     //void drawHuff(ds::HNode* root, qreal x, qreal y, qreal xspan);
@@ -74,10 +81,14 @@ private:
     QLineEdit* linklistValue{};
     QSpinBox* linklistPosition{};
 
+    //栈
+    QLineEdit* stackInput{};
+    QLineEdit* stackValue{};
 
     // 后端持久状态
     ds::Seqlist seq;
     ds::Linklist link;
+    ds::Stack st;
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;

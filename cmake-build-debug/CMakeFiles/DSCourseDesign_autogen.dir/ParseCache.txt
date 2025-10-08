@@ -915,5 +915,8 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
+ mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h
+D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp

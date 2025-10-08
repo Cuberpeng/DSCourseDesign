@@ -688,5 +688,7 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h \
+	D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp \
+	D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h \
 	D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/cmake/win/x64/bin/cmake.exe

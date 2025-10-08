@@ -105,6 +105,44 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
         tabs->addTab(w, "链表");
     }
 
+    //Tab:栈
+    {
+        QWidget* w = new QWidget;
+        auto* v = new QVBoxLayout(w);
+        auto* f = new QFormLayout;
+        v->addLayout(f);
+        stackInput = new QLineEdit;
+        stackInput->setPlaceholderText("例如: 1 3 5 7");
+        f->addRow("初始序列", stackInput);
+        auto* hb0 = new QHBoxLayout;
+        v->addLayout(hb0);
+        auto* btnRebuild = new QPushButton("建立");
+        hb0->addWidget(btnRebuild);
+        auto* btnClear = new QPushButton("清空");
+        hb0->addWidget(btnClear);
+        //操作行
+        auto* hb1 = new QHBoxLayout;
+        v->addLayout(hb1);
+        stackValue = new QLineEdit;
+        stackValue->setPlaceholderText("值");
+        auto* btnPush = new QPushButton("入栈");
+        hb1->addWidget(new QLabel("值:"));
+        hb1->addWidget(stackValue);
+        hb1->addWidget(btnPush);
+        auto* hb2 = new QHBoxLayout;
+        v->addLayout(hb2);
+        auto* btnPop = new QPushButton("出栈");
+        hb2->addWidget(btnPop);
+
+        // 信号连接
+        connect(btnRebuild,&QPushButton::clicked,this,&MainWindow::stackBuild);
+        connect(btnClear,&QPushButton::clicked,this,&MainWindow::stackClear);
+        connect(btnPush,&QPushButton::clicked,this,&MainWindow::stackPush);
+        connect(btnPop,&QPushButton::clicked,this,&MainWindow::stackPop);
+
+        tabs->addTab(w, "栈");
+    }
+
 
     //演示播放定时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
@@ -263,6 +301,68 @@ void MainWindow::linklistClear() {
     statusBar()->showMessage("链表：已清空");
 }
 
+//栈
+void MainWindow::stackBuild(){
+    //st.clear();
+    //auto a = parseIntList(stackInput->text()); // 与顺序表/链表一致的解析
+    //for (int x : a) st.push(x);                   // 顺序压栈：底 1 ... 顶 为最后一个
+    //drawStack(st);
+    //statusBar()->showMessage("栈：已从序列重建");
+
+
+    st.clear();
+    auto a = parseIntList(stackInput->text());
+
+    // 准备步骤播放
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+    view->resetScene();
+    view->setTitle("栈：建立");
+
+    // 第一步：空表
+    steps.push_back([this](){
+      drawStack(st);
+      statusBar()->showMessage("栈：开始建立");
+    });
+
+    // 依次插入
+    for (int x : a){
+        steps.push_back([this, x](){
+            st.push(x);
+          drawStack(st);
+          statusBar()->showMessage(QString("栈：插入 %1").arg(x));
+        });
+    }
+
+    // 开始播放
+    timer.start();
+}
+void MainWindow::stackPush() {
+    bool ok = false;
+    int v = stackValue->text().toInt(&ok);
+    if(!ok) {
+        statusBar()->showMessage("栈：请输入有效的值");
+        return;
+    }
+    st.push(v);
+    drawStack(st);
+    statusBar()->showMessage(QString("栈：push(%1)").arg(v));
+}
+void MainWindow::stackPop() {
+    int out=0;
+    if(!st.pop(&out)) {
+        statusBar()->showMessage("栈：空栈，无法 pop");
+        return;
+    }
+    drawStack(st);
+    statusBar()->showMessage(QString("栈：pop() -> %1").arg(out));
+}
+void MainWindow::stackClear() {
+    st.clear();
+    drawStack(st);
+    statusBar()->showMessage("栈：已清空");
+}
 
 
 
@@ -273,7 +373,7 @@ void MainWindow::drawSeqlist(const ds::Seqlist& sl){
     view->setTitle("顺序表");
     const int n = sl.size();
     const qreal y = 220;
-    for(int i=0;i<n;i++) {
+    for(int i = 0;i < n;i++) {
         qreal x = 120 + i*90;
         //auto *nitem = view->addNode(x,y, four(sl.get(i)));
         view->addNode(x, y, QString::number(sl.get(i)));
@@ -293,12 +393,21 @@ void MainWindow::drawLinklist(const ds::Linklist& ll){
         auto* idx = view->Scene()->addText(QString::number(i));
         idx->setDefaultTextColor(Qt::darkGray);
         idx->setPos(x-6, y+40);
-        if(lastx>0) view->addEdge(QPointF(lastx,y), QPointF(x-34,y));
-        lastx=x+34;
-        x+=120;
-        p=p->next;
+        if(lastx > 0) view->addEdge(QPointF(lastx,y), QPointF(x-34,y));
+        lastx = x+34;
+        x += 120;
+        p = p->next;
         i++;
         idx++;
+    }
+}
+void MainWindow::drawStack(const ds::Stack& st){
+    view->resetScene();
+    view->setTitle("顺序栈");
+    const int n = st.size();
+    qreal x=220, y=420;
+    for(int i = 0;i < n;i++) {
+        view->addNode(x, y - i*90, QString::number(i==n-1? st.getPeek(): st.get(i)));
     }
 }
 

@@ -323,6 +323,12 @@
 			null
 		],
 		[
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h",
+			"MU",
+			"EWIEGA46WW/moc_stack.cpp",
+			null
+		],
+		[
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h",
 			"MU",
 			"EWIEGA46WW/moc_tool.cpp",
@@ -412,7 +418,8 @@
 			"MU",
 			null
 		],
-		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp", "MU", null ]
+		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp", "MU", null ],
+		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp", "MU", null ]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],

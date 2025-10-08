@@ -466,4 +466,5 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qwidget.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h \
-  D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
+  D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h \
+  D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h
