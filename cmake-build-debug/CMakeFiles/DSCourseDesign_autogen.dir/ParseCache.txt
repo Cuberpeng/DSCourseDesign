@@ -2,6 +2,7 @@
 D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/main.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/windows.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/window.h
@@ -911,6 +912,8 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qwidget.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/moc_predefs.h
+ mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h
+D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp
