@@ -1,0 +1,14 @@
+# ninja log v6
+4295	50707	7815378554186179	CMakeFiles/DSCourseDesign.dir/canvas.cpp.obj	d28e95f12103c2b3
+2019	8440	7815395164131958	CMakeFiles/DSCourseDesign.dir/DSCourseDesign_autogen/mocs_compilation.cpp.obj	158fed05583ea7e
+11	1361	7816029342136601	build.ninja	f04af0baa5d23505
+36	414	7815964986899772	D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/mocs_compilation.cpp	184e551ac9274bd
+36	414	7815964986899772	DSCourseDesign_autogen/timestamp	184e551ac9274bd
+36	414	7815964986899772	DSCourseDesign_autogen/mocs_compilation.cpp	184e551ac9274bd
+36	414	7815964986899772	D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/timestamp	184e551ac9274bd
+2034	8376	7815395164282617	CMakeFiles/DSCourseDesign.dir/main.cpp.obj	dee4afa634a0461e
+509	782	7815408167587555	CMakeFiles/DSCourseDesign.dir/seqlist.cpp.obj	172abba7f9ec42cd
+7626	9029	7815965062803206	DSCourseDesign.exe	1b67073bacf15635
+1648	9393	7809188319087321	CMakeFiles/DSCourseDesign.dir/windows.cpp.obj	92d0b64c2c9b315d
+1571	8258	7809204533110826	CMakeFiles/DSCourseDesign.dir/window.cpp.obj	47cf3563305252c4
+415	7626	7815964990694987	CMakeFiles/DSCourseDesign.dir/mainwindow.cpp.obj	393eb7484e3430f6

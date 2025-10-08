@@ -1,0 +1,5 @@
+D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/DSCourseDesign.dir
+D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/DSCourseDesign_autogen_timestamp_deps.dir
+D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/DSCourseDesign_autogen.dir
