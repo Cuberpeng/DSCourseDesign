@@ -25,7 +25,9 @@ add_executable(DSCourseDesign main.cpp
         linklist.h
         linklist.cpp
         stack.h
-        stack.cpp)
+        stack.cpp
+        binarytree.h
+        binarytree.cpp)
 target_link_libraries(DSCourseDesign
   Qt::Core
   Qt::Gui

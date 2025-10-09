@@ -143,6 +143,31 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
         tabs->addTab(w, "栈");
     }
 
+    //Tab:二叉树
+    {
+        QWidget* w = new QWidget;
+        auto* v = new QVBoxLayout(w);
+        auto* f = new QFormLayout;
+        v->addLayout(f);
+        btInput = new QLineEdit;
+        btInput->setPlaceholderText("层序，空位用哨兵表示，如: 15 6 23 4 7 17 71 5 -1 -1 50");
+        btNull = new QSpinBox;
+        btNull->setRange(-1000000,1000000);
+        btNull->setValue(-1);
+        f->addRow("层序数组", btInput);
+        f->addRow("空位哨兵", btNull);
+        auto* hb = new QHBoxLayout;
+        v->addLayout(hb);
+        auto* btnBuild = new QPushButton("建立");
+        hb->addWidget(btnBuild);
+        auto* btnClear = new QPushButton("清空");
+        hb->addWidget(btnClear);
+        connect(btnBuild,&QPushButton::clicked,this,&MainWindow::btBuild);
+        connect(btnClear,&QPushButton::clicked,this,&MainWindow::btClear);
+
+        tabs->addTab(w, "二叉树");
+    }
+
 
     //演示播放定时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
@@ -184,16 +209,16 @@ void MainWindow::seqlistBuild(){
 
     // 第一步：空表
     steps.push_back([this](){
-      drawSeqlist(seq);
-      statusBar()->showMessage("顺序表：开始建立");
+        drawSeqlist(seq);
+        statusBar()->showMessage("顺序表：开始建立");
     });
 
     // 依次插入
     for (int x : a){
         steps.push_back([this, x](){
             seq.insert(seq.size(), x);
-          drawSeqlist(seq);
-          statusBar()->showMessage(QString("顺序表：插入 %1").arg(x));
+            drawSeqlist(seq);
+            statusBar()->showMessage(QString("顺序表：插入 %1").arg(x));
         });
     }
 
@@ -249,16 +274,16 @@ void MainWindow::linklistBuild(){
 
     // 第一步：空表
     steps.push_back([this](){
-      drawLinklist(link);
-      statusBar()->showMessage("单链表：开始建立");
+        drawLinklist(link);
+        statusBar()->showMessage("单链表：开始建立");
     });
 
     // 依次插入
     for (int x : a){
         steps.push_back([this, x](){
             link.insert(link.size(), x);
-          drawLinklist(link);
-          statusBar()->showMessage(QString("单链表：插入 %1").arg(x));
+            drawLinklist(link);
+            statusBar()->showMessage(QString("单链表：插入 %1").arg(x));
         });
     }
 
@@ -322,16 +347,16 @@ void MainWindow::stackBuild(){
 
     // 第一步：空表
     steps.push_back([this](){
-      drawStack(st);
-      statusBar()->showMessage("栈：开始建立");
+        drawStack(st);
+        statusBar()->showMessage("栈：开始建立");
     });
 
     // 依次插入
     for (int x : a){
         steps.push_back([this, x](){
             st.push(x);
-          drawStack(st);
-          statusBar()->showMessage(QString("栈：插入 %1").arg(x));
+            drawStack(st);
+            statusBar()->showMessage(QString("栈：插入 %1").arg(x));
         });
     }
 
@@ -364,6 +389,53 @@ void MainWindow::stackClear() {
     statusBar()->showMessage("栈：已清空");
 }
 
+//二叉树
+void MainWindow::btBuild(){
+    auto a = parseIntList(btInput->text());
+    int sent = btNull->value();
+
+    // 准备步骤播放（完全仿照顺序表/链表/栈）
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 第 0 步：空树
+    steps.push_back([this](){
+        bt.clear();
+        view->resetScene();
+        view->setTitle("二叉树：开始建立（空树）");
+        drawBT(bt.root(), 600, 120, 300, 0);
+        statusBar()->showMessage("二叉树：开始建立（空树）");
+    });
+
+    // 逐步“前缀重建”并绘制（≤i 用真实值，其它位置用哨兵）
+    for (int i = 0; i < a.size(); ++i){
+        steps.push_back([this, a, sent, i](){//sent为哨兵，表示空位
+            QVector<int> b(a.size(), sent);
+            for (int k = 0; k <= i; k++)
+                b[k] = a[k];//b中前i个是真数，后面用哨兵代替，表示目前在进行第i个
+
+            bt.clear();
+            bt.buildTree(b.data(), b.size(), sent);
+
+            view->resetScene();
+            QString msg = (a[i]==sent) ? QString("空位(哨兵 %1) 跳过").arg(sent) : QString("插入 %1").arg(a[i]);
+            view->setTitle(QString("二叉树：%1 / 共 %2 步").arg(msg).arg(a.size()));
+            drawBT(bt.root(), 600, 120, 300, 0);
+            statusBar()->showMessage(QString("二叉树：步骤 %1/%2，%3").arg(i+1).arg(a.size()).arg(msg));
+        });
+    }
+
+    // 播放
+    timer.start();
+}
+
+void MainWindow::btClear() {
+    bt.clear();
+    view->resetScene();
+    view->setTitle("二叉树（空）");
+    statusBar()->showMessage("二叉树：已清空");
+}
 
 
 
@@ -408,6 +480,22 @@ void MainWindow::drawStack(const ds::Stack& st){
     qreal x=220, y=420;
     for(int i = 0;i < n;i++) {
         view->addNode(x, y - i*90, QString::number(i==n-1? st.getPeek(): st.get(i)));
+    }
+}
+void MainWindow::drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey){
+    if(!root)
+        return;
+    bool hl = (root->key == highlightKey);
+    view->addNode(x, y, QString::number(root->key), hl);
+    if(root->left) {
+        qreal lx = x - distance, ly = y + 100;
+        view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34));
+        drawBT(root->left, lx, ly, distance/1.8, highlightKey);
+    }
+    if(root->right) {
+        qreal rx = x + distance, ry = y + 100;
+        view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34));
+        drawBT(root->right, rx, ry, distance/1.8, highlightKey);
     }
 }
 

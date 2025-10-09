@@ -23,6 +23,7 @@
 #include "seqlist.h"
 #include "linklist.h"
 #include "stack.h"
+#include "binarytree.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -49,6 +50,10 @@ private slots:
     void stackPop();
     void stackClear();
 
+    //二叉树
+    void btBuild();
+    void btClear();
+
 private:
     Canvas* view{};
     QTimer timer;
@@ -61,7 +66,7 @@ private:
     void drawSeqlist(const ds::Seqlist& sl);
     void drawLinklist(const ds::Linklist& ll);
     void drawStack(const ds::Stack& st);
-    //void drawBT(ds::BTNode* root, qreal x, qreal y, qreal xspan, int depth, int highlightKey=-99999);
+    void drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey=-99999);
     //int subtreeWidth(ds::BTNode* root);
     //void drawHuff(ds::HNode* root, qreal x, qreal y, qreal xspan);
 
@@ -85,10 +90,15 @@ private:
     QLineEdit* stackInput{};
     QLineEdit* stackValue{};
 
+    //二叉树
+    QLineEdit* btInput{}; // 例如：15 6 23 4 7 17 71 5 -1 -1 50
+    QSpinBox* btNull{}; // 缺失哨兵，默认 -1
+
     // 后端持久状态
     ds::Seqlist seq;
     ds::Linklist link;
     ds::Stack st;
+    ds::BinaryTree bt;
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;

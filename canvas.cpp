@@ -27,7 +27,7 @@ void Canvas::resetScene(){//初始化
 }
 
 QGraphicsEllipseItem* Canvas::addNode(qreal x, qreal y, const QString& text, bool highlight){ // 绘制节点
-    auto* n=scene->addEllipse(QRectF(x-20, y-20, 40, 40), QPen(Qt::NoPen), QBrush(highlight?QColor("#ffd166"): QColor("#a8dadc"))); // 在场景中添加圆形
+    auto* n=scene->addEllipse(QRectF(x-33, y-33, 66, 66), QPen(Qt::NoPen), QBrush(highlight?QColor("#ffd166"): QColor("#a8dadc"))); // 在场景中添加圆形
     auto* label = scene->addText(text); // 添加标题文本
     label->setDefaultTextColor(Qt::black); // 设置文本默认颜色
     QRectF tb=label->boundingRect();//边界矩形

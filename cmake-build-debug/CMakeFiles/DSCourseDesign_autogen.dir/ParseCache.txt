@@ -910,6 +910,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtwidgetsexports.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtwidgetsglobal.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qwidget.h
+ mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/moc_predefs.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
@@ -920,3 +921,5 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
+D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp
