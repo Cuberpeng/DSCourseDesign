@@ -24,6 +24,7 @@
 #include "linklist.h"
 #include "stack.h"
 #include "binarytree.h"
+#include "binarysearchtree.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -53,6 +54,12 @@ private slots:
     //二叉树
     void btBuild();
     void btClear();
+
+    //二叉搜索树
+    void bstBuild();
+    void bstFind();
+    void bstErase();
+    void bstClear();
 
 private:
     Canvas* view{};
@@ -94,11 +101,16 @@ private:
     QLineEdit* btInput{}; // 例如：15 6 23 4 7 17 71 5 -1 -1 50
     QSpinBox* btNull{}; // 缺失哨兵，默认 -1
 
+    // 二叉搜索树
+    QLineEdit* bstInput{}; // 初始批量插入
+    QLineEdit* bstValue{}; // 单值操作
+
     // 后端持久状态
     ds::Seqlist seq;
     ds::Linklist link;
     ds::Stack st;
     ds::BinaryTree bt;
+    ds::BinarySearchTree bst;
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;

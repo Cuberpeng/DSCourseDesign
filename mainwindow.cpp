@@ -168,6 +168,41 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
         tabs->addTab(w, "二叉树");
     }
 
+    // 二叉搜索树
+    {
+        QWidget* w = new QWidget;
+        auto* v = new QVBoxLayout(w);
+        auto* f = new QFormLayout;
+        v->addLayout(f);
+        bstInput = new QLineEdit;
+        bstInput->setPlaceholderText("例如: 15 6 23 4 7 17 71");
+        f->addRow("初始序列", bstInput);
+        auto* hb0 = new QHBoxLayout;
+        v->addLayout(hb0);
+        auto* btnBuild = new QPushButton("建立");
+        hb0->addWidget(btnBuild);
+        auto* btnClear = new QPushButton("清空");
+        hb0->addWidget(btnClear);
+
+        auto* hb1 = new QHBoxLayout;
+        v->addLayout(hb1);
+        bstValue = new QLineEdit;
+        bstValue->setPlaceholderText("键值");
+        auto* btnFind= new QPushButton("查找");
+        auto* btnDel = new QPushButton("删除");
+        hb1->addWidget(new QLabel("值:"));
+        hb1->addWidget(bstValue);
+        hb1->addWidget(btnFind);
+        hb1->addWidget(btnDel);
+
+        connect(btnBuild,&QPushButton::clicked,this,&MainWindow::bstBuild);
+        connect(btnClear,&QPushButton::clicked,this,&MainWindow::bstClear);
+        connect(btnFind,&QPushButton::clicked,this,&MainWindow::bstFind);
+        connect(btnDel,&QPushButton::clicked,this,&MainWindow::bstErase);
+
+        tabs->addTab(w, "二叉搜索树");
+    }
+
 
     //演示播放定时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
@@ -429,13 +464,266 @@ void MainWindow::btBuild(){
     // 播放
     timer.start();
 }
-
 void MainWindow::btClear() {
     bt.clear();
     view->resetScene();
     view->setTitle("二叉树（空）");
     statusBar()->showMessage("二叉树：已清空");
 }
+
+//二叉搜索树
+void MainWindow::bstBuild() {
+    auto a = parseIntList(bstInput->text());
+    int sent = btNull->value();
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+    steps.push_back([this]() {
+        bst.clear();
+        view->resetScene();
+        view->setTitle("二叉搜索树：开始构建");
+        drawBT(bst.root(), 600, 120, 300, 0);
+    });
+    for (int i = 0; i < a.size(); i++) {
+        steps.push_back([this, a, sent, i]() {
+            bst.insert(a[i]);
+            view->resetScene();
+            view->setTitle(QString("二叉搜索树：插入 %1（第 %2/%3 步）").arg(a[i]).arg(i+1).arg(a.size()));
+            drawBT(bst.root(), 600, 120, 300, 0);
+        });
+    }
+    timer.start();
+}
+void MainWindow::bstFind() {
+    bool ok = false;
+    int value = bstValue->text().toInt(&ok);
+    if(!ok) {
+        statusBar()->showMessage("二叉搜索树：请输入有效的键值");
+        return;
+    }
+    //单次遍历：收集访问路径，并判断是否命中
+    QVector<int> path;
+    ds::BTNode* p = bst.root();
+    while(p){
+        path.push_back(p->key);
+        if (value < p->key)
+            p = p->left;
+        else if (value > p->key)
+            p = p->right;
+        else
+            break;
+    }
+    bool found = (!path.isEmpty() && path.last() == value);
+    //组织播放
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    if (path.isEmpty()) {
+        // 空树
+        steps.push_back([this](){
+          view->resetScene();
+          view->setTitle("二叉搜索树查找：空树");
+          drawBT(bst.root(), 600, 120, 300, 0);
+        });
+        timer.start();
+        return;
+    }
+    // 逐步高亮访问路径
+    for(int i = 0; i<path.size(); i++){
+        int key = path[i];
+        const bool isLast = (i + 1 == path.size());
+        if(isLast){
+            steps.push_back([this, value, key, found](){
+              view->resetScene();
+              view->setTitle(found ? QString("BST 查找 %1：找到").arg(value) : QString("BST 查找 %1：未找到").arg(value));
+              drawBT(bst.root(), 600, 120, 300, key);
+            });
+        }else{
+            steps.push_back([this, value, key](){
+              view->resetScene();
+              view->setTitle(QString("BST 查找 %1：访问 %2").arg(value).arg(key));
+              drawBT(bst.root(), 600, 120, 300, key);
+            });
+        }
+    }
+    timer.start();
+}
+void MainWindow::bstErase() {
+    bool ok = false;
+    int value = bstValue->text().toInt(&ok);
+    if(!ok) {
+        statusBar()->showMessage("二叉搜索树：请输入有效的键值");
+        return;
+    }
+    //找p
+    ds::BTNode* parent = nullptr;
+    ds::BTNode* p = bst.root();
+    while(p && p->key!=value) {
+        parent = p;
+        if (value < p->key)
+            p = p->left;
+        else
+            p = p->right;
+    }
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+    if (!p) {
+        steps.push_back([this,value]() {
+            view->resetScene();
+            view->setTitle(QString("二叉搜索树：删除 %1：未找到").arg(value));
+            drawBT(bst.root(),600,120,300,0);
+        });
+        timer.start();
+        return;
+    }
+
+    //子树绘画lambda
+    auto drawPlain = [this](ds::BTNode* r, qreal x, qreal y, qreal distance, int highlight=INT_MIN){
+        std::function<void(ds::BTNode*, qreal, qreal, qreal)> f;
+        f = [this,highlight,&f](ds::BTNode* n,qreal x,qreal y,qreal s){
+            if(!n) return;
+            bool hl = (n->key == highlight);
+            view->addNode(x,y, QString::number(n->key), hl);
+            if(n->left) {
+                qreal lx = x-s, ly=y+100;
+                view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34));
+                f(n->left,lx,ly,s/1.8);
+            }
+            if(n->right) {
+                qreal rx=x+s, ry=y+100;
+                view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34));
+                f(n->right,rx,ry,s/1.8);
+            }
+        };
+        f(r,x,y,distance);
+    };
+
+    // 1)删除与 p 相连的边
+    steps.push_back([this,p,drawPlain](){
+      std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
+      g = [this,p,&g](ds::BTNode* n,qreal x,qreal y,qreal s){
+        if(!n) return;
+        view->addNode(x,y, QString::number(n->key));
+        if(n->left){
+            qreal lx=x-s, ly=y+100;
+            if(!(n==p || n->left==p))
+                view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34));
+            g(n->left,lx,ly,s/1.8);
+        }
+        if(n->right){
+            qreal rx=x+s, ry=y+100;
+            if(!(n==p || n->right==p))
+                 view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34));
+            g(n->right,rx,ry,s/1.8);
+        }
+      };
+      view->resetScene();
+      view->setTitle("二叉搜索树：删除第1步 删指针域（与 p 相连的边）");
+      g(bst.root(),600,120,300);
+    });
+
+    // 2)删除p结点，但保留它的左右子树
+    steps.push_back([this,p,drawPlain](){
+      std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
+      g = [this,p,&g,drawPlain](ds::BTNode* n,qreal x,qreal y,qreal s){
+        if(!n) return;
+        if(n==p){
+          // 不画 p，自身的左右子树分别在原相对位置绘制（不连边）
+          if(n->left) {
+              qreal lx=x-s, ly=y+100;
+              drawPlain(n->left,lx,ly,s/1.8);
+          }
+          if(n->right) {
+              qreal rx=x+s, ry=y+100;
+              drawPlain(n->right,rx,ry,s/1.8);
+          }
+          return;
+        }
+        view->addNode(x,y, QString::number(n->key));
+        if(n->left) {
+            qreal lx=x-s, ly=y+100;
+            view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34));
+            g(n->left,lx,ly,s/1.8);
+        }
+        if(n->right) {
+            qreal rx=x+s, ry=y+100;
+            view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34));
+            g(n->right,rx,ry,s/1.8);
+        }
+      };
+      view->resetScene(); view->setTitle("二叉搜索树：删除第2步 删值域（移除 p 本身）");
+      g(bst.root(),600,120,300);
+    });
+
+
+    bool hasL = p->left!=nullptr, hasR=p->right!=nullptr;
+    if (hasL && hasR) {
+        // 3) 找左子树中序最后一个结点 a，并高亮（在“去掉 p”的画面上）
+        ds::BTNode* a = p->left;
+        while(a && a->right)
+            a=a->right;
+        steps.push_back([this,p,a,drawPlain](){
+          std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
+          g = [this,p,a,&g,drawPlain](ds::BTNode* n,qreal x,qreal y,qreal s){
+            if(!n) return;
+            if(n == p){
+              if(n->left) {
+                  qreal lx=x-s, ly=y+100;
+                  drawPlain(n->left,lx,ly,s/1.8);
+              }
+              if(n->right) {
+                  qreal rx=x+s, ry=y+100;
+                  drawPlain(n->right,rx,ry,s/1.8);
+              }
+              return;
+            }
+            bool hl = (n==a);
+            view->addNode(x,y, QString::number(n->key), hl);
+            if(n->left) {
+                qreal lx=x-s, ly=y+100;
+                view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34));
+                g(n->left,lx,ly,s/1.8);
+            }
+            if(n->right) {
+                qreal rx=x+s, ry=y+100;
+                view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34));
+                g(n->right,rx,ry,s/1.8);
+            }
+          };
+          view->resetScene();
+            view->setTitle("二叉搜索树：删除第3步 标红左子树中序最后一个结点 a");
+          g(bst.root(),600,120,300);
+        });
+
+        // 4) 最终结构
+        steps.push_back([this,value](){
+          bst.eraseKey(value); // 在 bst.cpp 中已按“前驱替换+右子树接到a->r”规则实现
+          view->resetScene();
+            view->setTitle("二叉搜索树：删除第4步 接上并完成");
+          drawBT(bst.root(),600,120,300,0);
+        });
+
+        timer.start();
+        return;
+    }
+
+    //其它两类（叶子/只有一个孩子）：删边、删点 、真删除
+    steps.push_back([this,value](){
+      bst.eraseKey(value);
+      view->resetScene();
+        view->setTitle("二叉搜索树：删除完成");
+      drawBT(bst.root(),600,120,300,0);
+    });
+    timer.start();
+}
+void MainWindow::bstClear() {
+    bst.clear();
+    view->resetScene();
+    view->setTitle("BST（空）");
+}
+
 
 
 

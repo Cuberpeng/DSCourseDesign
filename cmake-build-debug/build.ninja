@@ -113,6 +113,14 @@ build CMakeFiles/DSCourseDesign.dir/binarytree.cpp.obj: CXX_COMPILER__DSCourseDe
   OBJECT_DIR = CMakeFiles\DSCourseDesign.dir
   OBJECT_FILE_DIR = CMakeFiles\DSCourseDesign.dir
 
+build CMakeFiles/DSCourseDesign.dir/binarysearchtree.cpp.obj: CXX_COMPILER__DSCourseDesign_unscanned_Debug D$:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp || cmake_object_order_depends_target_DSCourseDesign
+  DEFINES = -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64
+  DEP_FILE = CMakeFiles\DSCourseDesign.dir\binarysearchtree.cpp.obj.d
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  INCLUDES = -isystem D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/include -isystem D:/Qt/6.9.2/mingw_64/include/QtCore -isystem D:/Qt/6.9.2/mingw_64/include -isystem D:/Qt/6.9.2/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.9.2/mingw_64/include/QtGui -isystem D:/Qt/6.9.2/mingw_64/include/QtWidgets
+  OBJECT_DIR = CMakeFiles\DSCourseDesign.dir
+  OBJECT_FILE_DIR = CMakeFiles\DSCourseDesign.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target DSCourseDesign
@@ -121,7 +129,7 @@ build CMakeFiles/DSCourseDesign.dir/binarytree.cpp.obj: CXX_COMPILER__DSCourseDe
 #############################################
 # Link the executable DSCourseDesign.exe
 
-build DSCourseDesign.exe: CXX_EXECUTABLE_LINKER__DSCourseDesign_Debug CMakeFiles/DSCourseDesign.dir/DSCourseDesign_autogen/mocs_compilation.cpp.obj CMakeFiles/DSCourseDesign.dir/main.cpp.obj CMakeFiles/DSCourseDesign.dir/seqlist.cpp.obj CMakeFiles/DSCourseDesign.dir/canvas.cpp.obj CMakeFiles/DSCourseDesign.dir/mainwindow.cpp.obj CMakeFiles/DSCourseDesign.dir/linklist.cpp.obj CMakeFiles/DSCourseDesign.dir/stack.cpp.obj CMakeFiles/DSCourseDesign.dir/binarytree.cpp.obj | D$:/Qt/6.9.2/mingw_64/lib/libQt6Widgets.a D$:/Qt/6.9.2/mingw_64/lib/libQt6Gui.a D$:/Qt/6.9.2/mingw_64/lib/libQt6Core.a || DSCourseDesign_autogen DSCourseDesign_autogen_timestamp_deps
+build DSCourseDesign.exe: CXX_EXECUTABLE_LINKER__DSCourseDesign_Debug CMakeFiles/DSCourseDesign.dir/DSCourseDesign_autogen/mocs_compilation.cpp.obj CMakeFiles/DSCourseDesign.dir/main.cpp.obj CMakeFiles/DSCourseDesign.dir/seqlist.cpp.obj CMakeFiles/DSCourseDesign.dir/canvas.cpp.obj CMakeFiles/DSCourseDesign.dir/mainwindow.cpp.obj CMakeFiles/DSCourseDesign.dir/linklist.cpp.obj CMakeFiles/DSCourseDesign.dir/stack.cpp.obj CMakeFiles/DSCourseDesign.dir/binarytree.cpp.obj CMakeFiles/DSCourseDesign.dir/binarysearchtree.cpp.obj | D$:/Qt/6.9.2/mingw_64/lib/libQt6Widgets.a D$:/Qt/6.9.2/mingw_64/lib/libQt6Gui.a D$:/Qt/6.9.2/mingw_64/lib/libQt6Core.a || DSCourseDesign_autogen DSCourseDesign_autogen_timestamp_deps
   FLAGS = -g
   LINK_LIBRARIES = D:/Qt/6.9.2/mingw_64/lib/libQt6Widgets.a  D:/Qt/6.9.2/mingw_64/lib/libQt6Gui.a  D:/Qt/6.9.2/mingw_64/lib/libQt6Core.a  -lmpr  -luserenv  -ld3d11  -ldxgi  -ldxguid  -ld3d12  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\DSCourseDesign.dir

@@ -674,6 +674,8 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Qt/6.9.2/mingw_64/lib/cmake/Qt6ZlibPrivate/Qt6ZlibPrivateTargets.cmake \
 	D:/Qt/6.9.2/mingw_64/lib/cmake/Qt6ZlibPrivate/Qt6ZlibPrivateVersionlessAliasTargets.cmake \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/CMakeLists.txt \
+	D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp \
+	D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.cpp \
