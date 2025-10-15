@@ -317,6 +317,12 @@
 			null
 		],
 		[
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.h",
+			"MU",
+			"EWIEGA46WW/moc_huffman.cpp",
+			null
+		],
+		[
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h",
 			"MU",
 			"EWIEGA46WW/moc_linklist.cpp",
@@ -429,6 +435,7 @@
 			null
 		],
 		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.cpp", "MU", null ],
+		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp", "MU", null ],
 		[
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp",
 			"MU",

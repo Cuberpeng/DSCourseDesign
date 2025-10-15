@@ -445,6 +445,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/windows.h
  mmc:Q_OBJECT
 D:/Users/xiang/CLionProjects/DSCourseDesign/window.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mmc:Q_OBJECT
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/algorithm
@@ -915,6 +916,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/moc_predefs.h
+ mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
@@ -926,3 +928,4 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp

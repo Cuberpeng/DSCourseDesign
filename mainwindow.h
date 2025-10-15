@@ -25,6 +25,7 @@
 #include "stack.h"
 #include "binarytree.h"
 #include "binarysearchtree.h"
+#include "huffman.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -60,6 +61,10 @@ private slots:
     void bstFind();
     void bstErase();
     void bstClear();
+
+    //哈夫曼树
+    void huffmanBuild();
+    void huffmanClear();
 
 private:
     Canvas* view{};
@@ -105,12 +110,17 @@ private:
     QLineEdit* bstInput{}; // 初始批量插入
     QLineEdit* bstValue{}; // 单值操作
 
+    //哈夫曼树
+    QLineEdit* huffmanInput{};
+
+
     // 后端持久状态
     ds::Seqlist seq;
     ds::Linklist link;
     ds::Stack st;
     ds::BinaryTree bt;
     ds::BinarySearchTree bst;
+    ds::Huffman huff;
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;

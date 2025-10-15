@@ -2,7 +2,7 @@
 // Created by xiang on 25-9-30.
 //
 #include "mainwindow.h"
-#include "tool.h"
+//#include "tool.h"
 #include <QToolBar>
 #include <QAction>
 #include <QStatusBar>
@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     resize(1200, 740);
     view = new Canvas(this);
     setCentralWidget(view);
-    statusBar()->showMessage("数据结构可视化：顺序表 / 链表 / 栈 / 二叉树 / BST / 哈夫曼树");
+    statusBar()->showMessage("数据结构可视化");
 
 
     //右侧操作面板（交互）
@@ -201,6 +201,29 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
         connect(btnDel,&QPushButton::clicked,this,&MainWindow::bstErase);
 
         tabs->addTab(w, "二叉搜索树");
+    }
+
+    //哈夫曼树
+    {
+        QWidget* w = new QWidget;
+        auto* v = new QVBoxLayout(w);
+        auto* f = new QFormLayout;
+        v->addLayout(f);
+        huffmanInput = new QLineEdit;
+        huffmanInput->setPlaceholderText("权值序列，如: 5 7 2 9 3");
+        f->addRow("权值序列", huffmanInput);
+
+        auto* hb = new QHBoxLayout;
+        v->addLayout(hb);
+        auto* btnBuild = new QPushButton("建立");
+        auto* btnClear = new QPushButton("清空");
+        hb->addWidget(btnBuild);
+        hb->addWidget(btnClear);
+
+        connect(btnBuild,&QPushButton::clicked,this,&MainWindow::huffmanBuild);
+        connect(btnClear,&QPushButton::clicked,this,&MainWindow::huffmanClear);
+
+        tabs->addTab(w, "哈夫曼树");
     }
 
 
@@ -412,11 +435,11 @@ void MainWindow::stackPush() {
 void MainWindow::stackPop() {
     int out=0;
     if(!st.pop(&out)) {
-        statusBar()->showMessage("栈：空栈，无法 pop");
+        statusBar()->showMessage("栈：空栈，无法出栈");
         return;
     }
     drawStack(st);
-    statusBar()->showMessage(QString("栈：pop() -> %1").arg(out));
+    statusBar()->showMessage(QString("栈：%1出栈").arg(out));
 }
 void MainWindow::stackClear() {
     st.clear();
@@ -723,6 +746,105 @@ void MainWindow::bstClear() {
     view->resetScene();
     view->setTitle("BST（空）");
 }
+
+//哈夫曼树
+// —— 新增：哈夫曼树 —— //
+void MainWindow::huffmanBuild() {
+    // 解析权值
+    auto w = parseIntList(huffmanInput->text());
+    if (w.isEmpty()) {
+        view->resetScene();
+        view->setTitle("哈夫曼树：请输入权值序列");
+        statusBar()->showMessage("哈夫曼树：无有效输入");
+        return;
+    }
+
+    // 若已有旧树，释放
+    huff.clear();
+
+    // 准备步骤播放
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 初始森林（叶子结点）；这里直接创建 BTNode 以便最终汇成一棵树交给 huff 管理
+    QVector<ds::BTNode*> forest;
+    forest.reserve(w.size());
+    for (int x : w) {
+        forest.push_back(ds::Huffman::makeNode(x));
+    }
+
+    auto drawForest = [this](const QVector<ds::BTNode*>& F, const QString& title){
+        view->resetScene();
+        view->setTitle(title);
+        qreal x = 150;
+        for (int i = 0; i < F.size(); ++i) {
+            drawBT(F[i], x, 120, 60, -99999);
+            x += 180;
+        }
+    };
+
+    // 第 0 步：显示初始森林
+    QVector<ds::BTNode*> F0 = forest;
+    steps.push_back([this, F0, drawForest](){
+        drawForest(F0, QString("哈夫曼树：初始森林（%1 棵）").arg(F0.size()));
+        statusBar()->showMessage("哈夫曼树：开始构建");
+    });
+
+    // 逐步“选两最小+合并”
+    QVector<ds::BTNode*> cur = forest;
+    while (cur.size() > 1) {
+        int i1 = -1, i2 = -1;
+        for (int i = 0; i < cur.size(); i++)
+            if (i1 == -1 || cur[i]->key < cur[i1]->key) i1 = i;
+        for (int i = 0; i < cur.size(); i++) {
+            if (i == i1) continue;
+            if (i2 == -1 || cur[i]->key < cur[i2]->key) i2 = i;
+        }
+        if (i1 > i2) { int t = i1; i1 = i2; i2 = t; }
+
+        int a = cur[i1]->key, b = cur[i2]->key;
+        ds::BTNode* parent = ds::Huffman::makeNode(a + b);
+        parent->left = cur[i1];
+        parent->right = cur[i2];
+
+        QVector<ds::BTNode*> before = cur;
+        QVector<ds::BTNode*> after  = cur;
+        after[i1] = parent;
+        after.remove(i2);
+
+        steps.push_back([this, before, a, b, drawForest](){
+            drawForest(before, QString("哈夫曼树：选择最小的两棵：%1 与 %2").arg(a).arg(b));
+        });
+        steps.push_back([this, after, a, b, parent, drawForest](){
+            drawForest(after, QString("哈夫曼树：合并 %1 + %2 -> %3").arg(a).arg(b).arg(parent->key));
+        });
+
+        cur[i1] = parent;
+        cur.remove(i2);
+    }
+
+    // 最终根交给 huff 管理，便于 clear()
+    if (!cur.isEmpty())
+        huff.rootNode = cur[0];
+
+    steps.push_back([this](){
+        view->resetScene();
+        view->setTitle("哈夫曼树：构建完成");
+        drawBT(huff.root(), 600, 120, 300, -99999);
+        statusBar()->showMessage("哈夫曼树：完成");
+    });
+
+    timer.start();
+}
+
+void MainWindow::huffmanClear() {
+    huff.clear();
+    view->resetScene();
+    view->setTitle("哈夫曼树（空）");
+    statusBar()->showMessage("哈夫曼树：已清空");
+}
+
 
 
 
