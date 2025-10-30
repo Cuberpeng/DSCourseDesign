@@ -9,24 +9,51 @@
 #include <QGraphicsEllipseItem>
 #include <QGraphicsTextItem>
 #include <QTimer>
+#include <QWheelEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
 class Canvas : public QGraphicsView {
     Q_OBJECT
-    public:
-        explicit Canvas(QWidget* parent=nullptr);
-        QGraphicsScene* Scene() const { return scene; }
+public:
+    explicit Canvas(QWidget* parent=nullptr);
+    QGraphicsScene* Scene() const { return scene; }
 
-        // 清理与渐入动画（简单好看）
-        void resetScene();
-        void setTitle(const QString& t);
+    // 清理与标题
+    void resetScene();
+    void setTitle(const QString& t);
 
-        // 画基本元素
-        QGraphicsEllipseItem* addNode(qreal x, qreal y, const QString& text, bool highlight=false);
-        void addEdge(QPointF a, QPointF b);
+    // 画基本元素
+    QGraphicsEllipseItem* addNode(qreal x, qreal y, const QString& text, bool highlight=false);
+    void addEdge(QPointF a, QPointF b);
+    void addCurveArrow(QPointF s, QPointF c1, QPointF c2, QPointF e);
+    QGraphicsRectItem* addBox(qreal x, qreal y, qreal w, qreal h, const QString& text, bool highlight=false);
 
-    private:
-        QGraphicsScene* scene;
-        QGraphicsTextItem* title;
+    // 缩放控制（供工具栏按钮调用）
+    void zoomIn();
+    void zoomOut();
+    void zoomReset();
+    void zoomFit();
+
+protected:
+    // 交互：Ctrl+滚轮缩放、空格/中键拖拽
+    void wheelEvent(QWheelEvent* e) override;
+    void mousePressEvent(QMouseEvent* e) override;
+    void mouseReleaseEvent(QMouseEvent* e) override;
+    void keyPressEvent(QKeyEvent* e) override;
+    void keyReleaseEvent(QKeyEvent* e) override;
+
+private:
+    QGraphicsScene* scene{};
+    QGraphicsTextItem* title{};
+    qreal currentZoom = 1.0;               // 相对基准比例
+    const qreal minZoom = 0.05;
+    const qreal maxZoom = 8.0;
+    bool spacePanning = false;
+    bool middlePanning = false;
+
+    void applyZoom(qreal newZoom, const QPointF& anchorViewPos);
 };
 
-#endif //CANVAS_H
+#endif // CANVAS_H
+

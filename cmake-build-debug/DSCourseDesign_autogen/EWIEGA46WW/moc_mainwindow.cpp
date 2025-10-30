@@ -55,12 +55,24 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "stackClear",
         "btBuild",
         "btClear",
+        "btPreorder",
+        "btInorder",
+        "btPostorder",
+        "animateBTOrder",
+        "const int*",
+        "order",
+        "n",
+        "title",
         "bstBuild",
         "bstFind",
         "bstErase",
         "bstClear",
         "huffmanBuild",
-        "huffmanClear"
+        "huffmanClear",
+        "onZoomIn",
+        "onZoomOut",
+        "onZoomFit",
+        "onZoomReset"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -92,18 +104,36 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(14, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'btClear'
         QtMocHelpers::SlotData<void()>(15, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'bstBuild'
+        // Slot 'btPreorder'
         QtMocHelpers::SlotData<void()>(16, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'bstFind'
+        // Slot 'btInorder'
         QtMocHelpers::SlotData<void()>(17, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'bstErase'
+        // Slot 'btPostorder'
         QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'animateBTOrder'
+        QtMocHelpers::SlotData<void(const int *, int, const QString &)>(19, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 20, 21 }, { QMetaType::Int, 22 }, { QMetaType::QString, 23 },
+        }}),
+        // Slot 'bstBuild'
+        QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'bstFind'
+        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'bstErase'
+        QtMocHelpers::SlotData<void()>(26, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'bstClear'
-        QtMocHelpers::SlotData<void()>(19, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(27, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'huffmanBuild'
-        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(28, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'huffmanClear'
-        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(29, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onZoomIn'
+        QtMocHelpers::SlotData<void()>(30, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onZoomOut'
+        QtMocHelpers::SlotData<void()>(31, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onZoomFit'
+        QtMocHelpers::SlotData<void()>(32, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onZoomReset'
+        QtMocHelpers::SlotData<void()>(33, 2, QMC::AccessPrivate, QMetaType::Void),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -141,16 +171,23 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 11: _t->stackClear(); break;
         case 12: _t->btBuild(); break;
         case 13: _t->btClear(); break;
-        case 14: _t->bstBuild(); break;
-        case 15: _t->bstFind(); break;
-        case 16: _t->bstErase(); break;
-        case 17: _t->bstClear(); break;
-        case 18: _t->huffmanBuild(); break;
-        case 19: _t->huffmanClear(); break;
+        case 14: _t->btPreorder(); break;
+        case 15: _t->btInorder(); break;
+        case 16: _t->btPostorder(); break;
+        case 17: _t->animateBTOrder((*reinterpret_cast< std::add_pointer_t<const int*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
+        case 18: _t->bstBuild(); break;
+        case 19: _t->bstFind(); break;
+        case 20: _t->bstErase(); break;
+        case 21: _t->bstClear(); break;
+        case 22: _t->huffmanBuild(); break;
+        case 23: _t->huffmanClear(); break;
+        case 24: _t->onZoomIn(); break;
+        case 25: _t->onZoomOut(); break;
+        case 26: _t->onZoomFit(); break;
+        case 27: _t->onZoomReset(); break;
         default: ;
         }
     }
-    (void)_a;
 }
 
 const QMetaObject *MainWindow::metaObject() const
@@ -172,14 +209,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 20)
+        if (_id < 28)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 20;
+        _id -= 28;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 20)
+        if (_id < 28)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 20;
+        _id -= 28;
     }
     return _id;
 }

@@ -46,17 +46,17 @@ namespace ds{
         }
         else {
             if (root->left == nullptr && root->right == nullptr) {
-                delete root;
+                std::free(root);
                 return nullptr;
             }
             else if (root->left == nullptr) {
                 BTNode* temp = root->right;
-                delete root;
+                std::free(root);
                 return temp;
             }
             else if (root->right == nullptr) {
                 BTNode* temp = root->left;
-                delete root;
+                std::free(root);
                 return temp;
             }
             else {
@@ -64,7 +64,7 @@ namespace ds{
                 BTNode* R = root->right;
                 BTNode* p = findMax(L);
                 p->right = R;
-                delete root;
+                std::free(root);
                 return L;
             }
         }
