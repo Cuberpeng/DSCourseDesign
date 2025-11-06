@@ -133,7 +133,7 @@ void Canvas::zoomFit() {
     if (br.isEmpty())
         return;
 
-    // 将 fit 作为新的“基准变换”，并把 currentZoom 归一
+    // 将 fit 作为新的"基准变换"，并把 currentZoom 归一
     resetTransform();
     fitInView(br, Qt::KeepAspectRatio);
     currentZoom = 1.0;

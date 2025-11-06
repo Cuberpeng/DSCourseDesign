@@ -256,7 +256,6 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtCore/QList \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QObject \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QRect \
-  D:/Qt/6.9.2/mingw_64/include/QtCore/QRegularExpression \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSize \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSizeF \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QTimer \

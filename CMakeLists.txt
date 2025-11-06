@@ -20,7 +20,6 @@ add_executable(DSCourseDesign main.cpp
         canvas.h
         canvas.cpp
         mainwindow.h
-        mainwindow.cpp
         tool.h
         linklist.h
         linklist.cpp
@@ -31,7 +30,10 @@ add_executable(DSCourseDesign main.cpp
         binarysearchtree.h
         binarysearchtree.cpp
         huffman.h
-        huffman.cpp)
+        huffman.cpp
+        mainwindow_layout.cpp
+        mainwindow_forms.cpp
+        mainwindow_actions.cpp)
 target_link_libraries(DSCourseDesign
   Qt::Core
   Qt::Gui

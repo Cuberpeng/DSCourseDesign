@@ -2,9 +2,11 @@
 D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/main.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_actions.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/windows.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_forms.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/window.h
  mmc:Q_OBJECT
 D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h
@@ -731,7 +733,6 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QList
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QObject
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QRect
- mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QRegularExpression
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QSize
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QSizeF
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QTimer
@@ -994,3 +995,4 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp

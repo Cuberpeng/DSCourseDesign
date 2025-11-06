@@ -2,10 +2,9 @@
 // Created by xiang on 25-9-28.
 //
 //
-// Reworked by ChatGPT on 2025-10-16.
-// 全新布局：QSplitter(左画布/右控制面板) + 下拉选择 + 分页表单 + 画布缩放工具栏
+// Reworked by ChatGPT on 2025-11-06
+// 拆分：base/pages/ops 三个实现文件，后端逻辑完全保留
 //
-
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
@@ -21,11 +20,10 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QRegularExpression>
 #include <QToolBar>
 #include <QAction>
-#include <functional>
 #include <QVector>
+#include <functional>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -84,61 +82,47 @@ private slots:
     void onZoomReset();
 
 private:
-    //布局核心
-    QSplitter* splitter{};
-    Canvas* view{};                  // 左侧画布（可缩放/拖拽）
-    QWidget* controlPanel{};         // 右侧控制面板
-    QComboBox* moduleCombo{};        // 下拉选择模块
-    QStackedWidget* moduleStack{};   // 每个模块一页
-    QToolBar* canvasBar{};           // 顶部工具栏（缩放控制）
-
-    //播放队列
-    QTimer timer;
-    QVector<std::function<void()>> steps;
-    int stepIndex = 0;
-    void playSteps();
-
-    //绘制助手
-    void drawSeqlist(const ds::Seqlist& sl);
-    void drawLinklist(const ds::Linklist& ll);
-    void drawStack(const ds::Stack& st);
-    void drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey=-99999);
-
-    //右侧控件
-    // 顺序表
-    QLineEdit* seqlistInput{};
-    QLineEdit* seqlistValue{};
-    QSpinBox* seqlistPosition{};
-
-    // 链表
-    QLineEdit* linklistInput{};
-    QLineEdit* linklistValue{};
-    QSpinBox* linklistPosition{};
-
-    // 栈
-    QLineEdit* stackInput{};
-    QLineEdit* stackValue{};
-
-    // 二叉树
-    QLineEdit* btInput{};
-    QSpinBox* btNull{};
-
-    // BST
-    QLineEdit* bstInput{};
-    QLineEdit* bstValue{};
-
-    // 哈夫曼树
-    QLineEdit* huffmanInput{};
-
-    //后端状态
     ds::Seqlist seq;
     ds::Linklist link;
     ds::Stack st;
     ds::BinaryTree bt;
     ds::BinarySearchTree bst;
     ds::Huffman huff;
+    // 布局核心
+    QSplitter* splitter{};
+    Canvas* view{};                  // 左侧画布
+    QWidget* controlPanel{};         // 右侧控制面板
+    QComboBox* moduleCombo{};        // 模块选择
+    QStackedWidget* moduleStack{};   // 每个模块一页
+    QToolBar* canvasBar{};           // 顶部工具栏（缩放）
 
-    //工具
+    // 播放队列
+    QTimer timer;
+    QVector<std::function<void()>> steps;
+    int stepIndex = 0;
+    void playSteps();
+
+    // 绘制助手
+    void drawSeqlist(const ds::Seqlist& sl);
+    void drawLinklist(const ds::Linklist& ll);
+    void drawStack(const ds::Stack& st);
+    void drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey=-99999);
+
+    // 右侧控件
+    // 顺序表
+    QLineEdit* seqlistInput{}; QLineEdit* seqlistValue{}; QSpinBox* seqlistPosition{};
+    // 链表
+    QLineEdit* linklistInput{}; QLineEdit* linklistValue{}; QSpinBox* linklistPosition{};
+    // 栈
+    QLineEdit* stackInput{}; QLineEdit* stackValue{};
+    // 二叉树
+    QLineEdit* btInput{}; QSpinBox* btNull{};
+    // BST
+    QLineEdit* bstInput{}; QLineEdit* bstValue{};
+    // 哈夫曼
+    QLineEdit* huffmanInput{};
+
+    // 工具
     QVector<int> parseIntList(const QString& text) const;
 
     // 右侧表单页构建
@@ -148,7 +132,6 @@ private:
     QWidget* buildBTPage();
     QWidget* buildBSTPage();
     QWidget* buildHuffmanPage();
-
     static QWidget* makeScrollPage(QWidget* content); // 放进 QScrollArea
 };
 

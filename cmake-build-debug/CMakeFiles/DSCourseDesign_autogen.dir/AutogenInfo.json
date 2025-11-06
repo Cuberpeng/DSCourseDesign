@@ -443,7 +443,17 @@
 		],
 		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/main.cpp", "MU", null ],
 		[
-			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.cpp",
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_actions.cpp",
+			"MU",
+			null
+		],
+		[
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_forms.cpp",
+			"MU",
+			null
+		],
+		[
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp",
 			"MU",
 			null
 		],
