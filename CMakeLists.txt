@@ -33,7 +33,9 @@ add_executable(DSCourseDesign main.cpp
         huffman.cpp
         mainwindow_layout.cpp
         mainwindow_forms.cpp
-        mainwindow_actions.cpp)
+        mainwindow_actions.cpp
+        avl.h
+        avl.cpp)
 target_link_libraries(DSCourseDesign
   Qt::Core
   Qt::Gui

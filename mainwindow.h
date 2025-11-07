@@ -14,7 +14,9 @@
 #include <QScrollArea>
 #include <QComboBox>
 #include <QStackedWidget>
+#include <QTextEdit>
 #include <QLineEdit>
+#include <QMenuBar>
 #include <QSpinBox>
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -24,6 +26,10 @@
 #include <QAction>
 #include <QVector>
 #include <functional>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QFileDialog>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -32,6 +38,7 @@
 #include "binarytree.h"
 #include "binarysearchtree.h"
 #include "huffman.h"
+#include "avl.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -75,11 +82,32 @@ private slots:
     void huffmanBuild();
     void huffmanClear();
 
+    // AVL树
+    void avlBuild();
+    void avlInsert();
+    void avlClear();
+
     // 画布缩放
     void onZoomIn();
     void onZoomOut();
     void onZoomFit();
     void onZoomReset();
+
+    //文件保存
+    void saveDoc();
+    void openDoc();
+    void exportPNG();
+
+    //DSL
+    void insertDSLExample();
+    void runDSL();
+    void runNLI();
+
+    //辅助函数
+    QVector<int> dumpBTLevel(ds::BTNode* root, int nullSentinel) const;
+    void dumpPreorder(ds::BTNode* r, QVector<int>& out) const;
+    void collectLeafWeights(ds::BTNode* r, QVector<int>& out) const;
+
 
 private:
     ds::Seqlist seq;
@@ -88,6 +116,7 @@ private:
     ds::BinaryTree bt;
     ds::BinarySearchTree bst;
     ds::Huffman huff;
+    ds::AVL avl;
     // 布局核心
     QSplitter* splitter{};
     Canvas* view{};                  // 左侧画布
@@ -121,6 +150,20 @@ private:
     QLineEdit* bstInput{}; QLineEdit* bstValue{};
     // 哈夫曼
     QLineEdit* huffmanInput{};
+    // AVL树
+    QLineEdit* avlInput{}; QLineEdit* avlValue{};
+
+
+    // 文件保存相关
+    enum class DocKind { None, SeqList, LinkedList, Stack, BinaryTree, BST, Huffman, AVL };
+    DocKind currentKind_ = DocKind::None;
+    int btLastNullSentinel_ = -1;
+    QVector<int> huffLastWeights_;
+
+    // DSL/NLI 相关
+    QTextEdit* dslEdit{};
+    QTextEdit* nliEdit{};
+
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;
@@ -132,6 +175,8 @@ private:
     QWidget* buildBTPage();
     QWidget* buildBSTPage();
     QWidget* buildHuffmanPage();
+    QWidget* buildAVLPage();
+    QWidget* buildDSLPage();
     static QWidget* makeScrollPage(QWidget* content); // 放进 QScrollArea
 };
 

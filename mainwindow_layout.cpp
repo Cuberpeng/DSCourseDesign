@@ -2,6 +2,9 @@
 // Created by xiang on 25-11-6.
 //
 //
+// mainwindow_base.cpp
+// 框架与全局：窗口、分栏、工具栏、模块页容器、通用工具
+//
 #include "mainwindow.h"
 #include <QStatusBar>
 #include <QApplication>
@@ -16,7 +19,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     setWindowTitle(QStringLiteral("数据结构可视化"));
     statusBar()->showMessage(QStringLiteral("就绪"));
 
-    // 顶部：画布缩放工具栏（统一配色）
+    // 顶部：画布工具栏（包含文件操作和缩放操作）
     canvasBar = addToolBar(QStringLiteral("画布"));
     canvasBar->setMovable(false);
     canvasBar->setStyleSheet(
@@ -24,10 +27,27 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
         "QToolButton{color:white;font-weight:600;padding:6px 10px;} "
         "QToolButton:hover{background:rgba(255,255,255,0.15);border-radius:6px;}"
     );
+
+    // 文件操作按钮
+    QAction* actOpen = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("打开"));
+    QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
+    QAction* actPng = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), QStringLiteral("导出PNG"));
+
+    // 添加分隔符
+    canvasBar->addSeparator();
+
+    // 缩放按钮
     QAction* actZoomIn  = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowUp),   QStringLiteral("放大"));
     QAction* actZoomOut = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowDown), QStringLiteral("缩小"));
     QAction* actFit     = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("适配"));
     QAction* actReset   = canvasBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("重置"));
+
+    // 连接文件操作信号
+    connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
+    connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
+    connect(actPng,  &QAction::triggered, this, &MainWindow::exportPNG);
+
+    // 连接缩放操作信号
     connect(actZoomIn,  &QAction::triggered, this, &MainWindow::onZoomIn);
     connect(actZoomOut, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(actFit,     &QAction::triggered, this, &MainWindow::onZoomFit);
@@ -82,7 +102,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     moduleCombo = new QComboBox(controlPanel);
     moduleCombo->addItems({QStringLiteral("顺序表"), QStringLiteral("链表"), QStringLiteral("栈"),
-                           QStringLiteral("二叉树"), QStringLiteral("二叉搜索树"), QStringLiteral("哈夫曼树")});
+                           QStringLiteral("二叉树"), QStringLiteral("二叉搜索树"), QStringLiteral("哈夫曼树"), QStringLiteral("AVL树"), QStringLiteral("脚本/DSL")});
     moduleCombo->setStyleSheet("QComboBox{padding:6px;border:2px solid #e2e8f0;border-radius:10px;}");
     v->addWidget(new QLabel(QStringLiteral("模块选择："), controlPanel));
     v->addWidget(moduleCombo);
@@ -97,6 +117,8 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     moduleStack->addWidget(makeScrollPage(buildBTPage()));
     moduleStack->addWidget(makeScrollPage(buildBSTPage()));
     moduleStack->addWidget(makeScrollPage(buildHuffmanPage()));
+    moduleStack->addWidget(makeScrollPage(buildAVLPage()));
+    moduleStack->addWidget(makeScrollPage(buildDSLPage()));
 
     connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             moduleStack, &QStackedWidget::setCurrentIndex);
@@ -139,4 +161,3 @@ void MainWindow::onZoomIn()   { view->zoomIn();   }
 void MainWindow::onZoomOut()  { view->zoomOut();  }
 void MainWindow::onZoomFit()  { view->zoomFit();  }
 void MainWindow::onZoomReset(){ view->zoomReset(); }
-

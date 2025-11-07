@@ -509,6 +509,10 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/exception.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/exception_defines.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/exception_ptr.h
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/fs_dir.h
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/fs_fwd.h
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/fs_ops.h
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/fs_path.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/functexcept.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/functional_hash.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/bits/hash_bytes.h
@@ -601,6 +605,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/climits
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/clocale
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/cmath
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/codecvt
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/compare
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/concepts
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/cstddef
@@ -621,6 +626,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/numeric_traits.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/string_conversions.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/ext/type_traits.h
+ mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/filesystem
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/format
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/functional
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/initializer_list
@@ -730,6 +736,9 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/vadefs.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wchar.h
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wctype.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonArray
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonDocument
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonObject
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QList
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QObject
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/QRect
@@ -761,6 +770,9 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qbytearrayalgorithms.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qbytearraylist.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qbytearrayview.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcalendar.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcborcommon.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcborvalue.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qchar.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcompare.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcompare_impl.h
@@ -777,12 +789,18 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qcoreevent.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdarwinhelpers.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdatetime.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdeadlinetimer.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdebug.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdir.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qdirlisting.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qelapsedtimer.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qendian.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qeventloop.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qexceptionhandling.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qfile.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qfiledevice.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qfileinfo.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qflags.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qfloat16.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qforeach.h
@@ -797,6 +815,11 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qiodevicebase.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qiterable.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qiterator.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qjsonarray.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qjsondocument.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qjsonobject.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qjsonparseerror.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qjsonvalue.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qlatin1stringview.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qline.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qlist.h
@@ -860,6 +883,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtextstream.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtformat_impl.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtimer.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtimezone.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtmetamacros.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtnoop.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtpreprocessorsupport.h
@@ -872,6 +896,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qtypes.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qurl.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qutf8stringview.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/quuid.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qvariant.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qvarlengtharray.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtCore/qvector.h
@@ -930,6 +955,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtGui/qwindowdefs.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtGui/qwindowdefs_win.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QComboBox
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QFileDialog
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QFormLayout
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QGraphicsEllipseItem
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QGraphicsTextItem
@@ -939,10 +965,12 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QLayout
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QLineEdit
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMainWindow
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMenuBar
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QScrollArea
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSpinBox
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitter
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QStackedWidget
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QTextEdit
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QToolBar
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QVBoxLayout
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractitemdelegate.h
@@ -951,6 +979,8 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractspinbox.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qboxlayout.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qcombobox.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qdialog.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qfiledialog.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qformlayout.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qframe.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qgraphicsitem.h
@@ -962,6 +992,8 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qlayoutitem.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qlineedit.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qmainwindow.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qmenu.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qmenubar.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qrubberband.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qscrollarea.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qsizepolicy.h
@@ -973,11 +1005,13 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qstyleoption.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabbar.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabwidget.h
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtextedit.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtoolbar.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtwidgets-config.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtwidgetsexports.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtwidgetsglobal.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/qwidget.h
+ mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/avl.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h
@@ -996,3 +1030,5 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp
+D:/Users/xiang/CLionProjects/DSCourseDesign/avl.h
+D:/Users/xiang/CLionProjects/DSCourseDesign/avl.cpp

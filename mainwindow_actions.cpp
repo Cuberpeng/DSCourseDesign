@@ -753,6 +753,49 @@ void MainWindow::huffmanBuild() {
     timer.start();
 }
 
+// ===== AVL树 =====
+void MainWindow::avlBuild() {
+    auto a = parseIntList(avlInput->text());
+    timer.stop(); steps.clear(); stepIndex = 0;
+    steps.push_back([this]() { avl.clear(); view->resetScene(); view->setTitle(QStringLiteral("AVL树：开始构建")); drawBT(avl.root(), 400, 120, 200, 0); });
+    for (int i = 0; i < a.size(); i++) {
+        steps.push_back([=]() { avl.insert(a[i]); view->resetScene(); view->setTitle(QStringLiteral("AVL树：插入 %1（第 %2/%3 步）").arg(a[i]).arg(i+1).arg(a.size())); drawBT(avl.root(), 400, 120, 200, 0); });
+    }
+    timer.start();
+}
+
+void MainWindow::avlInsert() {
+    bool ok = false; int value = avlValue->text().toInt(&ok);
+    if(!ok) { statusBar()->showMessage(QStringLiteral("AVL树：请输入有效的键值")); return; }
+
+    timer.stop(); steps.clear(); stepIndex = 0;
+
+    // 显示插入前的树
+    steps.push_back([=]() {
+        view->resetScene();
+        view->setTitle(QStringLiteral("AVL树：插入 %1 前").arg(value));
+        drawBT(avl.root(), 400, 120, 200, 0);
+    });
+
+    // 插入操作
+    steps.push_back([=]() {
+        avl.insert(value);
+        view->resetScene();
+        view->setTitle(QStringLiteral("AVL树：插入 %1 后").arg(value));
+        drawBT(avl.root(), 400, 120, 200, value);
+        statusBar()->showMessage(QStringLiteral("AVL树：插入 %1 完成").arg(value));
+    });
+
+    timer.start();
+}
+
+void MainWindow::avlClear() {
+    avl.clear();
+    view->resetScene();
+    view->setTitle(QStringLiteral("AVL树（空）"));
+    statusBar()->showMessage(QStringLiteral("AVL树：已清空"));
+}
+
 void MainWindow::huffmanClear() { huff.clear(); view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树（空）")); statusBar()->showMessage(QStringLiteral("哈夫曼树：已清空")); }
 
 // ===== 绘制基础 =====
@@ -851,4 +894,467 @@ void MainWindow::animateBTOrder(const int* order, int n, const QString& title)
         });
     }
     timer.start();
+}
+
+// ================== 文件保存/打开/导出 ==================
+void MainWindow::saveDoc() {
+    QFileDialog dialog(this, QStringLiteral("保存为"), "", "DS Visualizer (*.dsviz)");
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setDefaultSuffix("dsviz");
+    dialog.setStyleSheet(
+        "QFileDialog { background: #f8fafc; }"
+        "QLabel { color: #334155; font-weight: 600; }"
+        "QPushButton { background: #3b82f6; color: white; border-radius: 6px; padding: 6px 12px; }"
+        "QPushButton:hover { background: #2563eb; }"
+        "QLineEdit { border: 2px solid #e2e8f0; border-radius: 6px; padding: 6px; }"
+        "QLineEdit:focus { border-color: #3b82f6; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString path = dialog.selectedFiles().first();
+        if(path.isEmpty()) return;
+
+        QJsonObject root;
+        switch(currentKind_) {
+        case DocKind::SeqList: {
+            root["kind"] = "seqlist";
+            QJsonArray arr;
+            for(int i = 0; i < seq.size(); ++i) arr.push_back(seq.get(i));
+            root["values"] = arr;
+        } break;
+
+        case DocKind::LinkedList: {
+            root["kind"] = "linkedlist";
+            QJsonArray arr;
+            for(int i = 0; i < link.size(); ++i) arr.push_back(link.get(i));
+            root["values"] = arr;
+        } break;
+
+        case DocKind::Stack: {
+            root["kind"] = "stack";
+            QJsonArray arr;
+            for(int i = 0; i < st.size(); ++i) arr.push_back(st.get(i));
+            root["values"] = arr;
+        } break;
+
+        case DocKind::BinaryTree: {
+            root["kind"] = "binarytree";
+            int sent = (btLastNullSentinel_ == INT_MIN ? -1 : btLastNullSentinel_);
+            root["null"] = sent;
+            QJsonArray arr;
+            auto v = dumpBTLevel(bt.root(), sent);
+            for(int x: v) arr.push_back(x);
+            root["level"] = arr;
+        } break;
+
+        case DocKind::BST: {
+            root["kind"] = "bst";
+            QJsonArray arr;
+            QVector<int> pre;
+            dumpPreorder(bst.root(), pre);
+            for(int x: pre) arr.push_back(x);
+            root["preorder"] = arr;
+        } break;
+
+        case DocKind::AVL: {
+            root["kind"] = "avl";
+            QJsonArray arr;
+            QVector<int> pre;
+            dumpPreorder(avl.root(), pre);
+            for(int x: pre) arr.push_back(x);
+            root["preorder"] = arr;
+        } break;
+
+        case DocKind::Huffman: {
+            root["kind"] = "huffman";
+            QJsonArray arr;
+            if(!huffLastWeights_.isEmpty()) {
+                for(int w: huffLastWeights_) arr.push_back(w);
+            } else {
+                QVector<int> leaves;
+                collectLeafWeights(huff.root(), leaves);
+                for(int w: leaves) arr.push_back(w);
+            }
+            root["weights"] = arr;
+        } break;
+
+        default: { root["kind"] = "none"; } break;
+        }
+
+        QFile f(path);
+        if(f.open(QIODevice::WriteOnly)) {
+            f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+            f.close();
+            statusBar()->showMessage(QString("已保存：%1").arg(path));
+        }
+    }
+}
+
+void MainWindow::openDoc() {
+    QFileDialog dialog(this, QStringLiteral("打开"), "", "DS Visualizer (*.dsviz)");
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setStyleSheet(
+        "QFileDialog { background: #f8fafc; }"
+        "QLabel { color: #334155; font-weight: 600; }"
+        "QPushButton { background: #3b82f6; color: white; border-radius: 6px; padding: 6px 12px; }"
+        "QPushButton:hover { background: #2563eb; }"
+        "QLineEdit { border: 2px solid #e2e8f0; border-radius: 6px; padding: 6px; }"
+        "QLineEdit:focus { border-color: #3b82f6; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString path = dialog.selectedFiles().first();
+        if(path.isEmpty()) return;
+
+    QFile f(path);
+    if(!f.open(QIODevice::ReadOnly)) {
+        statusBar()->showMessage("打开失败");
+        return;
+    }
+
+    auto doc = QJsonDocument::fromJson(f.readAll());
+    f.close();
+    if(!doc.isObject()) {
+        statusBar()->showMessage("文件格式错误");
+        return;
+    }
+
+    auto o = doc.object();
+    QString k = o.value("kind").toString();
+
+    if(k == "seqlist") {
+        seq.clear();
+        for(auto v : o["values"].toArray()) seq.insert(seq.size(), v.toInt());
+        currentKind_ = DocKind::SeqList;
+        drawSeqlist(seq);
+        view->setTitle("顺序表（已从文件恢复）");
+    } else if(k == "linkedlist") {
+        link.clear();
+        for(auto v : o["values"].toArray()) link.insert(link.size(), v.toInt());
+        currentKind_ = DocKind::LinkedList;
+        drawLinklist(link);
+        view->setTitle("单链表（已从文件恢复）");
+    } else if(k == "stack") {
+        st.clear();
+        for(auto v : o["values"].toArray()) st.push(v.toInt());
+        currentKind_ = DocKind::Stack;
+        drawStack(st);
+        view->setTitle("顺序栈（已从文件恢复）");
+    } else if(k == "binarytree") {
+        int sent = o["null"].toInt(-1);
+        auto ja = o["level"].toArray();
+        QVector<int> a;
+        a.reserve(ja.size());
+        for(auto v: ja) a.push_back(v.toInt());
+        bt.clear();
+        bt.buildTree(a.data(), a.size(), sent);
+        btLastNullSentinel_ = sent;
+        currentKind_ = DocKind::BinaryTree;
+        view->resetScene();
+        view->setTitle("二叉树（已从文件恢复）");
+        drawBT(bt.root(), 400, 120, 200, 0);
+    } else if(k == "bst") {
+        bst.clear();
+        for(auto v : o["preorder"].toArray()) bst.insert(v.toInt());
+        currentKind_ = DocKind::BST;
+        view->resetScene();
+        view->setTitle("BST（已从文件恢复）");
+        drawBT(bst.root(), 400, 120, 200, 0);
+    } else if(k == "avl") {
+        avl.clear();
+        for(auto v : o["preorder"].toArray()) avl.insert(v.toInt());
+        currentKind_ = DocKind::AVL;
+        view->resetScene();
+        view->setTitle("AVL（已从文件恢复）");
+        drawBT(avl.root(), 400, 120, 200, 0);
+    } else if(k == "huffman") {
+        huff.clear();
+        QVector<int> w;
+        for(auto v : o["weights"].toArray()) w.push_back(v.toInt());
+        huff.buildFromWeights(w.data(), w.size());
+        huffLastWeights_ = w;
+        currentKind_ = DocKind::Huffman;
+        view->resetScene();
+        view->setTitle("哈夫曼树（已从文件恢复）");
+        drawBT(huff.root(), 400, 120, 200, 0);
+    } else {
+        statusBar()->showMessage("未知 kind，无法打开");
+        return;
+    }
+    statusBar()->showMessage(QString("已打开：%1").arg(path));
+    }
+
+
+
+
+}
+
+void MainWindow::exportPNG() {
+    QFileDialog dialog(this, QStringLiteral("导出为 PNG"), "", "PNG Image (*.png)");
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setDefaultSuffix("png");
+    dialog.setStyleSheet(
+        "QFileDialog { background: #f8fafc; }"
+        "QLabel { color: #334155; font-weight: 600; }"
+        "QPushButton { background: #3b82f6; color: white; border-radius: 6px; padding: 6px 12px; }"
+        "QPushButton:hover { background: #2563eb; }"
+        "QLineEdit { border: 2px solid #e2e8f0; border-radius: 6px; padding: 6px; }"
+        "QLineEdit:focus { border-color: #3b82f6; }"
+    );
+
+    if (dialog.exec() == QDialog::Accepted) {
+        QString path = dialog.selectedFiles().first();
+        if(path.isEmpty()) return;
+
+        auto* sc = view->Scene();
+        QRectF rect = sc->itemsBoundingRect().adjusted(-40, -40, 40, 80);
+        QImage img(rect.size().toSize() * 2, QImage::Format_ARGB32_Premultiplied);
+        img.fill(Qt::transparent);
+        QPainter p(&img);
+        p.setRenderHint(QPainter::Antialiasing, true);
+        p.translate(-rect.topLeft() * 2);
+        p.scale(2, 2);
+        sc->render(&p, QRectF(), rect);
+        p.end();
+
+        if(img.save(path))
+            statusBar()->showMessage(QString("已导出 PNG：%1").arg(path));
+        else
+            statusBar()->showMessage("导出 PNG 失败");
+    }
+
+}
+
+// ================== DSL / 自然语言 ==================
+void MainWindow::insertDSLExample() {
+    dslEdit->setPlainText(
+        "seq: 1 3 5 7\n"
+        "list: 2 4 6 8\n"
+        "stack: 3 8 13\n"
+        "bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50\n"
+        "bst: 15 6 23 4 7 17 71\n"
+        "avl: 10 20 30 40 50 25\n"
+        "huff: 5 9 12 13 16 45\n"
+    );
+}
+
+void MainWindow::runDSL() {
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    QStringList lines = dslEdit->toPlainText().split('\n', Qt::SkipEmptyParts);
+
+    for(QString ln : lines) {
+        QString s = ln.trimmed();
+        if(s.startsWith('#') || s.isEmpty()) continue;
+        QString low = s.toLower();
+
+        if(low.startsWith("seq:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                seq.clear();
+                for(int x: a) seq.insert(seq.size(), x);
+                currentKind_ = DocKind::SeqList;
+                drawSeqlist(seq);
+                statusBar()->showMessage("DSL：seq 重建");
+            });
+        } else if(low.startsWith("list:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                link.clear();
+                for(int x: a) link.insert(link.size(), x);
+                currentKind_ = DocKind::LinkedList;
+                drawLinklist(link);
+                statusBar()->showMessage("DSL：list 重建");
+            });
+        } else if(low.startsWith("stack:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                st.clear();
+                for(int x: a) st.push(x);
+                currentKind_ = DocKind::Stack;
+                drawStack(st);
+                statusBar()->showMessage("DSL：stack 重建");
+            });
+        } else if(low.startsWith("bt:")) {
+            QRegularExpression re("null\\s*=\\s*([-+]?\\d+)");
+            int sent = -1;
+            auto m = re.match(s);
+            if(m.hasMatch()) sent = m.captured(1).toInt();
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                bt.clear();
+                if(!a.isEmpty()) {
+                    bt.buildTree(a.data(), a.size(), sent);
+                }
+                btLastNullSentinel_ = sent;
+                currentKind_ = DocKind::BinaryTree;
+                view->resetScene();
+                view->setTitle("二叉树（DSL）");
+                drawBT(bt.root(), 400, 120, 200, 0);
+                statusBar()->showMessage("DSL：bt 重建");
+            });
+        } else if(low.startsWith("bst:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                bst.clear();
+                for(int x: a) bst.insert(x);
+                currentKind_ = DocKind::BST;
+                view->resetScene();
+                view->setTitle("BST（DSL）");
+                drawBT(bst.root(), 400, 120, 200, 0);
+                statusBar()->showMessage("DSL：bst 构建");
+            });
+        } else if(low.startsWith("avl:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                avl.clear();
+                for(int x: a) avl.insert(x);
+                currentKind_ = DocKind::AVL;
+                view->resetScene();
+                view->setTitle("AVL（DSL）");
+                drawBT(avl.root(), 400, 120, 200, 0);
+                statusBar()->showMessage("DSL：avl 构建");
+            });
+        } else if(low.startsWith("huff:")) {
+            QVector<int> a = parseIntList(s);
+            steps.push_back([=]() {
+                huff.clear();
+                huff.buildFromWeights(a.data(), a.size());
+                huffLastWeights_ = a;
+                currentKind_ = DocKind::Huffman;
+                view->resetScene();
+                view->setTitle("哈夫曼（DSL）");
+                drawBT(huff.root(), 400, 120, 200, 0);
+                statusBar()->showMessage("DSL：huffman 构建");
+            });
+        } else {
+            steps.push_back([=](){
+                statusBar()->showMessage(QString("未识别的 DSL 行：%1").arg(s));
+            });
+        }
+    }
+
+    if(!steps.isEmpty()) timer.start();
+    else statusBar()->showMessage("DSL：没有可执行的行");
+}
+
+void MainWindow::runNLI() {
+    QString t = nliEdit->toPlainText().trimmed();
+    if(t.isEmpty()) {
+        statusBar()->showMessage("自然语言为空");
+        return;
+    }
+
+    QString low = t.toLower();
+    QString dsl;
+
+    if(low.contains("二叉搜索树") || low.contains("bst")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "bst: " + numbers;
+    } else if(low.contains("平衡二叉树") || low.contains("avl")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "avl: " + numbers;
+    } else if(low.contains("哈夫曼")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "huff: " + numbers;
+    } else if(low.contains("顺序表") || low.contains("数组") || low.contains("seqlist")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "seq: " + numbers;
+    } else if(low.contains("链表") || low.contains("linked")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "list: " + numbers;
+    } else if(low.contains("栈") || low.contains("stack")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "stack: " + numbers;
+    } else if(low.contains("二叉树") || low.contains("binary tree")) {
+        QVector<int> a = parseIntList(t);
+        QString numbers;
+        for(int i = 0; i < a.size(); ++i) {
+            if(i) numbers += ' ';
+            numbers += QString::number(a[i]);
+        }
+        dsl = "bt: null=-1 " + numbers;
+    } else {
+        statusBar()->showMessage("暂不支持的自然语言指令（可在 DSL 页直接写脚本）");
+        return;
+    }
+
+    dslEdit->setPlainText(dsl);
+    runDSL();
+}
+
+// ================== 辅助函数 ==================
+QVector<int> MainWindow::dumpBTLevel(ds::BTNode* root, int nullSentinel) const {
+    QVector<int> level;
+    if(!root) return level;
+
+    QVector<ds::BTNode*> q;
+    q.reserve(128);
+    q.push_back(root);
+    int qi = 0, lastNonNull = -1;
+
+    while(qi < q.size()) {
+        ds::BTNode* p = q[qi++];
+        if(p) {
+            level.push_back(p->key);
+            lastNonNull = level.size() - 1;
+            q.push_back(p->left);
+            q.push_back(p->right);
+        } else {
+            level.push_back(nullSentinel);
+            q.push_back(nullptr);
+            q.push_back(nullptr);
+        }
+        if(q.size() > 4096) break;
+    }
+
+    while(level.size() > 0 && level.back() == nullSentinel)
+        level.pop_back();
+    return level;
+}
+
+void MainWindow::dumpPreorder(ds::BTNode* r, QVector<int>& out) const {
+    if(!r) return;
+    out.push_back(r->key);
+    dumpPreorder(r->left, out);
+    dumpPreorder(r->right, out);
+}
+
+void MainWindow::collectLeafWeights(ds::BTNode* r, QVector<int>& out) const {
+    if(!r) return;
+    if(!r->left && !r->right) out.push_back(r->key);
+    collectLeafWeights(r->left, out);
+    collectLeafWeights(r->right, out);
 }

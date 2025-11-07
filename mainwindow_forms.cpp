@@ -210,3 +210,104 @@ QWidget* MainWindow::buildHuffmanPage() {
     connect(btnClear,&QPushButton::clicked,this,&MainWindow::huffmanClear);
     return root;
 }
+
+QWidget* MainWindow::buildAVLPage() {
+    auto* root = new QWidget;
+    auto* v = new QVBoxLayout(root); v->setSpacing(10);
+
+    auto* form = new QWidget; auto* f = new QFormLayout(form);
+    avlInput = new QLineEdit; avlInput->setPlaceholderText("例如: 15 6 23 4 7 17 71");
+    f->addRow("初始序列", avlInput);
+
+    auto* row0 = new QWidget; auto* hb0 = new QHBoxLayout(row0);
+    auto* btnBuild = new QPushButton("建立"); btnBuild->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
+    auto* btnClear = new QPushButton("清空"); btnClear->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
+    hb0->addWidget(btnBuild); hb0->addWidget(btnClear);
+
+    auto* row1 = new QWidget; auto* hb1 = new QHBoxLayout(row1);
+    avlValue = new QLineEdit; avlValue->setPlaceholderText("键值");
+    auto* btnInsert = new QPushButton("插入"); btnInsert->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    hb1->addWidget(new QLabel("值:")); hb1->addWidget(avlValue);
+    hb1->addWidget(btnInsert);
+
+    v->addWidget(wrapGroup("AVL树建立", form));
+    v->addWidget(wrapGroup("AVL树操作", row0));
+    v->addWidget(wrapGroup("插入", row1));
+    v->addStretch(1);
+
+    connect(btnBuild,&QPushButton::clicked,this,&MainWindow::avlBuild);
+    connect(btnClear,&QPushButton::clicked,this,&MainWindow::avlClear);
+    connect(btnInsert,&QPushButton::clicked,this,&MainWindow::avlInsert);
+    return root;
+}
+
+QWidget* MainWindow::buildDSLPage() {
+    auto* root = new QWidget;
+    auto* v = new QVBoxLayout(root); v->setSpacing(10);
+
+    dslEdit = new QTextEdit;
+    dslEdit->setPlaceholderText(
+        "示例：\n"
+        "seq: 1 3 5 7\n"
+        "list: 2 4 6 8\n"
+        "stack: 3 8 13\n"
+        "bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50\n"
+        "bst: 15 6 23 4 7 17 71\n"
+        "avl: 10 20 30 40 50 25\n"
+        "huff: 5 9 12 13 16 45\n"
+    );
+    dslEdit->setFixedHeight(120); // 设置固定高度为120像素
+    dslEdit->setStyleSheet(
+        "QTextEdit {"
+        "   border: 2px solid #e2e8f0;"
+        "   border-radius: 8px;"
+        "   padding: 8px;"
+        "   background: white;"
+        "   font-size: 14px;"
+        "}"
+        "QTextEdit:focus {"
+        "   border-color: #3b82f6;"
+        "}"
+    );
+    auto* hb0 = new QHBoxLayout;
+    auto* btnRun = new QPushButton("执行脚本");
+    btnRun->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
+    auto* btnEx = new QPushButton("插入示例");
+    btnEx->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    hb0->addWidget(btnRun); hb0->addWidget(btnEx);
+
+    nliEdit = new QTextEdit;  // 改为 QTextEdit
+    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树\n支持多行输入");
+    nliEdit->setMaximumHeight(100);  // 设置最大高度，避免太高
+    nliEdit->setStyleSheet(
+    "QTextEdit {"
+    "   border: 2px solid #e2e8f0;"
+    "   border-radius: 8px;"
+    "   padding: 8px;"
+    "   background: white;"
+    "   font-size: 14px;"
+    "}"
+    "QTextEdit:focus {"
+    "   border-color: #3b82f6;"
+    "}"
+);
+    auto* btnNLI = new QPushButton("理解并执行");
+    btnNLI->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
+
+    v->addWidget(new QLabel("脚本（自定义 DSL）："));
+    v->addWidget(dslEdit);
+    v->addLayout(hb0);
+    v->addWidget(new QLabel("自然语言（将自动转为 DSL 后执行）："));
+
+    // 修改布局：将水平布局改为垂直布局，让按钮在文本编辑框下方
+    v->addWidget(nliEdit);  // 直接添加文本编辑框
+    v->addWidget(btnNLI);   // 添加按钮
+
+    v->addStretch(1);
+
+    connect(btnRun, &QPushButton::clicked, this, &MainWindow::runDSL);
+    connect(btnEx,  &QPushButton::clicked, this, &MainWindow::insertDSLExample);
+    connect(btnNLI, &QPushButton::clicked, this, &MainWindow::runNLI);
+
+    return root;
+}
