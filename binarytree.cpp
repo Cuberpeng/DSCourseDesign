@@ -128,4 +128,45 @@ namespace ds {
         return cnt;
     }
 
+    int BinaryTree::levelorder(int* out, int maxn) const {
+        if (!rootNode) return 0;  // 空树返回0
+
+        // 如果只需要统计节点数量，使用递归计数
+        if (out == nullptr || maxn <= 0) {
+            return count();
+        }
+
+        // 使用简易队列（指针数组）
+        int nodeCount = count();
+        if (nodeCount <= 0) return 0;
+
+        // 分配足够大的队列空间
+        BTNode** q = (BTNode**)std::malloc(sizeof(BTNode*) * (size_t)nodeCount);
+        if (!q) return 0;
+
+        int head = 0, tail = 0;
+        int cnt = 0;
+
+        q[tail++] = rootNode;
+
+        while (head < tail && cnt < maxn) {
+            BTNode* p = q[head++];
+
+            // 访问当前节点
+            out[cnt] = p->key;
+            cnt++;
+
+            // 将左右子节点加入队列
+            if (p->left) {
+                q[tail++] = p->left;
+            }
+            if (p->right) {
+                q[tail++] = p->right;
+            }
+        }
+
+        std::free(q);
+        return cnt;
+    }
+
 } // namespace ds

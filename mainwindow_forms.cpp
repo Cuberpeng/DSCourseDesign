@@ -142,7 +142,8 @@ QWidget* MainWindow::buildBTPage() {
     auto* btnPre  = new QPushButton("先序遍历"); btnPre ->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
     auto* btnIn   = new QPushButton("中序遍历"); btnIn  ->setStyleSheet("QPushButton{background:#6366f1;color:white;}");
     auto* btnPost = new QPushButton("后序遍历"); btnPost->setStyleSheet("QPushButton{background:#a855f7;color:white;}");
-    hb1->addWidget(btnPre); hb1->addWidget(btnIn); hb1->addWidget(btnPost);
+    auto* btnLevel = new QPushButton("层序遍历"); btnLevel->setStyleSheet("QPushButton{background:#10b981;color:white;}"); // 新增按钮
+    hb1->addWidget(btnPre); hb1->addWidget(btnIn); hb1->addWidget(btnPost); hb1->addWidget(btnLevel);
 
     v->addWidget(wrapGroup("二叉树建立", form));
     v->addWidget(wrapGroup("二叉树操作", row0));
@@ -154,6 +155,7 @@ QWidget* MainWindow::buildBTPage() {
     connect(btnPre,  &QPushButton::clicked,this,&MainWindow::btPreorder);
     connect(btnIn,   &QPushButton::clicked,this,&MainWindow::btInorder);
     connect(btnPost, &QPushButton::clicked,this,&MainWindow::btPostorder);
+    connect(btnLevel, &QPushButton::clicked,this,&MainWindow::btLevelorder); // 连接新按钮
     return root;
 }
 
@@ -173,18 +175,20 @@ QWidget* MainWindow::buildBSTPage() {
     auto* row1 = new QWidget; auto* hb1 = new QHBoxLayout(row1);
     bstValue = new QLineEdit; bstValue->setPlaceholderText("键值");
     auto* btnFind = new QPushButton("查找"); btnFind->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    auto* btnInsert = new QPushButton("插入"); btnInsert->setStyleSheet("QPushButton{background:#10b981;color:white;}"); // 新增插入按钮
     auto* btnDel  = new QPushButton("删除"); btnDel ->setStyleSheet("QPushButton{background:#f59e0b;color:white;}");
     hb1->addWidget(new QLabel("值:")); hb1->addWidget(bstValue);
-    hb1->addWidget(btnFind); hb1->addWidget(btnDel);
+    hb1->addWidget(btnFind); hb1->addWidget(btnInsert); hb1->addWidget(btnDel); // 添加插入按钮
 
     v->addWidget(wrapGroup("BST 建立", form));
     v->addWidget(wrapGroup("BST 操作", row0));
-    v->addWidget(wrapGroup("查找/删除", row1));
+    v->addWidget(wrapGroup("查找/插入/删除", row1)); // 修改组标题
     v->addStretch(1);
 
     connect(btnBuild,&QPushButton::clicked,this,&MainWindow::bstBuild);
     connect(btnClear,&QPushButton::clicked,this,&MainWindow::bstClear);
     connect(btnFind, &QPushButton::clicked,this,&MainWindow::bstFind);
+    connect(btnInsert, &QPushButton::clicked,this,&MainWindow::bstInsert); // 连接插入按钮
     connect(btnDel,  &QPushButton::clicked,this,&MainWindow::bstErase);
     return root;
 }

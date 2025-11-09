@@ -42,6 +42,7 @@ namespace ds {
         int preorder (int* out, int maxn) const;
         int inorder  (int* out, int maxn) const;
         int postorder(int* out, int maxn) const;
+        int levelorder(int* out, int maxn) const;
     };
 
 } // namespace ds

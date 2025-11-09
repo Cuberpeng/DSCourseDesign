@@ -70,11 +70,13 @@ private slots:
     void btPreorder();
     void btInorder();
     void btPostorder();
+    void btLevelorder();
     void animateBTOrder(const int* order, int n, const QString& title);
 
     // 二叉搜索树
     void bstBuild();
     void bstFind();
+    void bstInsert();
     void bstErase();
     void bstClear();
 

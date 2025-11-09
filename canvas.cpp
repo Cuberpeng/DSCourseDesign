@@ -38,16 +38,28 @@ void Canvas::resetScene(){
 }
 
 QGraphicsEllipseItem* Canvas::addNode(qreal x, qreal y, const QString& text, bool highlight){
-    auto* n=scene->addEllipse(QRectF(x-33, y-33, 66, 66), QPen(Qt::NoPen), QBrush(highlight ? QColor("#ffd166"): QColor("#a8dadc")));
-    auto* label = scene->addText(text);
-    label->setDefaultTextColor(Qt::black);
-    QRectF tb=label->boundingRect();
-    label->setPos(x- tb.width()/2, y- tb.height()/2);
+    // 改进的节点样式
+    QColor nodeColor = highlight ? QColor("#f59e0b") : QColor("#3b82f6"); // 橙色高亮，蓝色普通
+    QColor borderColor = highlight ? QColor("#d97706") : QColor("#1d4ed8"); // 深色边框
 
+    auto* n = scene->addEllipse(QRectF(x-35, y-35, 70, 70),
+                               QPen(borderColor, 3),
+                               QBrush(nodeColor));
+
+    auto* label = scene->addText(text);
+    label->setDefaultTextColor(Qt::white);
+    label->setFont(QFont("Arial", 12, QFont::Bold));
+
+    QRectF tb = label->boundingRect();
+    label->setPos(x - tb.width()/2, y - tb.height()/2);
+
+    // 改进的阴影效果
     auto* effect = new QGraphicsDropShadowEffect;
-    effect->setBlurRadius(8);
-    effect->setOffset(0,2);
+    effect->setBlurRadius(15);
+    effect->setOffset(3, 3);
+    effect->setColor(QColor(0, 0, 0, 80));
     n->setGraphicsEffect(effect);
+
     return n;
 }
 
