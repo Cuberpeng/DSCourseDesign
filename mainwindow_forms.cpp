@@ -252,12 +252,9 @@ QWidget* MainWindow::buildDSLPage() {
     // 上半：DSL 脚本编辑与执行
     dslEdit = new QTextEdit;
     dslEdit->setPlaceholderText(
-        "在此编写 DSL 脚本：一行一条命令，# 开头为注释，大小写不敏感。\n"
-        "例：\n"
-        "  bst 15 6 23 4 7 17 71\n"
-        "  bst.find 7\n"
-        "  bt 15 6 23 4 -1 -1 7  null=-1\n"
-        "（更多指令：点击右侧“DSL 使用说明”查看）"
+        "指令格式可点击下侧“DSL使用说明”查看\n"
+        "每行只能填写一条语句"
+        "只能输入同一种数据结构中的指令"
     );
     dslEdit->setFixedHeight(120);
     dslEdit->setStyleSheet(
@@ -283,7 +280,7 @@ QWidget* MainWindow::buildDSLPage() {
 
     // 下半：自然语言输入（保持原逻辑）
     nliEdit = new QTextEdit;
-    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树（支持多行）");
+    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树，注意只能对同一种数据结构进行操作");
     nliEdit->setMaximumHeight(100);
     nliEdit->setStyleSheet(
         "QTextEdit {"
