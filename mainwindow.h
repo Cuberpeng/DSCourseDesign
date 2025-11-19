@@ -166,9 +166,14 @@ private:
     QTextEdit* dslEdit{};
     QTextEdit* nliEdit{};
 
+    //信息显示栏
+    QTextEdit* messageBar{};
+
 
     // 工具
     QVector<int> parseIntList(const QString& text) const;
+    void showMessage(const QString& message);
+    void clearMessages();
 
     // 右侧表单页构建
     QWidget* buildSeqlistPage();

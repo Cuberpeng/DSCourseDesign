@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QGraphicsScene>
 #include <QApplication>
+#include <QMessageBox>
 #include <QStyle>
 #include <QIcon>
 #include <QStatusBar>
@@ -20,7 +21,7 @@ void MainWindow::seqlistBuild(){
     timer.stop(); steps.clear(); stepIndex = 0;
     view->resetScene();
     view->setTitle(QStringLiteral("顺序表：建立"));
-    steps.push_back([this](){ drawSeqlist(seq); statusBar()->showMessage(QStringLiteral("顺序表：开始建立")); });
+    steps.push_back([this](){ drawSeqlist(seq); showMessage(QStringLiteral("顺序表：开始建立")); });
     for (int x : a){
         steps.push_back([this, x](){ seq.insert(seq.size(), x); drawSeqlist(seq); statusBar()->showMessage(QStringLiteral("顺序表：插入 %1").arg(x)); });
     }
@@ -30,7 +31,7 @@ void MainWindow::seqlistBuild(){
 void MainWindow::seqlistInsert(){
     int pos = seqlistPosition->value();
     bool ok = false; int val = seqlistValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("顺序表：请输入有效的值")); return; }
+    if(!ok) { showMessage(QStringLiteral("顺序表：请输入有效的值")); return; }
 
     const int n = seq.size();
     if (pos < 0) pos = 0;
@@ -61,7 +62,7 @@ void MainWindow::seqlistInsert(){
         // 高亮插入位置
         qreal highlightX = startX + pos*(cellW+gap);
         view->Scene()->addRect(QRectF(highlightX,startY,cellW,cellH), QPen(QColor("#ef4444"),3), QBrush(Qt::transparent));
-        statusBar()->showMessage(QStringLiteral("顺序表：准备在位置 %1 插入").arg(pos));
+        showMessage(QStringLiteral("顺序表：准备在位置 %1 插入").arg(pos));
     });
 
     // 步骤2：移动插入位置之后的元素
@@ -105,7 +106,7 @@ void MainWindow::seqlistInsert(){
             auto* newIdx = view->Scene()->addText(QString::number(pos)); newIdx->setDefaultTextColor(Qt::darkGray);
             newIdx->setPos(newX+cellW/2-6, newY+cellH+6);
 
-            statusBar()->showMessage(QStringLiteral("顺序表：移动元素并插入新值"));
+            //showMessage(QStringLiteral("顺序表：移动元素并插入新值"));
             if (f==frames) timer.setInterval(prevInterval);
         });
     }
@@ -131,7 +132,7 @@ void MainWindow::seqlistInsert(){
             auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
             idx->setPos(x+cellW/2-6, y+cellH+6);
         }
-        statusBar()->showMessage(QStringLiteral("顺序表：插入完成"));
+        showMessage(QStringLiteral("顺序表：插入完成"));
     });
 
     timer.start();
@@ -140,7 +141,7 @@ void MainWindow::seqlistInsert(){
 void MainWindow::seqlistErase(){
     int pos = seqlistPosition->value();
     const int n = seq.size();
-    if (pos < 0 || pos >= n) { statusBar()->showMessage(QStringLiteral("顺序表：删除失败(位置越界)")); return; }
+    if (pos < 0 || pos >= n) { showMessage(QStringLiteral("顺序表：删除失败(位置越界)")); return; }
 
     QVector<QString> arr(n);
     for (int i=0;i<n;++i) arr[i] = QString::number(seq.get(i));
@@ -166,7 +167,7 @@ void MainWindow::seqlistErase(){
             auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
             idx->setPos(x+cellW/2-6, y+cellH+6);
         }
-        statusBar()->showMessage(QStringLiteral("顺序表：准备删除位置 %1 的元素").arg(pos));
+        showMessage(QStringLiteral("顺序表：准备删除位置 %1 的元素").arg(pos));
     });
 
     // 步骤2：删除元素并移动后续元素
@@ -220,7 +221,7 @@ void MainWindow::seqlistErase(){
                 idx->setPos(sx+cellW/2-6, sy+cellH+6);
             }
 
-            statusBar()->showMessage(QStringLiteral("顺序表：删除元素并移动后续元素"));
+            //showMessage(QStringLiteral("顺序表：删除元素并移动后续元素"));
             if (f==frames) timer.setInterval(prevInterval);
         });
     }
@@ -245,14 +246,14 @@ void MainWindow::seqlistErase(){
             auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
             idx->setPos(x+cellW/2-6, y+cellH+6);
         }
-        statusBar()->showMessage(QStringLiteral("顺序表：删除完成"));
+        showMessage(QStringLiteral("顺序表：删除完成"));
     });
 
     timer.start();
 }
 
 void MainWindow::seqlistClear() {
-    seq.clear(); drawSeqlist(seq); statusBar()->showMessage(QStringLiteral("顺序表：已清空"));
+    seq.clear(); drawSeqlist(seq); showMessage(QStringLiteral("顺序表：已清空"));
 }
 
 // ===== 链表 =====
@@ -272,7 +273,7 @@ void MainWindow::linklistBuild(){
 void MainWindow::linklistInsert() {
     int pos = linklistPosition->value();
     bool ok = false; int v = linklistValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("链表：请输入有效的值")); return; }
+    if(!ok) { showMessage(QStringLiteral("链表：请输入有效的值")); return; }
 
     int n = link.size();
     if (pos < 0) pos = 0; if (pos > n) pos = n;
@@ -280,7 +281,7 @@ void MainWindow::linklistInsert() {
     QVector<int> vals; vals.reserve(n);
     for (int i = 0; i < n; ++i) vals.push_back(link.get(i));
 
-    const qreal y = 220, dx = 120, startX = 120;
+    const qreal y = 220, dx = 120, startX = 150; // 增加startX，让链表整体右移
     QVector<QPointF> centers; centers.reserve(n);
     for (int i = 0; i < n; ++i) centers.push_back(QPointF(startX + i*dx, y));
 
@@ -297,10 +298,10 @@ void MainWindow::linklistInsert() {
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
+        headLabel->setPos(30, y-10);
 
         if (n > 0) {
-            view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+            view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));
         }
 
         // 绘制所有节点
@@ -335,14 +336,25 @@ void MainWindow::linklistInsert() {
             auto* pLabel = view->Scene()->addText("p (head)");
             pLabel->setDefaultTextColor(QColor("#ef4444"));
             pLabel->setFont(QFont("Arial", 14, QFont::Bold));
-            pLabel->setPos(60, y-50);
+            pLabel->setPos(30, y-50); // 从60改为30
         }
 
-        statusBar()->showMessage(QStringLiteral("步骤1：定位插入位置的前驱节点 p"));
+        // 绘制尾指针
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10);
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y));
+        }
+
+        showMessage(QStringLiteral("步骤1：定位插入位置的前驱节点 p"));
     });
 
-    // 步骤2：创建新节点 q，初始时 q->next 为 NULL
-    QPointF qPos(startX + 200, y - 100);
+    // 步骤2：创建新节点 q，在插入位置上方创建
+    QPointF finalPos(startX + pos*dx, y);
+    QPointF qPos(finalPos.x(), y - 100); // 在最终位置的上方创建，而不是固定位置
+
     steps.push_back([=]() {
         view->resetScene(); view->setTitle(QStringLiteral("单链表：创建新节点 q"));
 
@@ -360,12 +372,12 @@ void MainWindow::linklistInsert() {
             }
         }
 
-        // 绘制头指针
+        // 绘制头指针 - 向左移动
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
-        if (n > 0) view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+        headLabel->setPos(30, y-20); // 从60改为30
+        if (n > 0) view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y)); // 从90改为60
 
         // 显示指针变量 p
         if (prevIndex >= 0) {
@@ -377,10 +389,10 @@ void MainWindow::linklistInsert() {
             auto* pLabel = view->Scene()->addText("p (head)");
             pLabel->setDefaultTextColor(QColor("#ef4444"));
             pLabel->setFont(QFont("Arial", 14, QFont::Bold));
-            pLabel->setPos(60, y-50);
+            pLabel->setPos(30, y-50); // 从60改为30
         }
 
-        // 创建新节点 q
+        // 创建新节点 q - 在插入位置上方
         view->addNode(qPos.x(), qPos.y(), QString::number(v), true);
         auto* qLabel = view->Scene()->addText("q");
         qLabel->setDefaultTextColor(QColor("#22c55e"));
@@ -393,7 +405,16 @@ void MainWindow::linklistInsert() {
         qNextLabel->setFont(QFont("Arial", 10, QFont::Bold));
         qNextLabel->setPos(qPos.x()+50, qPos.y()-20);
 
-        statusBar()->showMessage(QStringLiteral("步骤2：创建新节点"));
+        // 绘制尾指针 - 向左移动
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10); // 从60改为30，向左移动
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y)); // 从90改为60
+        }
+
+        showMessage(QStringLiteral("步骤2：创建新节点"));
     });
 
     // 步骤3：执行 q->next = p->next
@@ -414,12 +435,12 @@ void MainWindow::linklistInsert() {
             }
         }
 
-        // 绘制头指针
+        // 绘制头指针 - 向左移动
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
-        if (n > 0) view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+        headLabel->setPos(30, y-20);
+        if (n > 0) view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));
 
         // 显示指针变量 p
         if (prevIndex >= 0) {
@@ -437,7 +458,7 @@ void MainWindow::linklistInsert() {
             auto* pLabel = view->Scene()->addText("p (head)");
             pLabel->setDefaultTextColor(QColor("#ef4444"));
             pLabel->setFont(QFont("Arial", 14, QFont::Bold));
-            pLabel->setPos(60, y-50);
+            pLabel->setPos(30, y-50);
         }
 
         // 新节点 q
@@ -447,18 +468,23 @@ void MainWindow::linklistInsert() {
         qLabel->setFont(QFont("Arial", 14, QFont::Bold));
         qLabel->setPos(qPos.x()-20, qPos.y()-70);
 
-        // 绘制 q->next = p->next 的连接
+        // 绘制 q->next = p->next 的连接 - 使用更直的箭头
         if (succIndex != -1) {
-            // q 指向 p->next
+            // 使用直线连接，避免过度弯曲
             QPointF start(qPos.x()+34, qPos.y());
             QPointF end(centers[succIndex].x()-34, y);
-            QPointF c1(start.x()+80, start.y()-50), c2(end.x()-80, end.y()-50);
+
+            // 计算控制点，使曲线更平缓
+            qreal controlOffset = 40; // 较小的控制点偏移
+            QPointF c1(start.x() + controlOffset, start.y());
+            QPointF c2(end.x() - controlOffset, end.y());
+
             view->addCurveArrow(start, c1, c2, end);
 
             auto* nextLabel = view->Scene()->addText("q->next");
             nextLabel->setDefaultTextColor(QColor("#3b82f6"));
             nextLabel->setFont(QFont("Arial", 10, QFont::Bold));
-            nextLabel->setPos((start.x()+end.x())/2 - 25, (start.y()+end.y())/2 - 70);
+            nextLabel->setPos((start.x()+end.x())/2 - 25, (start.y()+end.y())/2 - 40); // 调整标签位置
         } else {
             // q->next = nullptr
             auto* nullLabel = view->Scene()->addText("q->next = NULL");
@@ -466,187 +492,223 @@ void MainWindow::linklistInsert() {
             nullLabel->setFont(QFont("Arial", 10, QFont::Bold));
             nullLabel->setPos(qPos.x()+50, qPos.y()-20);
         }
+        // 绘制尾指针 - 向左移动
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10); // 从60改为30，向左移动
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y)); // 从90改为60
+        }
 
-        statusBar()->showMessage(QStringLiteral("步骤3：执行 q->next = p->next"));
+        showMessage(QStringLiteral("步骤3：执行 q->next = p->next"));
     });
 
     // 步骤4：执行 p->next = q
     steps.push_back([=]() {
-        view->resetScene(); view->setTitle(QStringLiteral("单链表：执行 p->next = q"));
+    view->resetScene(); view->setTitle(QStringLiteral("单链表：执行 p->next = q"));
 
-        // 绘制原有链表（断开 p 到原后继的连接）
-        for (int i = 0; i < vals.size(); ++i) {
-            bool hl = (i == prevIndex);
-            QPointF c = centers[i];
-            view->addNode(c.x(), y, QString::number(vals[i]), hl);
-            auto* idxItem = view->Scene()->addText(QString::number(i));
-            idxItem->setDefaultTextColor(Qt::darkGray);
-            idxItem->setPos(c.x()-6, y+40);
+    // 绘制原有链表（断开 p 到原后继的连接）
+    for (int i = 0; i < vals.size(); ++i) {
+        bool hl = (i == prevIndex);
+        QPointF c = centers[i];
+        view->addNode(c.x(), y, QString::number(vals[i]), hl);
+        auto* idxItem = view->Scene()->addText(QString::number(i));
+        idxItem->setDefaultTextColor(Qt::darkGray);
+        idxItem->setPos(c.x()-6, y+40);
 
-            // 不绘制 p 到原后继的连接
-            if (i > 0 && i-1 != prevIndex) {
-                view->addEdge(QPointF(centers[i-1].x()+34, y), QPointF(centers[i].x()-34, y));
-            }
+        // 不绘制 p 到原后继的连接
+        if (i > 0 && i-1 != prevIndex) {
+            view->addEdge(QPointF(centers[i-1].x()+34, y), QPointF(centers[i].x()-34, y));
         }
+    }
 
-        // 绘制头指针
+    // 绘制头指针 - 向左移动
+    auto* headLabel = view->Scene()->addText("head");
+    headLabel->setDefaultTextColor(QColor("#334155"));
+    headLabel->setFont(QFont("Arial", 12, QFont::Bold));
+    headLabel->setPos(30, y-20);
+
+    // 头指针连接
+    if (prevIndex >= 0) {
+        view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));
+    }
+
+    // 显示指针变量 p
+    if (prevIndex >= 0) {
+        auto* pLabel = view->Scene()->addText("p");
+        pLabel->setDefaultTextColor(QColor("#ef4444"));
+        pLabel->setFont(QFont("Arial", 14, QFont::Bold));
+        pLabel->setPos(centers[prevIndex].x()-20, centers[prevIndex].y()-70);
+    } else if (pos == 0) {
+        auto* pLabel = view->Scene()->addText("p (head)");
+        pLabel->setDefaultTextColor(QColor("#ef4444"));
+        pLabel->setFont(QFont("Arial", 14, QFont::Bold));
+        pLabel->setPos(30, y-50);
+    }
+
+    // 新节点 q
+    view->addNode(qPos.x(), qPos.y(), QString::number(v), true);
+    auto* qLabel = view->Scene()->addText("q");
+    qLabel->setDefaultTextColor(QColor("#22c55e"));
+    qLabel->setFont(QFont("Arial", 14, QFont::Bold));
+    qLabel->setPos(qPos.x()-20, qPos.y()-70);
+
+    // 绘制 p->next = q 的连接 - 使用更直的箭头
+    if (prevIndex >= 0) {
+        // p 指向 q
+        QPointF start(centers[prevIndex].x()+34, y);
+        QPointF end(qPos.x()-34, qPos.y());
+
+        // 计算控制点，使曲线更平缓
+        qreal controlOffset = 40;
+        QPointF c1(start.x() + controlOffset, start.y());
+        QPointF c2(end.x() - controlOffset, end.y());
+
+        view->addCurveArrow(start, c1, c2, end);
+
+        auto* nextLabel = view->Scene()->addText("p->next");
+        nextLabel->setDefaultTextColor(QColor("#3b82f6"));
+        nextLabel->setFont(QFont("Arial", 10, QFont::Bold));
+        nextLabel->setPos((start.x()+end.x())/2 - 25, (start.y()+end.y())/2 - 40); // 调整标签位置
+    } else {
+        // 头插法：head = q
+        view->addEdge(QPointF(60, y), QPointF(qPos.x()-34, qPos.y()));
+
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
+        headLabel->setPos(30, y-20);
+    }
 
-        // 头指针连接
-        if (prevIndex >= 0) {
-            view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+    // 绘制 q->next 的连接（如果存在）并保持可见
+    if (succIndex != -1) {
+        // 保持 q->next 连接可见
+        QPointF qNextStart(qPos.x()+34, qPos.y());
+        QPointF qNextEnd(centers[succIndex].x()-34, y);
+        view->addEdge(qNextStart, qNextEnd);
+
+        // 添加 q->next 标签
+        auto* qNextLabel = view->Scene()->addText("q->next");
+        qNextLabel->setDefaultTextColor(QColor("#3b82f6"));
+        qNextLabel->setFont(QFont("Arial", 10, QFont::Bold));
+        qNextLabel->setPos((qNextStart.x()+qNextEnd.x())/2 - 25, (qNextStart.y()+qNextEnd.y())/2 - 20);
+    }
+
+    // 绘制尾指针 - 向左移动
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10); // 从60改为30，向左移动
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y)); // 从90改为60
         }
 
-        // 显示指针变量 p
-        if (prevIndex >= 0) {
-            auto* pLabel = view->Scene()->addText("p");
-            pLabel->setDefaultTextColor(QColor("#ef4444"));
-            pLabel->setFont(QFont("Arial", 14, QFont::Bold));
-            pLabel->setPos(centers[prevIndex].x()-20, centers[prevIndex].y()-70);
-        } else if (pos == 0) {
-            auto* pLabel = view->Scene()->addText("p (head)");
-            pLabel->setDefaultTextColor(QColor("#ef4444"));
-            pLabel->setFont(QFont("Arial", 14, QFont::Bold));
-            pLabel->setPos(60, y-50);
-        }
+    showMessage(QStringLiteral("步骤4：执行 p->next = q"));
+});
 
-        // 新节点 q
-        view->addNode(qPos.x(), qPos.y(), QString::number(v), true);
-        auto* qLabel = view->Scene()->addText("q");
-        qLabel->setDefaultTextColor(QColor("#22c55e"));
-        qLabel->setFont(QFont("Arial", 14, QFont::Bold));
-        qLabel->setPos(qPos.x()-20, qPos.y()-70);
+    // 步骤5：调整布局，新节点从上方移动到最终位置
+    const int moveFrames = 20;
+    const int originalInterval = timer.interval();
+    const int fastInterval = 30;
 
-        // 绘制 p->next = q 的连接
-        if (prevIndex >= 0) {
-            // p 指向 q
-            QPointF start(centers[prevIndex].x()+34, y);
-            QPointF end(qPos.x()-34, qPos.y());
-            QPointF c1(start.x()+80, start.y()-50), c2(end.x()-80, end.y()-50);
-            view->addCurveArrow(start, c1, c2, end);
+    // 在步骤5开始前设置快速动画
+    steps.push_back([=]() {
+        timer.setInterval(fastInterval);
+        showMessage(QStringLiteral("快速调整节点布局..."));
+    });
 
-            auto* nextLabel = view->Scene()->addText("p->next");
-            nextLabel->setDefaultTextColor(QColor("#3b82f6"));
-            nextLabel->setFont(QFont("Arial", 10, QFont::Bold));
-            nextLabel->setPos((start.x()+end.x())/2 - 25, (start.y()+end.y())/2 - 70);
-        } else {
-            // 头插法：head = q
-            view->addEdge(QPointF(90, y), QPointF(qPos.x()-34, qPos.y()));
+    for (int f = 0; f <= moveFrames; ++f) {
+        steps.push_back([=]() {
+            qreal t = (qreal)f / moveFrames;
+            // 使用缓动函数使动画更自然
+            qreal easedT = 1 - std::pow(1 - t, 2); // 缓出效果
 
+            QPointF currentPos = qPos + (finalPos - qPos) * easedT;
+
+            view->resetScene();
+            view->setTitle(QStringLiteral("单链表：调整布局"));
+
+            // 绘制头指针 - 向左移动
             auto* headLabel = view->Scene()->addText("head");
             headLabel->setDefaultTextColor(QColor("#334155"));
             headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-            headLabel->setPos(60, y-20);
-        }
+            headLabel->setPos(30, y-20); // 从60改为30
 
-        // 绘制 q->next 的连接（如果存在）
-        if (succIndex != -1) {
-            view->addEdge(QPointF(qPos.x()+34, qPos.y()), QPointF(centers[succIndex].x()-34, y));
-        }
+            // 绘制所有节点
+            for (int i = 0; i <= vals.size(); ++i) {
+                qreal currentX, currentY;
+                QString text;
 
-        statusBar()->showMessage(QStringLiteral("步骤4：执行 p->next = q"));
-    });
+                if (i < pos) {
+                    currentX = centers[i].x();
+                    currentY = y;
+                    text = QString::number(vals[i]);
+                } else if (i == pos) {
+                    currentX = currentPos.x();
+                    currentY = currentPos.y();
+                    text = QString::number(v);
+                } else {
+                    // 后续节点向右移动，使用缓动效果
+                    currentX = centers[i-1].x() + dx * easedT;
+                    currentY = y;
+                    text = QString::number(vals[i-1]);
+                }
 
-    // 步骤5：调整布局，新节点移动到最终位置
-QPointF finalPos(startX + pos*dx, y);
-const int moveFrames = 20; // 增加帧数从10到20，使动画更流畅
+                bool highlight = (i == pos);
+                view->addNode(currentX, currentY, text, highlight);
 
-// 保存原始计时器间隔
-const int originalInterval = timer.interval();
-const int fastInterval = 30; // 快速动画的间隔，单位毫秒
-
-// 在步骤5开始前设置快速动画
-steps.push_back([=]() {
-    timer.setInterval(fastInterval);
-    statusBar()->showMessage(QStringLiteral("快速调整节点布局..."));
-});
-
-for (int f = 0; f <= moveFrames; ++f) {
-    steps.push_back([=]() {
-        qreal t = (qreal)f / moveFrames;
-        // 使用缓动函数使动画更自然
-        qreal easedT = 1 - std::pow(1 - t, 2); // 缓出效果
-
-        QPointF currentPos = qPos + (finalPos - qPos) * easedT;
-
-        view->resetScene();
-        view->setTitle(QStringLiteral("单链表：调整布局"));
-
-        // 绘制头指针
-        auto* headLabel = view->Scene()->addText("head");
-        headLabel->setDefaultTextColor(QColor("#334155"));
-        headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
-
-        // 绘制所有节点
-        for (int i = 0; i <= vals.size(); ++i) {
-            qreal currentX, currentY;
-            QString text;
-
-            if (i < pos) {
-                currentX = centers[i].x();
-                currentY = y;
-                text = QString::number(vals[i]);
-            } else if (i == pos) {
-                currentX = currentPos.x();
-                currentY = currentPos.y();
-                text = QString::number(v);
-            } else {
-                // 后续节点向右移动，使用缓动效果
-                currentX = centers[i-1].x() + dx * easedT;
-                currentY = y;
-                text = QString::number(vals[i-1]);
+                auto* idxItem = view->Scene()->addText(QString::number(i));
+                idxItem->setDefaultTextColor(Qt::darkGray);
+                idxItem->setPos(currentX-6, currentY+40);
             }
 
-            bool highlight = (i == pos);
-            view->addNode(currentX, currentY, text, highlight);
+            // 绘制所有连接
+            for (int i = 1; i <= vals.size(); ++i) {
+                QPointF startPoint, endPoint;
 
-            auto* idxItem = view->Scene()->addText(QString::number(i));
-            idxItem->setDefaultTextColor(Qt::darkGray);
-            idxItem->setPos(currentX-6, currentY+40);
-        }
+                // 计算起始点
+                if (i-1 < pos) {
+                    startPoint = QPointF(centers[i-1].x()+34, y);
+                } else if (i-1 == pos) {
+                    startPoint = QPointF(currentPos.x()+34, currentPos.y());
+                } else {
+                    startPoint = QPointF(centers[i-2].x() + dx * easedT + 34, y);
+                }
 
-        // 绘制所有连接
-        for (int i = 1; i <= vals.size(); ++i) {
-            QPointF startPoint, endPoint;
+                // 计算结束点
+                if (i < pos) {
+                    endPoint = QPointF(centers[i].x()-34, y);
+                } else if (i == pos) {
+                    endPoint = QPointF(currentPos.x()-34, currentPos.y());
+                } else {
+                    endPoint = QPointF(centers[i-1].x() + dx * easedT - 34, y);
+                }
 
-            // 计算起始点
-            if (i-1 < pos) {
-                startPoint = QPointF(centers[i-1].x()+34, y);
-            } else if (i-1 == pos) {
-                startPoint = QPointF(currentPos.x()+34, currentPos.y());
-            } else {
-                startPoint = QPointF(centers[i-2].x() + dx * easedT + 34, y);
+                view->addEdge(startPoint, endPoint);
             }
 
-            // 计算结束点
-            if (i < pos) {
-                endPoint = QPointF(centers[i].x()-34, y);
-            } else if (i == pos) {
-                endPoint = QPointF(currentPos.x()-34, currentPos.y());
+            // 绘制头指针连接
+            if (pos == 0) {
+                view->addEdge(QPointF(60, y), QPointF(currentPos.x()-34, currentPos.y())); // 从90改为60
             } else {
-                endPoint = QPointF(centers[i-1].x() + dx * easedT - 34, y);
+                view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y)); // 从90改为60
             }
 
-            view->addEdge(startPoint, endPoint);
-        }
+            // 绘制尾指针 - 向左移动
+            auto* tailLabel = view->Scene()->addText("tail");
+            tailLabel->setDefaultTextColor(QColor("#334155"));
+            tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+            tailLabel->setPos(centers[n-1].x()+195, y-10); // 从60改为30，向左移动
+            if (n > 0) {
+                view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+195, y)); // 从90改为60
+            }
 
-        // 绘制头指针连接
-        if (pos == 0) {
-            view->addEdge(QPointF(90, y), QPointF(currentPos.x()-34, currentPos.y()));
-        } else {
-            view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
-        }
-
-        // 在最后一帧恢复原始计时器间隔
-        if (f == moveFrames) {
-            timer.setInterval(originalInterval);
-        }
-    });
-
+            // 在最后一帧恢复原始计时器间隔
+            if (f == moveFrames) {
+                timer.setInterval(originalInterval);
+            }
+        });
     }
 
     // 步骤6：显示最终结果
@@ -654,7 +716,7 @@ for (int f = 0; f <= moveFrames; ++f) {
         link.insert(pos, v);
         drawLinklist(link);
         view->setTitle(QStringLiteral("单链表：插入完成"));
-        statusBar()->showMessage(QStringLiteral("链表插入完成：insert(%1,%2)").arg(pos).arg(v));
+        showMessage(QStringLiteral("链表插入完成：insert(%1,%2)").arg(pos).arg(v));
     });
 
     timer.start();
@@ -663,7 +725,7 @@ for (int f = 0; f <= moveFrames; ++f) {
 void MainWindow::linklistErase() {
     int pos = linklistPosition->value();
     int n = link.size();
-    if (pos < 0 || pos >= n) { statusBar()->showMessage(QStringLiteral("链表：删除失败(位置越界)")); return; }
+    if (pos < 0 || pos >= n) { showMessage(QStringLiteral("链表：删除失败(位置越界)")); return; }
 
     QVector<int> vals; vals.reserve(n);
     for (int i = 0; i < n; ++i) vals.push_back(link.get(i));
@@ -684,10 +746,10 @@ void MainWindow::linklistErase() {
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
+        headLabel->setPos(30, y-10);
 
         if (n > 0) {
-            view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+            view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));
         }
 
         for (int i = 0; i < vals.size(); ++i) {
@@ -715,7 +777,16 @@ void MainWindow::linklistErase() {
         qLabel->setFont(QFont("Arial", 14, QFont::Bold));
         qLabel->setPos(centers[qIndex].x()-20, centers[qIndex].y()-70);
 
-        statusBar()->showMessage(QStringLiteral("步骤1：定位节点 p 和 q (q = p->next)"));
+        // 绘制尾指针
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10);
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y));
+        }
+
+        showMessage(QStringLiteral("步骤1：定位节点 p 和 q (q = p->next)"));
     });
 
     // 步骤2：执行 q = p->next（已经完成，主要是展示关系）
@@ -737,8 +808,8 @@ void MainWindow::linklistErase() {
         auto* headLabel = view->Scene()->addText("head");
         headLabel->setDefaultTextColor(QColor("#334155"));
         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
-        if (n > 0) view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+        headLabel->setPos(30, y-10);
+        if (n > 0) { view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));}
 
         // 显示指针变量和关系
         if (prevIndex >= 0) {
@@ -767,7 +838,16 @@ void MainWindow::linklistErase() {
             qNextLabel->setPos(centers[qIndex].x()+40, centers[qIndex].y()-50);
         }
 
-        statusBar()->showMessage(QStringLiteral("步骤2：q = p->next"));
+        // 绘制尾指针
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10);
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y));
+        }
+
+        showMessage(QStringLiteral("步骤2：q = p->next"));
     });
 
     // 步骤3：执行 p->next = q->next
@@ -775,10 +855,11 @@ void MainWindow::linklistErase() {
         view->resetScene(); view->setTitle(QStringLiteral("单链表：p->next = q->next"));
 
         // 绘制头指针
-        auto* headLabel = view->Scene()->addText("head");
-        headLabel->setDefaultTextColor(QColor("#334155"));
-        headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-        headLabel->setPos(60, y-20);
+         auto* headLabel = view->Scene()->addText("head");
+         headLabel->setDefaultTextColor(QColor("#334155"));
+         headLabel->setFont(QFont("Arial", 12, QFont::Bold));
+         headLabel->setPos(30, y-10);
+         if (n > 0) { view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));}
 
         // 绘制所有节点
         for (int i = 0; i < vals.size(); ++i) {
@@ -842,104 +923,153 @@ void MainWindow::linklistErase() {
             view->addEdge(QPointF(centers[qIndex].x()+34, y), QPointF(centers[succIndex].x()-34, y));
         }
 
-        statusBar()->showMessage(QStringLiteral("步骤3：执行 p->next = q->next"));
+        // 绘制尾指针
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        tailLabel->setPos(centers[n-1].x()+95, y-10);
+        if (n > 0) {
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y));
+        }
+
+        showMessage(QStringLiteral("步骤3：执行 p->next = q->next"));
     });
 
     // 步骤4：执行 delete q（节点下落消失）
-    const int deleteFrames = 20; // 增加帧数
-    const int originalInterval = timer.interval();
-    const int fastInterval = 30; // 快速动画间隔
+const int deleteFrames = 20;
+const int originalInterval = timer.interval();
+const int fastInterval = 30;
 
-    // 在删除动画开始前设置快速动画
+// 在删除动画开始前设置快速动画
+steps.push_back([=]() {
+    timer.setInterval(fastInterval);
+    showMessage(QStringLiteral("快速删除节点..."));
+});
+
+for (int f = 0; f <= deleteFrames; ++f) {
     steps.push_back([=]() {
-        timer.setInterval(fastInterval);
-        statusBar()->showMessage(QStringLiteral("快速删除节点..."));
+        const qreal t = qreal(f) / deleteFrames;
+        // 使用缓动函数
+        qreal easedT = 1 - std::pow(1 - t, 2);
+
+        view->resetScene();
+        view->setTitle(QStringLiteral("单链表：delete q"));
+
+        // 绘制头指针
+        auto* headLabel = view->Scene()->addText("head");
+        headLabel->setDefaultTextColor(QColor("#334155"));
+        headLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        headLabel->setPos(30, y-10);
+        if (n > 0) {
+            view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));
+        }
+
+        // 记录前驱节点和后继节点的位置
+        QPointF prevNodePos, nextNodePos;
+        bool hasPrev = false, hasNext = false;
+
+        // 绘制未被删除的节点
+        for (int i = 0; i < vals.size(); ++i) {
+            if (i == qIndex) continue;
+
+            QPointF c = centers[i];
+            bool hl = (i == prevIndex || (succIndex != -1 && i == succIndex));
+            view->addNode(c.x(), y, QString::number(vals[i]), hl);
+            auto* idxItem = view->Scene()->addText(QString::number(i < qIndex ? i : i-1));
+            idxItem->setDefaultTextColor(Qt::darkGray);
+            idxItem->setPos(c.x()-6, y+40);
+
+            // 记录前驱节点和后继节点的位置
+            if (i == prevIndex) {
+                prevNodePos = QPointF(c.x(), y);
+                hasPrev = true;
+            }
+            if (i == succIndex) {
+                nextNodePos = QPointF(c.x(), y);
+                hasNext = true;
+            }
+        }
+
+        // 绘制所有连接 - 确保指针保持连接
+        for (int i = 1; i < vals.size(); ++i) {
+            if (i == qIndex) continue; // 跳过被删除节点
+
+            int prevI = i-1;
+            if (prevI == qIndex) continue; // 如果前一个节点是被删除的节点，跳过
+
+            // 绘制正常的连接
+            if (prevI >= 0 && prevI != qIndex && i != qIndex) {
+                view->addEdge(QPointF(centers[prevI].x()+34, y),
+                            QPointF(centers[i].x()-34, y));
+            }
+        }
+
+        // 特别绘制前驱节点和后继节点之间的连接（重要修复）
+        if (hasPrev && hasNext) {
+            view->addEdge(QPointF(prevNodePos.x()+34, prevNodePos.y()),
+                        QPointF(nextNodePos.x()-34, nextNodePos.y()));
+        } else if (hasPrev && !hasNext) {
+            // 如果删除的是尾节点，前驱节点的next指向null
+            auto* nullLabel = view->Scene()->addText("p->next = NULL");
+            nullLabel->setDefaultTextColor(QColor("#64748b"));
+            nullLabel->setFont(QFont("Arial", 10, QFont::Bold));
+            nullLabel->setPos(prevNodePos.x()+50, prevNodePos.y()-20);
+        } else if (!hasPrev && hasNext) {
+            // 如果删除的是头节点，头指针指向后继节点
+            view->addEdge(QPointF(60, y), QPointF(nextNodePos.x()-34, y));
+        }
+
+        // 绘制下落的被删除节点
+        QPointF deletePos(centers[qIndex].x(), centers[qIndex].y() + 150 * easedT);
+        qreal opacity = 1.0 - easedT;
+
+        // 使用特殊样式绘制被删除的节点
+        auto* node = view->Scene()->addEllipse(QRectF(deletePos.x()-33, deletePos.y()-33, 66, 66),
+                                              QPen(QColor("#ef4444"), 3), QBrush(QColor("#fecaca")));
+        node->setOpacity(opacity);
+
+        auto* text = view->Scene()->addText(QString::number(vals[qIndex]));
+        text->setDefaultTextColor(Qt::black);
+        text->setOpacity(opacity);
+        QRectF tb = text->boundingRect();
+        text->setPos(deletePos.x() - tb.width()/2, deletePos.y() - tb.height()/2);
+
+        auto* qLabel = view->Scene()->addText("q");
+        qLabel->setDefaultTextColor(QColor("#22c55e"));
+        qLabel->setFont(QFont("Arial", 12, QFont::Bold));
+        qLabel->setOpacity(opacity);
+        qLabel->setPos(deletePos.x()-15, deletePos.y()-60);
+
+        auto* deleteLabel = view->Scene()->addText("delete q");
+        deleteLabel->setDefaultTextColor(QColor("#ef4444"));
+        deleteLabel->setFont(QFont("Arial", 10, QFont::Bold));
+        deleteLabel->setPos(deletePos.x()-30, deletePos.y()+50);
+
+        // 在最后一帧恢复原始计时器间隔
+        if (f == deleteFrames) {
+            timer.setInterval(originalInterval);
+        }
+
+        // 绘制尾指针
+        auto* tailLabel = view->Scene()->addText("tail");
+        tailLabel->setDefaultTextColor(QColor("#334155"));
+        tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+
+        // 如果删除的是尾节点，更新尾指针位置
+        if (qIndex == n-1 && hasPrev) {
+            tailLabel->setPos(prevNodePos.x()+95, y-10);
+            view->addEdge(QPointF(prevNodePos.x()+35, y), QPointF(prevNodePos.x()+95, y));
+        } else if (qIndex != n-1) {
+            tailLabel->setPos(centers[n-1].x()+95, y-10);
+            view->addEdge(QPointF(centers[n-1].x()+35, y), QPointF(centers[n-1].x()+95, y));
+        } else {
+            // 如果链表为空
+            tailLabel->setPos(150, y-10);
+        }
+
+        showMessage(QStringLiteral("步骤4：执行 delete q"));
     });
-
-    for (int f = 0; f <= deleteFrames; ++f) {
-        steps.push_back([=]() {
-            const qreal t = qreal(f) / deleteFrames;
-            // 使用缓动函数
-            qreal easedT = 1 - std::pow(1 - t, 2);
-
-            view->resetScene(); view->setTitle(QStringLiteral("单链表：delete q"));
-
-            // 绘制头指针
-            auto* headLabel = view->Scene()->addText("head");
-            headLabel->setDefaultTextColor(QColor("#334155"));
-            headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-            headLabel->setPos(60, y-20);
-
-            // 绘制未被删除的节点
-            for (int i = 0; i < vals.size(); ++i) {
-                if (i == qIndex) continue;
-                QPointF c = centers[i];
-                bool hl = (i == prevIndex || (succIndex != -1 && i == succIndex));
-                view->addNode(c.x(), y, QString::number(vals[i]), hl);
-                auto* idxItem = view->Scene()->addText(QString::number(i < qIndex ? i : i-1));
-                idxItem->setDefaultTextColor(Qt::darkGray);
-                idxItem->setPos(c.x()-6, y+40);
-
-                // 绘制边 - 确保指针保持连接
-                if (i > 0) {
-                    int prevI = i-1;
-                    // 如果前一个节点是被删除的节点，跳过
-                    if (prevI == qIndex) continue;
-
-                    // 如果当前节点是被删除节点的后继，且前一个节点是前驱
-                    if (i == succIndex && prevI == prevIndex) {
-                        // 直接连接前驱和后继
-                        view->addEdge(QPointF(centers[prevIndex].x()+34, y),
-                                    QPointF(centers[succIndex].x()-34, y));
-                    } else if (prevI >= 0 && prevI != qIndex) {
-                        view->addEdge(QPointF(centers[prevI].x()+34, y),
-                                    QPointF(centers[i].x()-34, y));
-                    }
-                }
-            }
-
-            // 头指针连接
-            if (prevIndex > 0) {
-                view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
-            } else if (prevIndex < 0 && succIndex != -1) {
-                // 删除头节点，头指针指向新的头节点
-                view->addEdge(QPointF(90, y), QPointF(centers[succIndex].x()-34, y));
-            }
-
-            // 绘制下落的被删除节点
-            QPointF deletePos(centers[qIndex].x(), centers[qIndex].y() + 150 * easedT);
-            qreal opacity = 1.0 - easedT;
-
-            // 使用特殊样式绘制被删除的节点
-            auto* node = view->Scene()->addEllipse(QRectF(deletePos.x()-33, deletePos.y()-33, 66, 66),
-                                                  QPen(QColor("#ef4444"), 3), QBrush(QColor("#fecaca")));
-            node->setOpacity(opacity);
-
-            auto* text = view->Scene()->addText(QString::number(vals[qIndex]));
-            text->setDefaultTextColor(Qt::black);
-            text->setOpacity(opacity);
-            QRectF tb = text->boundingRect();
-            text->setPos(deletePos.x() - tb.width()/2, deletePos.y() - tb.height()/2);
-
-            auto* qLabel = view->Scene()->addText("q");
-            qLabel->setDefaultTextColor(QColor("#22c55e"));
-            qLabel->setFont(QFont("Arial", 12, QFont::Bold));
-            qLabel->setOpacity(opacity);
-            qLabel->setPos(deletePos.x()-15, deletePos.y()-60);
-
-            auto* deleteLabel = view->Scene()->addText("delete q");
-            deleteLabel->setDefaultTextColor(QColor("#ef4444"));
-            deleteLabel->setFont(QFont("Arial", 10, QFont::Bold));
-            deleteLabel->setPos(deletePos.x()-30, deletePos.y()+50);
-
-            // 在最后一帧恢复原始计时器间隔
-            if (f == deleteFrames) {
-                timer.setInterval(originalInterval);
-            }
-
-            statusBar()->showMessage(QStringLiteral("步骤4：执行 delete q"));
-        });
-    }
+}
 
     // 步骤5：调整布局（压缩链表）
     const int adjustFrames = 20; // 增加帧数
@@ -947,7 +1077,7 @@ void MainWindow::linklistErase() {
     // 设置快速动画
     steps.push_back([=]() {
         timer.setInterval(fastInterval);
-        statusBar()->showMessage(QStringLiteral("快速调整布局..."));
+        showMessage(QStringLiteral("快速调整布局..."));
     });
 
     for (int f = 0; f <= adjustFrames; ++f) {
@@ -962,7 +1092,8 @@ void MainWindow::linklistErase() {
             auto* headLabel = view->Scene()->addText("head");
             headLabel->setDefaultTextColor(QColor("#334155"));
             headLabel->setFont(QFont("Arial", 12, QFont::Bold));
-            headLabel->setPos(60, y-20);
+            headLabel->setPos(30, y-10);
+            if (n > 0) { view->addEdge(QPointF(60, y), QPointF(centers[0].x()-34, y));}
 
             // 计算调整后的位置
             for (int i = 0; i < n; ++i) {
@@ -1019,20 +1150,28 @@ void MainWindow::linklistErase() {
             }
 
             // 头指针连接
-            if (qIndex > 0) {
-                view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
-            } else if (succIndex != -1) {
-                // 删除头节点，头指针指向新的头节点
-                qreal newHeadX = centers[succIndex].x() - dx * easedT;
-                view->addEdge(QPointF(90, y), QPointF(newHeadX-34, y));
-            }
+            // if (qIndex > 0) {
+            //     view->addEdge(QPointF(90, y), QPointF(centers[0].x()-34, y));
+            // } else if (succIndex != -1) {
+            //     // 删除头节点，头指针指向新的头节点
+            //     qreal newHeadX = centers[succIndex].x() - dx * easedT;
+            //     view->addEdge(QPointF(90, y), QPointF(newHeadX-34, y));
+            // }
 
             // 在最后一帧恢复原始计时器间隔
             if (f == adjustFrames) {
                 timer.setInterval(originalInterval);
             }
+            // 绘制尾指针
+            auto* tailLabel = view->Scene()->addText("tail");
+            tailLabel->setDefaultTextColor(QColor("#334155"));
+            tailLabel->setFont(QFont("Arial", 12, QFont::Bold));
+            tailLabel->setPos(centers[n-1].x()+95, y-10);
+            if (n > 0) {
+                view->addEdge(QPointF(centers[n-2].x()+35, y), QPointF(centers[n-1].x()+95, y));
+            }
 
-            statusBar()->showMessage(QStringLiteral("步骤5：调整节点位置"));
+            showMessage(QStringLiteral("步骤5：调整节点位置"));
         });
     }
 
@@ -1041,7 +1180,7 @@ void MainWindow::linklistErase() {
         link.erase(pos);
         drawLinklist(link);
         view->setTitle(QStringLiteral("单链表：删除完成"));
-        statusBar()->showMessage(QStringLiteral("链表：删除位置 %1 完成").arg(pos));
+        showMessage(QStringLiteral("链表：删除位置 %1 完成").arg(pos));
     });
 
     timer.start();
@@ -1055,16 +1194,16 @@ void MainWindow::stackBuild(){
     auto a = parseIntList(stackInput->text());
     timer.stop(); steps.clear(); stepIndex = 0;
     view->resetScene(); view->setTitle(QStringLiteral("栈：建立"));
-    steps.push_back([this](){ drawStack(st); statusBar()->showMessage(QStringLiteral("栈：开始建立")); });
+    steps.push_back([this](){ drawStack(st); showMessage(QStringLiteral("栈：开始建立")); });
     for (int x : a){
-        steps.push_back([this, x](){ st.push(x); drawStack(st); statusBar()->showMessage(QStringLiteral("栈：插入 %1").arg(x)); });
+        steps.push_back([this, x](){ st.push(x); drawStack(st); showMessage(QStringLiteral("栈：插入 %1").arg(x)); });
     }
     timer.start();
 }
 
 void MainWindow::stackPush() {
     bool ok = false; int v = stackValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("栈：请输入有效的值")); return; }
+    if(!ok) { showMessage(QStringLiteral("栈：请输入有效的值")); return; }
 
     const qreal x0 = 380, y0 = 120, W = 300, T = 12, innerPad = 6;
     const qreal BLOCK_H = 32, GAP = 4;
@@ -1114,12 +1253,12 @@ void MainWindow::stackPush() {
         });
     }
 
-    steps.push_back([=](){ st.push(v); drawStack(st); view->setTitle(QStringLiteral("栈：入栈完成")); statusBar()->showMessage(QStringLiteral("栈：push(%1)").arg(v)); });
+    steps.push_back([=](){ st.push(v); drawStack(st); view->setTitle(QStringLiteral("栈：入栈完成")); showMessage(QStringLiteral("栈：push(%1)").arg(v)); });
     timer.start();
 }
 
 void MainWindow::stackPop() {
-    if(st.size()==0){ statusBar()->showMessage(QStringLiteral("栈：空栈，无法出栈")); return; }
+    if(st.size()==0){ showMessage(QStringLiteral("栈：空栈，无法出栈")); return; }
 
     const qreal x0 = 380, y0 = 120, W = 300, T = 12, innerPad = 6;
     const qreal BLOCK_H = 32, GAP = 4;
@@ -1171,11 +1310,11 @@ void MainWindow::stackPop() {
         });
     }
 
-    steps.push_back([this](){ int out=0; st.pop(&out); drawStack(st); view->setTitle(QStringLiteral("栈：出栈完成")); statusBar()->showMessage(QStringLiteral("栈：%1 出栈").arg(out)); });
+    steps.push_back([this](){ int out=0; st.pop(&out); drawStack(st); view->setTitle(QStringLiteral("栈：出栈完成")); showMessage(QStringLiteral("栈：%1 出栈").arg(out)); });
     timer.start();
 }
 
-void MainWindow::stackClear() { st.clear(); drawStack(st); statusBar()->showMessage(QStringLiteral("栈：已清空")); }
+void MainWindow::stackClear() { st.clear(); drawStack(st); showMessage(QStringLiteral("栈：已清空")); }
 
 // ===== 二叉树（构建 & 遍历逐帧高亮） =====
 void MainWindow::btBuild(){
@@ -1185,7 +1324,7 @@ void MainWindow::btBuild(){
 
     steps.push_back([this](){
         bt.clear(); view->resetScene(); view->setTitle(QStringLiteral("二叉树：开始建立（空树）"));
-        drawBT(bt.root(), 400, 120, 200, 0); statusBar()->showMessage(QStringLiteral("二叉树：开始建立（空树）"));
+        drawBT(bt.root(), 400, 120, 200, 0); showMessage(QStringLiteral("二叉树：开始建立（空树）"));
     });
 
     for (int i = 0; i < a.size(); ++i){
@@ -1197,14 +1336,14 @@ void MainWindow::btBuild(){
             QString msg = (a[i]==sent) ? QStringLiteral("空位(哨兵 %1) 跳过").arg(sent) : QStringLiteral("插入 %1").arg(a[i]);
             view->setTitle(QStringLiteral("二叉树：%1 / 共 %2 步").arg(msg).arg(a.size()));
             drawBT(bt.root(), 400, 120, 200, 0);
-            statusBar()->showMessage(QStringLiteral("二叉树：步骤 %1/%2，%3").arg(i+1).arg(a.size()).arg(msg));
+            showMessage(QStringLiteral("二叉树：步骤 %1/%2，%3").arg(i+1).arg(a.size()).arg(msg));
         });
     }
     timer.start();
 }
 
 void MainWindow::btClear() {
-    bt.clear(); view->resetScene(); view->setTitle(QStringLiteral("二叉树（空）")); statusBar()->showMessage(QStringLiteral("二叉树：已清空"));
+    bt.clear(); view->resetScene(); view->setTitle(QStringLiteral("二叉树（空）")); showMessage(QStringLiteral("二叉树：已清空"));
 }
 
 void MainWindow::btPreorder() {
@@ -1252,7 +1391,7 @@ void MainWindow::btLevelorder() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        statusBar()->showMessage(QStringLiteral("层序遍历：空树"));
+        showMessage(QStringLiteral("层序遍历：空树"));
         return;
     }
 
@@ -1262,7 +1401,7 @@ void MainWindow::btLevelorder() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        statusBar()->showMessage(QStringLiteral("层序遍历：空树"));
+        showMessage(QStringLiteral("层序遍历：空树"));
         return;
     }
 
@@ -1278,7 +1417,7 @@ void MainWindow::btLevelorder() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：开始"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        statusBar()->showMessage(QStringLiteral("层序遍历：开始"));
+        showMessage(QStringLiteral("层序遍历：开始"));
     });
 
     for (int i=0;i<n;++i){
@@ -1287,7 +1426,7 @@ void MainWindow::btLevelorder() {
             view->resetScene();
             view->setTitle(QStringLiteral("层序遍历：访问 %1（%2/%3）").arg(key).arg(i+1).arg(n));
             drawBT(bt.root(), 400, 120, 200, key);
-            statusBar()->showMessage(QStringLiteral("层序遍历：访问 %1").arg(key));
+            showMessage(QStringLiteral("层序遍历：访问 %1").arg(key));
         });
     }
 
@@ -1296,7 +1435,7 @@ void MainWindow::btLevelorder() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：完成"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        statusBar()->showMessage(QStringLiteral("层序遍历：完成"));
+        showMessage(QStringLiteral("层序遍历：完成"));
     });
 
     timer.start();
@@ -1315,7 +1454,7 @@ void MainWindow::bstBuild() {
 
 void MainWindow::bstFind() {
     bool ok = false; int value = bstValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
+    if(!ok) { showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
 
     QVector<int> path; ds::BTNode* p = bst.root();
     while(p){ path.push_back(p->key); if (value < p->key) p = p->left; else if (value > p->key) p = p->right; else break; }
@@ -1328,6 +1467,20 @@ void MainWindow::bstFind() {
             view->setTitle(QStringLiteral("BST 查找 %1：%2（%3/%4）").arg(value).arg(last ? (found?QStringLiteral("找到"):QStringLiteral("未找到")) : QStringLiteral("遍历中")).arg(i+1).arg(path.size()));
             drawBT(bst.root(), 400, 120, 200, key); });
     }
+    // 添加最后一步：显示结果弹窗
+    steps.push_back([=](){
+        view->resetScene();
+        view->setTitle(QStringLiteral("BST 查找 %1：%2").arg(value).arg(found ? QStringLiteral("找到") : QStringLiteral("未找到")));
+        drawBT(bst.root(), 400, 120, 200, found ? value : 0);
+        showMessage(QStringLiteral("BST 查找：%1 %2").arg(value).arg(found ? QStringLiteral("查找成功") : QStringLiteral("查找失败")));
+
+        // 显示弹窗
+        if (found) {
+            QMessageBox::information(this,QStringLiteral("查找成功"),QStringLiteral("成功找到元素 %1").arg(value),QMessageBox::Ok);
+        } else {
+            QMessageBox::warning(this,QStringLiteral("查找失败"),QStringLiteral("未找到元素 %1，请重试").arg(value),QMessageBox::Ok);
+        }
+    });
     timer.start();
 }
 
@@ -1335,13 +1488,13 @@ void MainWindow::bstInsert() {
     bool ok = false;
     int value = bstValue->text().toInt(&ok);
     if(!ok) {
-        statusBar()->showMessage(QStringLiteral("二叉搜索树：请输入有效的键值"));
+        showMessage(QStringLiteral("二叉搜索树：请输入有效的键值"));
         return;
     }
 
     // 检查值是否已存在
     if (bst.find(value) != nullptr) {
-        statusBar()->showMessage(QStringLiteral("二叉搜索树：键值 %1 已存在").arg(value));
+        showMessage(QStringLiteral("二叉搜索树：键值 %1 已存在").arg(value));
         return;
     }
 
@@ -1375,7 +1528,7 @@ void MainWindow::bstInsert() {
             view->setTitle(QStringLiteral("BST 插入 %1：%2（%3/%4）")
                           .arg(value).arg(stepDesc).arg(i+1).arg(path.size()));
             drawBT(bst.root(), 400, 120, 200, key);
-            statusBar()->showMessage(QStringLiteral("BST 插入：正在查找插入位置"));
+            showMessage(QStringLiteral("BST 插入：正在查找插入位置"));
         });
     }
 
@@ -1425,7 +1578,7 @@ void MainWindow::bstInsert() {
             view->Scene()->addLine(QLineF(parentPos, childPos), dashPen);
         }
 
-        statusBar()->showMessage(QStringLiteral("BST 插入：创建新节点 %1").arg(value));
+        showMessage(QStringLiteral("BST 插入：创建新节点 %1").arg(value));
     });
 
     // 步骤3：执行实际插入并显示结果
@@ -1434,7 +1587,7 @@ void MainWindow::bstInsert() {
         view->resetScene();
         view->setTitle(QStringLiteral("BST 插入 %1：完成").arg(value));
         drawBT(bst.root(), 400, 120, 200, value);
-        statusBar()->showMessage(QStringLiteral("BST 插入：%1 插入完成").arg(value));
+        showMessage(QStringLiteral("BST 插入：%1 插入完成").arg(value));
     });
 
     timer.start();
@@ -1442,7 +1595,7 @@ void MainWindow::bstInsert() {
 
 void MainWindow::bstErase() {
     bool ok = false; int value = bstValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
+    if(!ok) { showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
 
     ds::BTNode* parent = nullptr; ds::BTNode* p = bst.root();
     while(p && p->key!=value) { parent = p; p = (value < p->key)? p->left : p->right; }
@@ -1527,7 +1680,7 @@ void MainWindow::bstClear() { bst.clear(); view->resetScene(); view->setTitle(QS
 // ===== 哈夫曼树（含合并动画） =====
 void MainWindow::huffmanBuild() {
     auto w = parseIntList(huffmanInput->text());
-    if (w.isEmpty()) { view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树：请输入权值序列")); statusBar()->showMessage(QStringLiteral("哈夫曼树：无有效输入")); return; }
+    if (w.isEmpty()) { view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树：请输入权值序列")); showMessage(QStringLiteral("哈夫曼树：无有效输入")); return; }
     huff.clear(); timer.stop(); steps.clear(); stepIndex = 0;
 
     auto addEdgeLabel = [this](const QPointF& a, const QPointF& b, const QString& text, qreal offset = 12.0) {
@@ -1600,7 +1753,7 @@ void MainWindow::huffmanBuild() {
         (*drawHuffTree)(huff.root(), 400, 120, 200, "", true);
         auto* legend = view->Scene()->addText(QStringLiteral("图例：黄色=原始叶结点   蓝绿色=内部结点（合并产生）"));
         legend->setDefaultTextColor(QColor("#444")); legend->setPos(16, 54);
-        statusBar()->showMessage(QStringLiteral("哈夫曼树：完成"));
+        showMessage(QStringLiteral("哈夫曼树：完成"));
     });
 
     timer.start();
@@ -1619,7 +1772,7 @@ void MainWindow::avlBuild() {
 
 void MainWindow::avlInsert() {
     bool ok = false; int value = avlValue->text().toInt(&ok);
-    if(!ok) { statusBar()->showMessage(QStringLiteral("AVL树：请输入有效的键值")); return; }
+    if(!ok) { showMessage(QStringLiteral("AVL树：请输入有效的键值")); return; }
 
     timer.stop(); steps.clear(); stepIndex = 0;
 
@@ -1636,7 +1789,7 @@ void MainWindow::avlInsert() {
         view->resetScene();
         view->setTitle(QStringLiteral("AVL树：插入 %1 后").arg(value));
         drawBT(avl.root(), 400, 120, 200, value);
-        statusBar()->showMessage(QStringLiteral("AVL树：插入 %1 完成").arg(value));
+        showMessage(QStringLiteral("AVL树：插入 %1 完成").arg(value));
     });
 
     timer.start();
@@ -1646,7 +1799,7 @@ void MainWindow::avlClear() {
     avl.clear();
     view->resetScene();
     view->setTitle(QStringLiteral("AVL树（空）"));
-    statusBar()->showMessage(QStringLiteral("AVL树：已清空"));
+    showMessage(QStringLiteral("AVL树：已清空"));
 }
 
 void MainWindow::huffmanClear() { huff.clear(); view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树（空）")); statusBar()->showMessage(QStringLiteral("哈夫曼树：已清空")); }
@@ -1667,17 +1820,17 @@ void MainWindow::drawSeqlist(const ds::Seqlist& sl){
 void MainWindow::drawLinklist(const ds::Linklist& ll){
     view->resetScene(); view->setTitle(QStringLiteral("单链表"));
     auto* p = ll.gethead();
-    qreal x=120, y=220, lastx=-1;
+    qreal x=150, y=220, lastx=-1;
     int i = 0;
 
-    // 绘制头指针
+    // 绘制头指针 - 向左移动
     auto* headLabel = view->Scene()->addText("head");
     headLabel->setDefaultTextColor(QColor("#334155"));
     headLabel->setFont(QFont("Arial", 10, QFont::Bold));
-    headLabel->setPos(60, y-10);
+    headLabel->setPos(30, y-10);
 
     if (p) {
-        view->addEdge(QPointF(90, y), QPointF(x-35, y));
+        view->addEdge(QPointF(60, y), QPointF(x-35, y));
     }
 
     while(p) {
@@ -1701,14 +1854,17 @@ void MainWindow::drawLinklist(const ds::Linklist& ll){
         i++;
     }
 
-    // 绘制尾指针
+    // 绘制尾指针 - 向右移动，避免被节点遮挡
     if (i > 0) {
         auto* tailLabel = view->Scene()->addText("tail");
         tailLabel->setDefaultTextColor(QColor("#334155"));
         tailLabel->setFont(QFont("Arial", 10, QFont::Bold));
-        tailLabel->setPos(x-30, y-10);
+        tailLabel->setPos(x-20, y-10); // 从x-30改为x-10，向右移动
 
-        view->addEdge(QPointF(lastx, y), QPointF(x-85, y));
+        // 调整尾指针连接线，确保不被节点遮挡
+        if (lastx > 0) {
+            view->addEdge(QPointF(lastx, y), QPointF(x-30, y)); // 从x-85改为x-65
+        }
     }
 }
 
@@ -2017,117 +2173,142 @@ void MainWindow::exportPNG() {
 
 // ================== DSL / 自然语言 ==================
 void MainWindow::insertDSLExample() {
-    dslEdit->setPlainText(
-        "seq: 1 3 5 7\n"
-        "list: 2 4 6 8\n"
-        "stack: 3 8 13\n"
-        "bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50\n"
-        "bst: 15 6 23 4 7 17 71\n"
-        "avl: 10 20 30 40 50 25\n"
-        "huff: 5 9 12 13 16 45\n"
-    );
+    dslEdit->setPlaceholderText(
+    "示例：\n"
+    "seq 1 3 5 7\n"
+    "link 2 4 6 8\n"
+    "stack 3 8 13\n"
+    "bt 15 6 23 4 7 17 71 5 -1 -1 50 null=-1\n"
+    "bst 15 6 23 4 7 17 71\n"
+    "avl 10 20 30 40 50 25\n"
+    "huff 5 9 12 13 16 45\n"
+);
 }
 
 void MainWindow::runDSL() {
-    timer.stop();
-    steps.clear();
-    stepIndex = 0;
-
+    // 为了复用各模块已有的动画逻辑，这里不再自己往 steps 里塞帧，
+    // 而是根据 DSL 解析出参数后，直接填充右侧输入框并调用对应的 *Build 函数。
+    // 注意：目前一次只执行第一条被识别的 DSL 指令。
     QStringList lines = dslEdit->toPlainText().split('\n', Qt::SkipEmptyParts);
 
-    for(QString ln : lines) {
+    for (QString ln : lines) {
         QString s = ln.trimmed();
-        if(s.startsWith('#') || s.isEmpty()) continue;
+        if (s.isEmpty() || s.startsWith('#')) continue;
+
         QString low = s.toLower();
 
-        if(low.startsWith("seq:")) {
+        // 顺序表：seq: 1 3 5 7
+        if (low.startsWith("seq")) {
             QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                seq.clear();
-                for(int x: a) seq.insert(seq.size(), x);
-                currentKind_ = DocKind::SeqList;
-                drawSeqlist(seq);
-                statusBar()->showMessage("DSL：seq 重建");
-            });
-        } else if(low.startsWith("list:")) {
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                link.clear();
-                for(int x: a) link.insert(link.size(), x);
-                currentKind_ = DocKind::LinkedList;
-                drawLinklist(link);
-                statusBar()->showMessage("DSL：list 重建");
-            });
-        } else if(low.startsWith("stack:")) {
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                st.clear();
-                for(int x: a) st.push(x);
-                currentKind_ = DocKind::Stack;
-                drawStack(st);
-                statusBar()->showMessage("DSL：stack 重建");
-            });
-        } else if(low.startsWith("bt:")) {
-            QRegularExpression re("null\\s*=\\s*([-+]?\\d+)");
-            int sent = -1;
-            auto m = re.match(s);
-            if(m.hasMatch()) sent = m.captured(1).toInt();
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                bt.clear();
-                if(!a.isEmpty()) {
-                    bt.buildTree(a.data(), a.size(), sent);
-                }
-                btLastNullSentinel_ = sent;
-                currentKind_ = DocKind::BinaryTree;
-                view->resetScene();
-                view->setTitle("二叉树（DSL）");
-                drawBT(bt.root(), 400, 120, 200, 0);
-                statusBar()->showMessage("DSL：bt 重建");
-            });
-        } else if(low.startsWith("bst:")) {
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                bst.clear();
-                for(int x: a) bst.insert(x);
-                currentKind_ = DocKind::BST;
-                view->resetScene();
-                view->setTitle("BST（DSL）");
-                drawBT(bst.root(), 400, 120, 200, 0);
-                statusBar()->showMessage("DSL：bst 构建");
-            });
-        } else if(low.startsWith("avl:")) {
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                avl.clear();
-                for(int x: a) avl.insert(x);
-                currentKind_ = DocKind::AVL;
-                view->resetScene();
-                view->setTitle("AVL（DSL）");
-                drawBT(avl.root(), 400, 120, 200, 0);
-                statusBar()->showMessage("DSL：avl 构建");
-            });
-        } else if(low.startsWith("huff:")) {
-            QVector<int> a = parseIntList(s);
-            steps.push_back([=]() {
-                huff.clear();
-                huff.buildFromWeights(a.data(), a.size());
-                huffLastWeights_ = a;
-                currentKind_ = DocKind::Huffman;
-                view->resetScene();
-                view->setTitle("哈夫曼（DSL）");
-                drawBT(huff.root(), 400, 120, 200, 0);
-                statusBar()->showMessage("DSL：huffman 构建");
-            });
-        } else {
-            steps.push_back([=](){
-                statusBar()->showMessage(QString("未识别的 DSL 行：%1").arg(s));
-            });
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+            currentKind_ = DocKind::SeqList;
+            seqlistInput->setText(numbers);
+            seqlistBuild();
+            return;
         }
+
+        // 单链表：link: 2 4 6 8
+        if (low.startsWith("link")) {
+            QVector<int> a = parseIntList(s);
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+            currentKind_ = DocKind::LinkedList;
+            linklistInput->setText(numbers);
+            linklistBuild();
+            return;
+        }
+
+        // 栈：stack: 3 8 13
+        if (low.startsWith("stack")) {
+            QVector<int> a = parseIntList(s);
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+            currentKind_ = DocKind::Stack;
+            stackInput->setText(numbers);
+            stackBuild();
+            return;
+        }
+
+        // 普通二叉树：bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50
+        // 约定：行内解析到的第一个整数作为空结点哨兵，其余为层序序列
+        if (low.startsWith("bt")) {
+            // 默认空结点哨兵
+            int sent = -1;
+
+            // 先从整行中找显式的 null=xxx
+            QRegularExpression re(QStringLiteral("null\\s*=\\s*([-+]?\\d+)"));
+            QString s2 = s;
+            QRegularExpressionMatch m = re.match(s2);
+            if (m.hasMatch()) {
+                sent = m.captured(1).toInt();
+                // 把 "null=xxx" 这一段从字符串里删掉，避免被当作节点数据
+                s2.replace(re, QStringLiteral(" "));
+            }
+
+            // 剩余部分全部当作层序序列
+            QVector<int> a = parseIntList(s2);
+            if (a.isEmpty()) {
+                statusBar()->showMessage(QStringLiteral("DSL：bt 行缺少层序序列数字"));
+                return;
+            }
+
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i > 0) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+
+            btLastNullSentinel_ = sent;
+            currentKind_ = DocKind::BinaryTree;
+            btNull->setValue(sent);
+            btInput->setText(numbers);
+            btBuild();
+            return;
+        }
+
+        // AVL：avl: 10 20 30 40 50 25
+        if (low.startsWith("avl")) {
+            QVector<int> a = parseIntList(s);
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+            currentKind_ = DocKind::AVL;
+            avlInput->setText(numbers);
+            avlBuild();
+            return;
+        }
+
+        // 哈夫曼：huff: 5 9 12 13 16 45
+        if (low.startsWith("huff")) {
+            QVector<int> a = parseIntList(s);
+            QString numbers;
+            for (int i = 0; i < a.size(); ++i) {
+                if (i) numbers += ' ';
+                numbers += QString::number(a[i]);
+            }
+            huffLastWeights_ = a;
+            currentKind_ = DocKind::Huffman;
+            huffmanInput->setText(numbers);
+            huffmanBuild();
+            return;
+        }
+
+        // 如果这一行没匹配到，上面 continue 之前会尝试下一行
     }
 
-    if(!steps.isEmpty()) timer.start();
-    else statusBar()->showMessage("DSL：没有可执行的行");
+    statusBar()->showMessage(QStringLiteral("DSL：没有可执行的行"));
 }
 
 void MainWindow::runNLI() {
@@ -2147,15 +2328,15 @@ void MainWindow::runNLI() {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "bst: " + numbers;
-    } else if(low.contains("平衡二叉树") || low.contains("avl")) {
+        dsl = "bst" + numbers;
+    } else if(low.contains("avl")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
         for(int i = 0; i < a.size(); ++i) {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "avl: " + numbers;
+        dsl = "avl" + numbers;
     } else if(low.contains("哈夫曼")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
@@ -2163,7 +2344,7 @@ void MainWindow::runNLI() {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "huff: " + numbers;
+        dsl = "huff" + numbers;
     } else if(low.contains("顺序表") || low.contains("数组") || low.contains("seqlist")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
@@ -2171,7 +2352,7 @@ void MainWindow::runNLI() {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "seq: " + numbers;
+        dsl = "seq" + numbers;
     } else if(low.contains("链表") || low.contains("linked")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
@@ -2179,7 +2360,7 @@ void MainWindow::runNLI() {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "list: " + numbers;
+        dsl = "link" + numbers;
     } else if(low.contains("栈") || low.contains("stack")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
@@ -2187,18 +2368,17 @@ void MainWindow::runNLI() {
             if(i) numbers += ' ';
             numbers += QString::number(a[i]);
         }
-        dsl = "stack: " + numbers;
-    } else if(low.contains("二叉树") || low.contains("binary tree")) {
+        dsl = "stack" + numbers;
+    } else if (low.contains(QStringLiteral("二叉树")) || low.contains("binary tree")) {
         QVector<int> a = parseIntList(t);
         QString numbers;
-        for(int i = 0; i < a.size(); ++i) {
-            if(i) numbers += ' ';
-            numbers += QString::number(a[i]);
+        for (int x : a) {
+            if (!numbers.isEmpty()) numbers += ' ';
+            numbers += QString::number(x);
         }
-        dsl = "bt: null=-1 " + numbers;
-    } else {
-        statusBar()->showMessage("暂不支持的自然语言指令（可在 DSL 页直接写脚本）");
-        return;
+        if (!numbers.isEmpty())
+            // 生成形如：bt 15 6 23 ... null=-1
+                dsl = "bt " + numbers + " null=-1";
     }
 
     dslEdit->setPlainText(dsl);

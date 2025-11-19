@@ -11,6 +11,7 @@
 #include <QStyle>
 #include <QScrollArea>
 #include <QRegularExpression>
+#include <QTime>
 
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
@@ -49,7 +50,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     // 连接缩放操作信号
     connect(actZoomIn,  &QAction::triggered, this, &MainWindow::onZoomIn);
-    connect(actZoomOut, &QAction::triggered, this, &MainWindow::onZoomOut);
+    connect(actZoomOut,  &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(actFit,     &QAction::triggered, this, &MainWindow::onZoomFit);
     connect(actReset,   &QAction::triggered, this, &MainWindow::onZoomReset);
 
@@ -57,9 +58,44 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     splitter = new QSplitter(Qt::Horizontal, this);
     setCentralWidget(splitter);
 
-    // 左：画布（初始即完整可见）
-    view = new Canvas(splitter);
-    splitter->addWidget(view);
+    // 左：画布区域（包含画布和信息栏）
+    QWidget* canvasArea = new QWidget(splitter);
+    QVBoxLayout* canvasLayout = new QVBoxLayout(canvasArea);
+    canvasLayout->setContentsMargins(0, 0, 0, 0);
+    canvasLayout->setSpacing(0);
+
+    // 画布
+    view = new Canvas(canvasArea);
+    canvasLayout->addWidget(view, 1); // 画布占据主要空间
+
+    // 信息栏
+    QWidget* messageBarContainer = new QWidget(canvasArea);
+    messageBarContainer->setStyleSheet("QWidget{background:#f8fafc;border-top:1px solid #e2e8f0;}");
+    QVBoxLayout* messageLayout = new QVBoxLayout(messageBarContainer);
+    messageLayout->setContentsMargins(12, 8, 12, 8);
+
+    QLabel* messageTitle = new QLabel(QStringLiteral("操作信息"));
+    messageTitle->setStyleSheet("QLabel{color:#334155;font-weight:600;font-size:12px;margin-bottom:4px;}");
+    messageLayout->addWidget(messageTitle);
+
+    messageBar = new QTextEdit(messageBarContainer);
+    messageBar->setMaximumHeight(120);
+    messageBar->setReadOnly(true);
+    messageBar->setStyleSheet(
+        "QTextEdit{"
+        "background:white;"
+        "border:1px solid #e2e8f0;"
+        "border-radius:6px;"
+        "padding:8px;"
+        "font-size:12px;"
+        "color:#475569;"
+        "}"
+    );
+    messageLayout->addWidget(messageBar);
+
+    canvasLayout->addWidget(messageBarContainer);
+
+    splitter->addWidget(canvasArea);
 
     // 右：控制面板（有明显的色块分区）
     controlPanel = new QWidget(splitter);
@@ -129,6 +165,27 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     // 初始画布提示
     view->setTitle(QStringLiteral("请选择右侧模块并操作"));
+    showMessage(QStringLiteral("欢迎使用数据结构可视化工具！请从右侧选择数据结构模块开始操作。"));
+}
+
+// 新增：显示消息到信息栏
+void MainWindow::showMessage(const QString& message) {
+    QString timestamp = QTime::currentTime().toString("hh:mm:ss");
+    QString formattedMessage = QString("[%1] %2").arg(timestamp, message);
+    messageBar->append(formattedMessage);
+
+    // 自动滚动到底部
+    QTextCursor cursor = messageBar->textCursor();
+    cursor.movePosition(QTextCursor::End);
+    messageBar->setTextCursor(cursor);
+
+    // 同时更新状态栏（简短提示）
+    statusBar()->showMessage(message, 3000);
+}
+
+// 新增：清空信息栏
+void MainWindow::clearMessages() {
+    messageBar->clear();
 }
 
 QWidget* MainWindow::makeScrollPage(QWidget* content) {
@@ -152,7 +209,7 @@ void MainWindow::playSteps(){
         steps[stepIndex++]();
     }else{
         timer.stop();
-        statusBar()->showMessage(QStringLiteral("播放结束"));
+        showMessage(QStringLiteral("播放结束"));
     }
 }
 
