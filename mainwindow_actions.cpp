@@ -11,6 +11,11 @@
 #include <cmath>
 #include <memory>
 #include <climits>
+#include <QDialog>
+#include <QTextBrowser>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
@@ -2173,142 +2178,535 @@ void MainWindow::exportPNG() {
 
 // ================== DSL / 自然语言 ==================
 void MainWindow::insertDSLExample() {
-    dslEdit->setPlaceholderText(
-    "示例：\n"
-    "seq 1 3 5 7\n"
-    "link 2 4 6 8\n"
-    "stack 3 8 13\n"
-    "bt 15 6 23 4 7 17 71 5 -1 -1 50 null=-1\n"
-    "bst 15 6 23 4 7 17 71\n"
-    "avl 10 20 30 40 50 25\n"
-    "huff 5 9 12 13 16 45\n"
-);
+    // 弹出一个只读文档页面，详细说明 DSL 用法
+    auto* dlg = new QDialog(this);
+    dlg->setWindowTitle(QStringLiteral("DSL 使用说明"));
+    dlg->resize(780, 620);
+    dlg->setModal(false);
+    dlg->setAttribute(Qt::WA_DeleteOnClose, true);
+
+    auto* v = new QVBoxLayout(dlg);
+
+    auto* doc = new QTextBrowser(dlg);
+    doc->setOpenExternalLinks(false);
+    doc->setStyleSheet(
+        "QTextBrowser{border:2px solid #e2e8f0;border-radius:10px;padding:12px;background:white;}"
+    );
+
+    const QString html = QString::fromUtf8(R"HTML(
+<h2 style="margin:0 0 12px 0;">DSL 使用说明</h2>
+<p>本 DSL 只做“解析 → 设置控件 → 调用已有槽函数”，<b>动画与绘制复用现有实现</b>。规则：</p>
+<ul>
+  <li>每行一条命令；<code>#</code> 开头为注释；大小写不敏感；数字可用空格或逗号分隔。</li>
+  <li>普通二叉树层序构建支持哨兵：<code>null=-1</code>，可省略（默认 -1）。</li>
+  <li>命令按顺序逐条执行；一条命令的动画结束后自动进入下一条。</li>
+</ul>
+
+<h3>顺序表（Seqlist）</h3>
+<pre><code>seq 1 3 5 7
+seq.insert  pos value
+seq.erase   pos
+seq.clear
+</code></pre>
+
+<h3>单链表（Linklist）</h3>
+<pre><code>link 2 4 6 8
+link.insert pos value
+link.erase  pos
+link.clear
+</code></pre>
+
+<h3>顺序栈（Stack）</h3>
+<pre><code>stack 3 8 13
+stack.push value
+stack.pop
+stack.clear
+</code></pre>
+
+<h3>普通二叉树（Binary Tree，层序+哨兵）</h3>
+<pre><code>bt 15 6 23 4 -1 -1 7  null=-1
+bt.preorder
+bt.inorder
+bt.postorder
+bt.levelorder
+bt.clear
+</code></pre>
+
+<h3>二叉搜索树（BST）</h3>
+<pre><code>bst 15 6 23 4 7 17 71
+bst.find   x
+bst.insert x
+bst.erase  x
+bst.clear
+</code></pre>
+
+<h3>哈夫曼树（Huffman）</h3>
+<pre><code>huff 5 9 12 13 16 45
+huff.clear
+</code></pre>
+
+<h3>AVL 树</h3>
+<pre><code>avl 10 20 30 40 50 25
+avl.insert x
+avl.clear
+</code></pre>
+
+<hr/>
+<p style="color:#6b7280">小贴士：若要批量运行多结构示例，可直接把右下角“插入示例”粘贴到编辑框后点击“执行脚本”。</p>
+)HTML");
+
+    doc->setHtml(html);
+
+    // 一键写入示例脚本
+    const QString sample = QString::fromUtf8(
+R"(# —— 顺序表 ——
+seq 1 3 5 7
+seq.insert 2 99
+seq.erase 1
+seq.clear
+
+# —— 单链表 ——
+link 2 4 6 8
+link.insert 1 42
+link.erase 3
+link.clear
+
+# —— 栈 ——
+stack 3 8 13
+stack.push 21
+stack.pop
+stack.clear
+
+# —— 普通二叉树（层序 + 哨兵）——
+bt 15 6 23 4 -1 -1 7  null=-1
+bt.preorder
+bt.inorder
+bt.postorder
+bt.levelorder
+bt.clear
+
+# —— BST ——
+bst 15 6 23 4 7 17 71
+bst.find 7
+bst.insert 50
+bst.erase 23
+bst.clear
+
+# —— Huffman ——
+huff 5 9 12 13 16 45
+huff.clear
+
+# —— AVL ——
+avl 10 20 30 40 50 25
+avl.insert 35
+avl.clear
+)");
+
+    auto* btnBar   = new QHBoxLayout;
+    auto* btnPaste = new QPushButton(QStringLiteral("插入示例到编辑框"));
+    auto* btnClose = new QPushButton(QStringLiteral("关闭"));
+    btnPaste->setStyleSheet("QPushButton{background:#10b981;color:white;}");
+    btnClose->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
+
+    connect(btnPaste, &QPushButton::clicked, this, [this, sample, dlg](){
+        if (dslEdit) {
+            dslEdit->setPlainText(sample);
+            dslEdit->setFocus();
+        }
+        dlg->close();
+    });
+    connect(btnClose, &QPushButton::clicked, dlg, &QDialog::close);
+
+    btnBar->addStretch(1);
+    btnBar->addWidget(btnPaste);
+    btnBar->addWidget(btnClose);
+
+    v->addWidget(doc, 1);
+    v->addLayout(btnBar);
+
+    dlg->show();
 }
 
 void MainWindow::runDSL() {
-    // 为了复用各模块已有的动画逻辑，这里不再自己往 steps 里塞帧，
-    // 而是根据 DSL 解析出参数后，直接填充右侧输入框并调用对应的 *Build 函数。
-    // 注意：目前一次只执行第一条被识别的 DSL 指令。
-    QStringList lines = dslEdit->toPlainText().split('\n', Qt::SkipEmptyParts);
+    // 读取并按行分割
+    const QString all = dslEdit->toPlainText();
+    QStringList lines = all.split('\n', Qt::SkipEmptyParts);
 
+    // 命令队列（每个元素是“执行一条 DSL 命令”的闭包）
+    QVector<std::function<void()>> ops;
+    ops.reserve(lines.size());
+
+    auto asNumbers = [this](const QString& s)->QVector<int>{
+        return parseIntList(s); // 你已有：正则提取整数（支持空格/逗号）:contentReference[oaicite:6]{index=6}
+    };
+
+    auto normalized = [](QString s){
+        s = s.trimmed();
+        // 去掉连续空白，并小写
+        s.replace(QRegularExpression("[\\t,]+"), " ");
+        return s.toLower();
+    };
+
+    auto pushContinueStepOrNext = [this](const std::shared_ptr<std::function<void()>>& runNext){
+        // 若当前动作未生成动画步骤，则立即进入下一条
+        if (steps.isEmpty()) {
+            QTimer::singleShot(0, this, [runNext]{ (*runNext)(); });
+        } else {
+            // 在动画步骤末尾补一个“继续下一条”的帧
+            steps.push_back([runNext](){ (*runNext)(); });
+            if (!timer.isActive()) timer.start();
+        }
+    };
+
+    // 逐行解析为闭包
     for (QString ln : lines) {
-        QString s = ln.trimmed();
+        QString s = normalized(ln);
         if (s.isEmpty() || s.startsWith('#')) continue;
 
-        QString low = s.toLower();
-
-        // 顺序表：seq: 1 3 5 7
-        if (low.startsWith("seq")) {
-            QVector<int> a = parseIntList(s);
-            QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i) numbers += ' ';
-                numbers += QString::number(a[i]);
+        // ===== 顺序表 =====
+        if (s.startsWith("seq.insert")) {
+            // seq.insert pos value
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 3) {
+                bool ok1=false, ok2=false;
+                int pos = tokens.value(1).toInt(&ok1);
+                int val = tokens.value(2).toInt(&ok2);
+                if (ok1 && ok2) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::SeqList;
+                        seqlistPosition->setValue(pos);
+                        seqlistValue->setText(QString::number(val));
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        seqlistInsert();
+                    });
+                    continue;
+                }
             }
-            currentKind_ = DocKind::SeqList;
-            seqlistInput->setText(numbers);
-            seqlistBuild();
-            return;
+        }
+        if (s.startsWith("seq.erase")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 2) {
+                bool ok=false; int pos = tokens.value(1).toInt(&ok);
+                if (ok) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::SeqList;
+                        seqlistPosition->setValue(pos);
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        seqlistErase();
+                    });
+                    continue;
+                }
+            }
+        }
+        if (s == "seq.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::SeqList;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                seqlistClear();
+            });
+            continue;
+        }
+        if (s.startsWith("seq ")) {
+            // seq 1 3 5 7
+            auto a = asNumbers(s);
+            QString numbers;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::SeqList;
+                seqlistInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                seqlistBuild();
+            });
+            continue;
         }
 
-        // 单链表：link: 2 4 6 8
-        if (low.startsWith("link")) {
-            QVector<int> a = parseIntList(s);
-            QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i) numbers += ' ';
-                numbers += QString::number(a[i]);
+        // ===== 单链表 =====
+        if (s.startsWith("link.insert")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 3) {
+                bool ok1=false, ok2=false;
+                int pos = tokens.value(1).toInt(&ok1);
+                int val = tokens.value(2).toInt(&ok2);
+                if (ok1 && ok2) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::LinkedList;
+                        linklistPosition->setValue(pos);
+                        linklistValue->setText(QString::number(val));
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        linklistInsert();
+                    });
+                    continue;
+                }
             }
-            currentKind_ = DocKind::LinkedList;
-            linklistInput->setText(numbers);
-            linklistBuild();
-            return;
+        }
+        if (s.startsWith("link.erase")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 2) {
+                bool ok=false; int pos = tokens.value(1).toInt(&ok);
+                if (ok) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::LinkedList;
+                        linklistPosition->setValue(pos);
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        linklistErase();
+                    });
+                    continue;
+                }
+            }
+        }
+        if (s == "link.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::LinkedList;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                linklistClear();
+            });
+            continue;
+        }
+        if (s.startsWith("link ")) {
+            auto a = asNumbers(s);
+            QString numbers;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::LinkedList;
+                linklistInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                linklistBuild();
+            });
+            continue;
         }
 
-        // 栈：stack: 3 8 13
-        if (low.startsWith("stack")) {
-            QVector<int> a = parseIntList(s);
-            QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i) numbers += ' ';
-                numbers += QString::number(a[i]);
+        // ===== 栈 =====
+        if (s == "stack.pop") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::Stack;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                stackPop();
+            });
+            continue;
+        }
+        if (s.startsWith("stack.push")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 2) {
+                bool ok=false; int v = tokens.value(1).toInt(&ok);
+                if (ok) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::Stack;
+                        stackValue->setText(QString::number(v));
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        stackPush();
+                    });
+                    continue;
+                }
             }
-            currentKind_ = DocKind::Stack;
-            stackInput->setText(numbers);
-            stackBuild();
-            return;
+        }
+        if (s == "stack.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::Stack;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                stackClear();
+            });
+            continue;
+        }
+        if (s.startsWith("stack ")) {
+            auto a = asNumbers(s);
+            QString numbers;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::Stack;
+                stackInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                stackBuild();
+            });
+            continue;
         }
 
-        // 普通二叉树：bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50
-        // 约定：行内解析到的第一个整数作为空结点哨兵，其余为层序序列
-        if (low.startsWith("bt")) {
-            // 默认空结点哨兵
-            int sent = -1;
-
-            // 先从整行中找显式的 null=xxx
-            QRegularExpression re(QStringLiteral("null\\s*=\\s*([-+]?\\d+)"));
-            QString s2 = s;
-            QRegularExpressionMatch m = re.match(s2);
-            if (m.hasMatch()) {
-                sent = m.captured(1).toInt();
-                // 把 "null=xxx" 这一段从字符串里删掉，避免被当作节点数据
-                s2.replace(re, QStringLiteral(" "));
-            }
-
-            // 剩余部分全部当作层序序列
-            QVector<int> a = parseIntList(s2);
-            if (a.isEmpty()) {
-                statusBar()->showMessage(QStringLiteral("DSL：bt 行缺少层序序列数字"));
-                return;
-            }
-
-            QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i > 0) numbers += ' ';
-                numbers += QString::number(a[i]);
-            }
-
-            btLastNullSentinel_ = sent;
+        // ===== 普通二叉树（层序+哨兵） =====
+        if (s == "bt.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::BinaryTree;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                btClear();
+            });
+            continue;
+        }
+        if (s == "bt.preorder" || s == "bt.inorder" || s=="bt.postorder" || s=="bt.levelorder") {
+            if (s == "bt.preorder")   ops.push_back([=](){ timer.stop(); steps.clear(); stepIndex=0; btPreorder(); });
+            if (s == "bt.inorder")    ops.push_back([=](){ timer.stop(); steps.clear(); stepIndex=0; btInorder(); });
+            if (s == "bt.postorder")  ops.push_back([=](){ timer.stop(); steps.clear(); stepIndex=0; btPostorder(); });
+            if (s == "bt.levelorder") ops.push_back([=](){ timer.stop(); steps.clear(); stepIndex=0; btLevelorder(); });
             currentKind_ = DocKind::BinaryTree;
-            btNull->setValue(sent);
-            btInput->setText(numbers);
-            btBuild();
-            return;
+            continue;
         }
+        if (s.startsWith("bt ")) {
+            // 解析 null=K（可选，默认 -1）
+            int sentinel = -1;
+            QRegularExpression reNull("\\bnull\\s*=\\s*(-?\\d+)");
+            QRegularExpressionMatch m = reNull.match(s);
+            if (m.hasMatch()) sentinel = m.captured(1).toInt();
+            auto a = asNumbers(s);
+            // 去掉末尾可能重复解析到的 null 值（parseIntList 会把 null 的数字也吃进去）
+            if (m.hasMatch() && !a.isEmpty() && a.back()==sentinel) a.pop_back();
 
-        // AVL：avl: 10 20 30 40 50 25
-        if (low.startsWith("avl")) {
-            QVector<int> a = parseIntList(s);
             QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i) numbers += ' ';
-                numbers += QString::number(a[i]);
-            }
-            currentKind_ = DocKind::AVL;
-            avlInput->setText(numbers);
-            avlBuild();
-            return;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            const int nullSent = sentinel;
+
+            ops.push_back([=](){
+                currentKind_ = DocKind::BinaryTree;
+                btInput->setText(numbers);
+                btNull->setValue(nullSent);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                btBuild();
+            });
+            continue;
         }
 
-        // 哈夫曼：huff: 5 9 12 13 16 45
-        if (low.startsWith("huff")) {
-            QVector<int> a = parseIntList(s);
+        // ===== BST =====
+        if (s == "bst.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::BST;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                bstClear();
+            });
+            continue;
+        }
+        if (s.startsWith("bst.find") || s.startsWith("bst.insert") || s.startsWith("bst.erase")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 2) {
+                bool ok=false; int v = tokens.value(1).toInt(&ok);
+                if (ok) {
+                    if (tokens[0]=="bst.find") {
+                        ops.push_back([=](){
+                            currentKind_ = DocKind::BST;
+                            bstValue->setText(QString::number(v));
+                            timer.stop(); steps.clear(); stepIndex = 0;
+                            bstFind();
+                        });
+                    } else if (tokens[0]=="bst.insert") {
+                        ops.push_back([=](){
+                            currentKind_ = DocKind::BST;
+                            bstValue->setText(QString::number(v));
+                            timer.stop(); steps.clear(); stepIndex = 0;
+                            bstInsert();
+                        });
+                    } else { // erase
+                        ops.push_back([=](){
+                            currentKind_ = DocKind::BST;
+                            bstValue->setText(QString::number(v));
+                            timer.stop(); steps.clear(); stepIndex = 0;
+                            bstErase();
+                        });
+                    }
+                    continue;
+                }
+            }
+        }
+        if (s.startsWith("bst ")) {
+            auto a = asNumbers(s);
             QString numbers;
-            for (int i = 0; i < a.size(); ++i) {
-                if (i) numbers += ' ';
-                numbers += QString::number(a[i]);
-            }
-            huffLastWeights_ = a;
-            currentKind_ = DocKind::Huffman;
-            huffmanInput->setText(numbers);
-            huffmanBuild();
-            return;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::BST;
+                bstInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                bstBuild();
+            });
+            continue;
         }
 
-        // 如果这一行没匹配到，上面 continue 之前会尝试下一行
+        // ===== Huffman =====
+        if (s == "huff.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::Huffman;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                huffmanClear();
+            });
+            continue;
+        }
+        if (s.startsWith("huff ")) {
+            auto a = asNumbers(s);
+            QString numbers;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::Huffman;
+                huffmanInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                huffmanBuild();
+            });
+            continue;
+        }
+
+        // ===== AVL =====
+        if (s == "avl.clear") {
+            ops.push_back([=](){
+                currentKind_ = DocKind::AVL;
+                timer.stop(); steps.clear(); stepIndex = 0;
+                avlClear();
+            });
+            continue;
+        }
+        if (s.startsWith("avl.insert")) {
+            auto tokens = s.split(QRegularExpression("\\s+"));
+            if (tokens.size() >= 2) {
+                bool ok=false; int v = tokens.value(1).toInt(&ok);
+                if (ok) {
+                    ops.push_back([=](){
+                        currentKind_ = DocKind::AVL;
+                        avlValue->setText(QString::number(v));
+                        timer.stop(); steps.clear(); stepIndex = 0;
+                        avlInsert();
+                    });
+                    continue;
+                }
+            }
+        }
+        if (s.startsWith("avl ")) {
+            auto a = asNumbers(s);
+            QString numbers;
+            for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            ops.push_back([=](){
+                currentKind_ = DocKind::AVL;
+                avlInput->setText(numbers);
+                timer.stop(); steps.clear(); stepIndex = 0;
+                avlBuild();
+            });
+            continue;
+        }
+
+        // 未识别：给出提示，不中断其它行
+        ops.push_back([=](){ showMessage(QStringLiteral("未识别 DSL：%1").arg(ln.trimmed())); });
     }
 
-    statusBar()->showMessage(QStringLiteral("DSL：没有可执行的行"));
+    if (ops.isEmpty()) {
+        showMessage(QStringLiteral("DSL：没有可执行的命令"));
+        return;
+    }
+
+    // 逐条顺序执行：利用“在 steps 末尾追加继续回调”的方式串联
+    auto runNext = std::make_shared<std::function<void()>>();
+    *runNext = [this, ops, runNext]() mutable {
+        if (ops.isEmpty()) {
+            showMessage(QStringLiteral("DSL：执行完成"));
+            return;
+        }
+        auto op = ops.takeFirst();
+        // 执行该命令，随后在该命令的动画队列末尾追加“继续下一条”的帧
+        op();
+        // 关键：若本命令无动画，立即进入下一条；否则在步骤尾部接力
+        QTimer::singleShot(0, this, [this, runNext](){
+            // 让槽函数先把 steps 填好
+            // 然后决定如何衔接下一条
+            if (steps.isEmpty()) {
+                (*runNext)();
+            } else {
+                steps.push_back([runNext](){ (*runNext)(); });
+                if (!timer.isActive()) timer.start();
+            }
+        });
+    };
+
+    // 开始执行第一条
+    (*runNext)();
 }
 
 void MainWindow::runNLI() {

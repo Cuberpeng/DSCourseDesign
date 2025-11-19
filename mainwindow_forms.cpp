@@ -249,18 +249,17 @@ QWidget* MainWindow::buildDSLPage() {
     auto* root = new QWidget;
     auto* v = new QVBoxLayout(root); v->setSpacing(10);
 
+    // 上半：DSL 脚本编辑与执行
     dslEdit = new QTextEdit;
     dslEdit->setPlaceholderText(
-        "示例：\n"
-        "seq: 1 3 5 7\n"
-        "list: 2 4 6 8\n"
-        "stack: 3 8 13\n"
-        "bt: null=-1 15 6 23 4 7 17 71 5 -1 -1 50\n"
-        "bst: 15 6 23 4 7 17 71\n"
-        "avl: 10 20 30 40 50 25\n"
-        "huff: 5 9 12 13 16 45\n"
+        "在此编写 DSL 脚本：一行一条命令，# 开头为注释，大小写不敏感。\n"
+        "例：\n"
+        "  bst 15 6 23 4 7 17 71\n"
+        "  bst.find 7\n"
+        "  bt 15 6 23 4 -1 -1 7  null=-1\n"
+        "（更多指令：点击右侧“DSL 使用说明”查看）"
     );
-    dslEdit->setFixedHeight(120); // 设置固定高度为120像素
+    dslEdit->setFixedHeight(120);
     dslEdit->setStyleSheet(
         "QTextEdit {"
         "   border: 2px solid #e2e8f0;"
@@ -273,45 +272,46 @@ QWidget* MainWindow::buildDSLPage() {
         "   border-color: #3b82f6;"
         "}"
     );
-    auto* hb0 = new QHBoxLayout;
-    auto* btnRun = new QPushButton("执行脚本");
-    btnRun->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
-    auto* btnEx = new QPushButton("插入示例");
-    btnEx->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
-    hb0->addWidget(btnRun); hb0->addWidget(btnEx);
 
-    nliEdit = new QTextEdit;  // 改为 QTextEdit
-    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树\n支持多行输入");
-    nliEdit->setMaximumHeight(100);  // 设置最大高度，避免太高
+    auto* hb0 = new QHBoxLayout;
+    auto* btnRun  = new QPushButton("执行脚本");
+    btnRun->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
+    auto* btnHelp = new QPushButton("DSL 使用说明");   // ← 新按钮
+    btnHelp->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    hb0->addWidget(btnRun);
+    hb0->addWidget(btnHelp);
+
+    // 下半：自然语言输入（保持原逻辑）
+    nliEdit = new QTextEdit;
+    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树（支持多行）");
+    nliEdit->setMaximumHeight(100);
     nliEdit->setStyleSheet(
-    "QTextEdit {"
-    "   border: 2px solid #e2e8f0;"
-    "   border-radius: 8px;"
-    "   padding: 8px;"
-    "   background: white;"
-    "   font-size: 14px;"
-    "}"
-    "QTextEdit:focus {"
-    "   border-color: #3b82f6;"
-    "}"
-);
+        "QTextEdit {"
+        "   border: 2px solid #e2e8f0;"
+        "   border-radius: 8px;"
+        "   padding: 8px;"
+        "   background: white;"
+        "   font-size: 14px;"
+        "}"
+        "QTextEdit:focus {"
+        "   border-color: #3b82f6;"
+        "}"
+    );
     auto* btnNLI = new QPushButton("理解并执行");
     btnNLI->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
 
-    v->addWidget(new QLabel("脚本（自定义 DSL）："));
+    v->addWidget(new QLabel("DSL 脚本："));
     v->addWidget(dslEdit);
     v->addLayout(hb0);
     v->addWidget(new QLabel("自然语言（将自动转为 DSL 后执行）："));
-
-    // 修改布局：将水平布局改为垂直布局，让按钮在文本编辑框下方
-    v->addWidget(nliEdit);  // 直接添加文本编辑框
-    v->addWidget(btnNLI);   // 添加按钮
-
+    v->addWidget(nliEdit);
+    v->addWidget(btnNLI);
     v->addStretch(1);
 
-    connect(btnRun, &QPushButton::clicked, this, &MainWindow::runDSL);
-    connect(btnEx,  &QPushButton::clicked, this, &MainWindow::insertDSLExample);
-    connect(btnNLI, &QPushButton::clicked, this, &MainWindow::runNLI);
+    // 事件连接
+    connect(btnRun,  &QPushButton::clicked, this, &MainWindow::runDSL);
+    connect(btnHelp, &QPushButton::clicked, this, &MainWindow::insertDSLExample); // ← 打开说明页
+    connect(btnNLI,  &QPushButton::clicked, this, &MainWindow::runNLI);
 
     return root;
 }
