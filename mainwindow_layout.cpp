@@ -1,10 +1,7 @@
 //
 // Created by xiang on 25-11-6.
 //
-//
-// mainwindow_base.cpp
-// 框架与全局：窗口、分栏、工具栏、模块页容器、通用工具
-//
+
 #include "mainwindow.h"
 #include <QStatusBar>
 #include <QApplication>
@@ -32,7 +29,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     // 文件操作按钮
     QAction* actOpen = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("打开"));
     QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
-    QAction* actPng = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), QStringLiteral("导出PNG"));
+    //QAction* actPng = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), QStringLiteral("导出PNG"));
 
     // 添加分隔符
     canvasBar->addSeparator();
@@ -46,7 +43,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     // 连接文件操作信号
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
     connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
-    connect(actPng,  &QAction::triggered, this, &MainWindow::exportPNG);
+    //connect(actPng,  &QAction::triggered, this, &MainWindow::exportPNG);
 
     // 连接缩放操作信号
     connect(actZoomIn,  &QAction::triggered, this, &MainWindow::onZoomIn);
@@ -156,8 +153,13 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     moduleStack->addWidget(makeScrollPage(buildAVLPage()));
     moduleStack->addWidget(makeScrollPage(buildDSLPage()));
 
+    // 原有：只切右侧页面
     connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            moduleStack, &QStackedWidget::setCurrentIndex);
+            moduleStack, &QStackedWidget::setCurrentIndex);  // 只切页面
+
+    // 新增：同步画布到对应数据结构的上一次状态
+    connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &MainWindow::onModuleChanged);
 
     // 动画计时
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);

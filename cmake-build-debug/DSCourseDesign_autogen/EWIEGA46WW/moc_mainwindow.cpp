@@ -79,6 +79,8 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "onZoomOut",
         "onZoomFit",
         "onZoomReset",
+        "onModuleChanged",
+        "index",
         "saveDoc",
         "openDoc",
         "exportPNG",
@@ -166,29 +168,33 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(37, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onZoomReset'
         QtMocHelpers::SlotData<void()>(38, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onModuleChanged'
+        QtMocHelpers::SlotData<void(int)>(39, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 40 },
+        }}),
         // Slot 'saveDoc'
-        QtMocHelpers::SlotData<void()>(39, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'openDoc'
-        QtMocHelpers::SlotData<void()>(40, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'exportPNG'
         QtMocHelpers::SlotData<void()>(41, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'insertDSLExample'
+        // Slot 'openDoc'
         QtMocHelpers::SlotData<void()>(42, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'runDSL'
+        // Slot 'exportPNG'
         QtMocHelpers::SlotData<void()>(43, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'runNLI'
+        // Slot 'insertDSLExample'
         QtMocHelpers::SlotData<void()>(44, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'runDSL'
+        QtMocHelpers::SlotData<void()>(45, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'runNLI'
+        QtMocHelpers::SlotData<void()>(46, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'dumpBTLevel'
-        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(45, 2, QMC::AccessPrivate, 0x80000000 | 46, {{
-            { 0x80000000 | 47, 48 }, { QMetaType::Int, 49 },
+        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(47, 2, QMC::AccessPrivate, 0x80000000 | 48, {{
+            { 0x80000000 | 49, 50 }, { QMetaType::Int, 51 },
         }}),
         // Slot 'dumpPreorder'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(50, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 47, 51 }, { 0x80000000 | 52, 53 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(52, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 49, 53 }, { 0x80000000 | 54, 55 },
         }}),
         // Slot 'collectLeafWeights'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(54, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 47, 51 }, { 0x80000000 | 52, 53 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(56, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 49, 53 }, { 0x80000000 | 54, 55 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -246,16 +252,17 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 30: _t->onZoomOut(); break;
         case 31: _t->onZoomFit(); break;
         case 32: _t->onZoomReset(); break;
-        case 33: _t->saveDoc(); break;
-        case 34: _t->openDoc(); break;
-        case 35: _t->exportPNG(); break;
-        case 36: _t->insertDSLExample(); break;
-        case 37: _t->runDSL(); break;
-        case 38: _t->runNLI(); break;
-        case 39: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
+        case 33: _t->onModuleChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 34: _t->saveDoc(); break;
+        case 35: _t->openDoc(); break;
+        case 36: _t->exportPNG(); break;
+        case 37: _t->insertDSLExample(); break;
+        case 38: _t->runDSL(); break;
+        case 39: _t->runNLI(); break;
+        case 40: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
             if (_a[0]) *reinterpret_cast< QList<int>*>(_a[0]) = std::move(_r); }  break;
-        case 40: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
-        case 41: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 41: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 42: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
         default: ;
         }
     }
@@ -280,14 +287,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 42)
+        if (_id < 43)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 42;
+        _id -= 43;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 42)
+        if (_id < 43)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 42;
+        _id -= 43;
     }
     return _id;
 }

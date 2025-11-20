@@ -95,6 +95,9 @@ private slots:
     void onZoomFit();
     void onZoomReset();
 
+    // 模块切换时同步画布
+    void onModuleChanged(int index);
+
     //文件保存
     void saveDoc();
     void openDoc();
