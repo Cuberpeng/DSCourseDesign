@@ -18,7 +18,9 @@
 #include <QHBoxLayout>
 #include <QRegularExpression>
 #include <QSet>
+#include <QHash>
 
+static ds::BTNode* g_btHighlightNode = nullptr;
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
 // ===== 顺序表 =====
@@ -1355,43 +1357,155 @@ void MainWindow::btClear() {
 
 void MainWindow::btPreorder() {
     int need = bt.preorder(nullptr, 0);
-    if (need <= 0) { view->resetScene(); view->setTitle(QStringLiteral("先序遍历：空树")); drawBT(bt.root(), 400, 120, 200, 0); return; }
+    if (need <= 0) {
+        view->resetScene();
+        view->setTitle(QStringLiteral("先序遍历：空树"));
+        drawBT(bt.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("先序遍历：空树"));
+        return;
+    }
+
+    // 1) 后端拿“值序列”，用于文字提示
     std::unique_ptr<int[]> buf(new int[need]);
     int n = bt.preorder(buf.get(), need);
 
-    timer.stop(); steps.clear(); stepIndex = 0;
-    for (int i=0;i<n;++i){
+    // 2) 前端再跑一遍先序，拿“结点指针序列”
+    QVector<ds::BTNode*> nodeOrder;
+    nodeOrder.reserve(need);
+    std::function<void(ds::BTNode*)> dfs = [&](ds::BTNode* p){
+        if (!p) return;
+        nodeOrder.push_back(p);
+        dfs(p->left);
+        dfs(p->right);
+    };
+    dfs(bt.root());
+
+    int m = qMin(n, nodeOrder.size());
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    for (int i = 0; i < m; ++i) {
         int key = buf[i];
-        steps.push_back([=](){ view->resetScene(); view->setTitle(QStringLiteral("先序遍历：访问 %1（%2/%3）").arg(key).arg(i+1).arg(n)); drawBT(bt.root(), 400, 120, 200, key); });
+        ds::BTNode* node = nodeOrder[i];
+
+        steps.push_back([this, i, m, key, node]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("先序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+
+            // ✅ 告诉 drawBT：这一次只高亮这个结点
+            g_btHighlightNode = node;
+            drawBT(bt.root(), 400, 120, 200, 0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("先序遍历：访问 %1").arg(key));
+        });
     }
+
     timer.start();
 }
+
 void MainWindow::btInorder() {
     int need = bt.inorder(nullptr, 0);
-    if (need <= 0) { view->resetScene(); view->setTitle(QStringLiteral("中序遍历：空树")); drawBT(bt.root(), 400, 120, 200, 0); return; }
+    if (need <= 0) {
+        view->resetScene();
+        view->setTitle(QStringLiteral("中序遍历：空树"));
+        drawBT(bt.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("中序遍历：空树"));
+        return;
+    }
+
+    // 1) 值序列
     std::unique_ptr<int[]> buf(new int[need]);
     int n = bt.inorder(buf.get(), need);
 
-    timer.stop(); steps.clear(); stepIndex = 0;
-    for (int i=0;i<n;++i){
+    // 2) 结点指针序列（中序）
+    QVector<ds::BTNode*> nodeOrder;
+    nodeOrder.reserve(need);
+    std::function<void(ds::BTNode*)> dfs = [&](ds::BTNode* p){
+        if (!p) return;
+        dfs(p->left);
+        nodeOrder.push_back(p);
+        dfs(p->right);
+    };
+    dfs(bt.root());
+
+    int m = qMin(n, nodeOrder.size());
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    for (int i = 0; i < m; ++i) {
         int key = buf[i];
-        steps.push_back([=](){ view->resetScene(); view->setTitle(QStringLiteral("中序遍历：访问 %1（%2/%3）").arg(key).arg(i+1).arg(n)); drawBT(bt.root(), 400, 120, 200, key); });
+        ds::BTNode* node = nodeOrder[i];
+
+        steps.push_back([this, i, m, key, node]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("中序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+
+            g_btHighlightNode = node;
+            drawBT(bt.root(), 400, 120, 200, 0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("中序遍历：访问 %1").arg(key));
+        });
     }
+
     timer.start();
 }
+
 void MainWindow::btPostorder() {
     int need = bt.postorder(nullptr, 0);
-    if (need <= 0) { view->resetScene(); view->setTitle(QStringLiteral("后序遍历：空树")); drawBT(bt.root(), 400, 120, 200, 0); return; }
+    if (need <= 0) {
+        view->resetScene();
+        view->setTitle(QStringLiteral("后序遍历：空树"));
+        drawBT(bt.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("后序遍历：空树"));
+        return;
+    }
+
+    // 1) 值序列
     std::unique_ptr<int[]> buf(new int[need]);
     int n = bt.postorder(buf.get(), need);
 
-    timer.stop(); steps.clear(); stepIndex = 0;
-    for (int i=0;i<n;++i){
+    // 2) 结点指针序列（后序）
+    QVector<ds::BTNode*> nodeOrder;
+    nodeOrder.reserve(need);
+    std::function<void(ds::BTNode*)> dfs = [&](ds::BTNode* p){
+        if (!p) return;
+        dfs(p->left);
+        dfs(p->right);
+        nodeOrder.push_back(p);
+    };
+    dfs(bt.root());
+
+    int m = qMin(n, nodeOrder.size());
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    for (int i = 0; i < m; ++i) {
         int key = buf[i];
-        steps.push_back([=](){ view->resetScene(); view->setTitle(QStringLiteral("后序遍历：访问 %1（%2/%3）").arg(key).arg(i+1).arg(n)); drawBT(bt.root(), 400, 120, 200, key); });
+        ds::BTNode* node = nodeOrder[i];
+
+        steps.push_back([this, i, m, key, node]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("后序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+
+            g_btHighlightNode = node;
+            drawBT(bt.root(), 400, 120, 200, 0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("后序遍历：访问 %1").arg(key));
+        });
     }
+
     timer.start();
 }
+
 void MainWindow::btLevelorder() {
     // 先检查树是否为空
     if (bt.root() == nullptr) {
@@ -1402,7 +1516,6 @@ void MainWindow::btLevelorder() {
         return;
     }
 
-    // 获取节点数量
     int need = bt.levelorder(nullptr, 0);
     if (need <= 0) {
         view->resetScene();
@@ -1412,33 +1525,58 @@ void MainWindow::btLevelorder() {
         return;
     }
 
+    // 1) 值序列
     std::unique_ptr<int[]> buf(new int[need]);
     int n = bt.levelorder(buf.get(), need);
+
+    // 2) 结点指针序列（层序：队列）
+    QVector<ds::BTNode*> nodeOrder;
+    nodeOrder.reserve(need);
+    QVector<ds::BTNode*> q;
+    q.reserve(need);
+    if (bt.root())
+        q.push_back(bt.root());
+    int head = 0;
+    while (head < q.size()) {
+        ds::BTNode* p = q[head++];
+        nodeOrder.push_back(p);
+        if (p->left)  q.push_back(p->left);
+        if (p->right) q.push_back(p->right);
+    }
+
+    int m = qMin(n, nodeOrder.size());
 
     timer.stop();
     steps.clear();
     stepIndex = 0;
 
-    // 添加初始状态
-    steps.push_back([=](){
+    // 起始状态
+    steps.push_back([this]() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：开始"));
         drawBT(bt.root(), 400, 120, 200, 0);
         showMessage(QStringLiteral("层序遍历：开始"));
     });
 
-    for (int i=0;i<n;++i){
+    // 每一步访问一个结点
+    for (int i = 0; i < m; ++i) {
         int key = buf[i];
-        steps.push_back([=](){
+        ds::BTNode* node = nodeOrder[i];
+
+        steps.push_back([this, i, m, key, node]() {
             view->resetScene();
-            view->setTitle(QStringLiteral("层序遍历：访问 %1（%2/%3）").arg(key).arg(i+1).arg(n));
-            drawBT(bt.root(), 400, 120, 200, key);
+            view->setTitle(QStringLiteral("层序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+
+            g_btHighlightNode = node;
+            drawBT(bt.root(), 400, 120, 200, 0);
+            g_btHighlightNode = nullptr;
+
             showMessage(QStringLiteral("层序遍历：访问 %1").arg(key));
         });
     }
 
-    // 添加结束状态
-    steps.push_back([=](){
+    // 结束状态
+    steps.push_back([this]() {
         view->resetScene();
         view->setTitle(QStringLiteral("层序遍历：完成"));
         drawBT(bt.root(), 400, 120, 200, 0);
@@ -1447,6 +1585,7 @@ void MainWindow::btLevelorder() {
 
     timer.start();
 }
+
 
 // ===== 二叉搜索树 =====
 void MainWindow::bstBuild() {
@@ -1460,227 +1599,198 @@ void MainWindow::bstBuild() {
 }
 
 void MainWindow::bstFind() {
-    bool ok = false; int value = bstValue->text().toInt(&ok);
-    if(!ok) { showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
-
-    QVector<int> path; ds::BTNode* p = bst.root();
-    while(p){ path.push_back(p->key); if (value < p->key) p = p->left; else if (value > p->key) p = p->right; else break; }
-    bool found = (!path.isEmpty() && path.last() == value);
-
-    timer.stop(); steps.clear(); stepIndex = 0;
-    for (int i=0;i<path.size();++i){
-        int key = path[i]; const bool last = (i==path.size()-1);
-        steps.push_back([=](){ view->resetScene();
-            view->setTitle(QStringLiteral("BST 查找 %1：%2（%3/%4）").arg(value).arg(last ? (found?QStringLiteral("找到"):QStringLiteral("未找到")) : QStringLiteral("遍历中")).arg(i+1).arg(path.size()));
-            drawBT(bst.root(), 400, 120, 200, key); });
-    }
-    // 添加最后一步：显示结果弹窗
-    steps.push_back([=](){
-        view->resetScene();
-        view->setTitle(QStringLiteral("BST 查找 %1：%2").arg(value).arg(found ? QStringLiteral("找到") : QStringLiteral("未找到")));
-        drawBT(bst.root(), 400, 120, 200, found ? value : 0);
-        showMessage(QStringLiteral("BST 查找：%1 %2").arg(value).arg(found ? QStringLiteral("查找成功") : QStringLiteral("查找失败")));
-
-        // 显示弹窗
-        if (found) {
-            QMessageBox::information(this,QStringLiteral("查找成功"),QStringLiteral("成功找到元素 %1").arg(value),QMessageBox::Ok);
-        } else {
-            QMessageBox::warning(this,QStringLiteral("查找失败"),QStringLiteral("未找到元素 %1，请重试").arg(value),QMessageBox::Ok);
-        }
-    });
-    timer.start();
-}
-
-void MainWindow::bstInsert() {
     bool ok = false;
     int value = bstValue->text().toInt(&ok);
-    if(!ok) {
+    if (!ok) {
         showMessage(QStringLiteral("二叉搜索树：请输入有效的键值"));
         return;
     }
 
-    // 检查值是否已存在
-    if (bst.find(value) != nullptr) {
-        showMessage(QStringLiteral("二叉搜索树：键值 %1 已存在").arg(value));
-        return;
-    }
-
-    // 查找插入路径
-    QVector<int> path;
+    // 记录查找路径（指针）
+    QVector<ds::BTNode*> path;
     ds::BTNode* p = bst.root();
-
-    // 记录查找路径
-    while(p) {
-        path.push_back(p->key);
+    while (p) {
+        path.push_back(p);
         if (value < p->key) {
             p = p->left;
         } else if (value > p->key) {
             p = p->right;
-        } else {
-            break; // 不应该发生，因为前面已经检查过
+        } else break;
+    }
+    bool found = (!path.isEmpty() && path.last()->key == value);
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 高亮路径每一个节点
+    for (int i = 0; i < path.size(); ++i) {
+        ds::BTNode* node = path[i];
+        steps.push_back([this, i, path, node, value, found]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("BST 查找 %1（%2/%3）")
+                .arg(value).arg(i+1).arg(path.size()));
+
+            g_btHighlightNode = node;      // ★按指针高亮
+            drawBT(bst.root(), 400, 120, 200, 0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("BST 查找：比较 %1 和 %2")
+                        .arg(node->key).arg(value));
+        });
+    }
+
+    // 最后一帧：结果展示
+    steps.push_back([this, value, found]() {
+        view->resetScene();
+        if (found) {
+            g_btHighlightNode = bst.find(value);
         }
+        drawBT(bst.root(), 400, 120, 200, 0);
+        g_btHighlightNode = nullptr;
+
+        view->setTitle(QStringLiteral("BST 查找 %1：%2")
+                       .arg(value).arg(found?QStringLiteral("找到"):QStringLiteral("未找到")));
+        showMessage(found ? QStringLiteral("查找成功") : QStringLiteral("查找失败"));
+    });
+
+    timer.start();
+}
+
+
+void MainWindow::bstInsert() {
+    bool ok = false;
+    int value = bstValue->text().toInt(&ok);
+    if (!ok) {
+        showMessage(QStringLiteral("二叉搜索树：请输入有效的键值"));
+        return;
+    }
+
+    // 若已存在则退出
+    if (bst.find(value) != nullptr) {
+        showMessage(QStringLiteral("BST：键值 %1 已存在").arg(value));
+        return;
     }
 
     timer.stop();
     steps.clear();
     stepIndex = 0;
 
-    // 步骤1：显示当前树状态，高亮查找路径
-    for (int i = 0; i < path.size(); ++i) {
-        int key = path[i];
-        bool last = (i == path.size() - 1);
-        steps.push_back([=]() {
+    // 查找插入位置路径
+    QVector<ds::BTNode*> path;
+    ds::BTNode* p = bst.root();
+    while (p) {
+        path.push_back(p);
+        p = (value < p->key) ? p->left : p->right;
+    }
+
+    // 空树情况
+    if (path.isEmpty()) {
+        steps.push_back([this,value]() {
+            bst.insert(value);
+            g_btHighlightNode = bst.root();
             view->resetScene();
-            QString stepDesc = last ? QStringLiteral("找到插入位置") : QStringLiteral("查找路径");
-            view->setTitle(QStringLiteral("BST 插入 %1：%2（%3/%4）")
-                          .arg(value).arg(stepDesc).arg(i+1).arg(path.size()));
-            drawBT(bst.root(), 400, 120, 200, key);
-            showMessage(QStringLiteral("BST 插入：正在查找插入位置"));
+            drawBT(bst.root(),400,120,200,0);
+            g_btHighlightNode = nullptr;
+            showMessage(QStringLiteral("BST 插入：空树插入 %1").arg(value));
+        });
+        timer.start();
+        return;
+    }
+
+    // 高亮插入路径
+    for (int i=0;i<path.size();++i) {
+        ds::BTNode* node = path[i];
+        steps.push_back([this,i,path,node,value]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("BST 插入 %1：查找位置（%2/%3）")
+                           .arg(value).arg(i+1).arg(path.size()));
+
+            g_btHighlightNode = node;   // ★按指针高亮
+            drawBT(bst.root(),400,120,200,0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("BST 插入：经过 %1").arg(node->key));
         });
     }
 
-    // 步骤2：显示新节点插入的动画
-    steps.push_back([=]() {
-        view->resetScene();
-        view->setTitle(QStringLiteral("BST 插入 %1：创建新节点").arg(value));
-
-        // 绘制原树
-        drawBT(bst.root(), 400, 120, 200, 0);
-
-        // 在新位置显示新节点（从上方进入的动画效果）
-        qreal x = 400, y = 120, distance = 200;
-
-        // 计算新节点的位置（模拟插入过程）
-        ds::BTNode* current = bst.root();
-        ds::BTNode* parent = nullptr;
-        bool isLeft = false;
-
-        while (current) {
-            parent = current;
-            if (value < current->key) {
-                current = current->left;
-                isLeft = true;
-                x -= distance;
-            } else {
-                current = current->right;
-                isLeft = false;
-                x += distance;
-            }
-            y += 100;
-            distance /= 1.8;
-        }
-
-        // 绘制新节点（从上方进入）
-        qreal newY = y - 100; // 从上方一点的位置开始
-        view->addNode(x, newY, QString::number(value), true);
-
-        // 绘制连接线（虚线表示将要连接）
-        QPen dashPen(QColor("#3b82f6"));
-        dashPen.setStyle(Qt::DashLine);
-        dashPen.setWidth(2);
-
-        if (parent) {
-            QPointF parentPos(x + (isLeft ? distance * 1.8 : -distance * 1.8), y - 100);
-            QPointF childPos(x, newY + 34);
-            view->Scene()->addLine(QLineF(parentPos, childPos), dashPen);
-        }
-
-        showMessage(QStringLiteral("BST 插入：创建新节点 %1").arg(value));
-    });
-
-    // 步骤3：执行实际插入并显示结果
-    steps.push_back([=]() {
+    // 插入并高亮新节点
+    steps.push_back([this,value]() {
         bst.insert(value);
+        ds::BTNode* node = bst.find(value);
+
         view->resetScene();
-        view->setTitle(QStringLiteral("BST 插入 %1：完成").arg(value));
-        drawBT(bst.root(), 400, 120, 200, value);
-        showMessage(QStringLiteral("BST 插入：%1 插入完成").arg(value));
+        g_btHighlightNode = node;
+        drawBT(bst.root(),400,120,200,0);
+        g_btHighlightNode = nullptr;
+
+        showMessage(QStringLiteral("BST 插入完成：%1").arg(value));
     });
 
     timer.start();
 }
+
 
 void MainWindow::bstErase() {
-    bool ok = false; int value = bstValue->text().toInt(&ok);
-    if(!ok) { showMessage(QStringLiteral("二叉搜索树：请输入有效的键值")); return; }
-
-    ds::BTNode* parent = nullptr; ds::BTNode* p = bst.root();
-    while(p && p->key!=value) { parent = p; p = (value < p->key)? p->left : p->right; }
-
-    timer.stop(); steps.clear(); stepIndex = 0;
-    if (!p) {
-        steps.push_back([=]() { view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除 %1：未找到").arg(value)); drawBT(bst.root(),400,120,200,0); });
-        timer.start(); return;
+    bool ok = false;
+    int value = bstValue->text().toInt(&ok);
+    if (!ok) {
+        showMessage(QStringLiteral("二叉搜索树：请输入有效的键值"));
+        return;
     }
 
-    auto drawPlain = [this](ds::BTNode* r, qreal x, qreal y, qreal distance, int highlight=INT_MIN){
-        std::function<void(ds::BTNode*, qreal, qreal, qreal)> f;
-        f = [this,highlight,&f](ds::BTNode* n,qreal x,qreal y,qreal s){
-            if(!n) return;
-            bool hl = (n->key == highlight);
-            view->addNode(x,y, QString::number(n->key), hl);
-            if(n->left)  { qreal lx = x-s, ly=y+100; view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34)); f(n->left, lx,ly,s/1.8); }
-            if(n->right) { qreal rx = x+s, ry=y+100; view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34)); f(n->right,rx,ry,s/1.8); }
-        };
-        f(r,x,y,distance);
-    };
+    // 查找目标结点路径
+    QVector<ds::BTNode*> path;
+    ds::BTNode* p = bst.root();
+    while (p && p->key != value) {
+        path.push_back(p);
+        p = (value < p->key) ? p->left : p->right;
+    }
+    if (p) path.push_back(p);
 
-    // 1) 断开与 p 相连边
-    steps.push_back([=](){
-      std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
-      g = [=,&g](ds::BTNode* n,qreal x,qreal y,qreal s){
-        if(!n) return;
-        view->addNode(x,y, QString::number(n->key));
-        if(n->left){  qreal lx=x-s, ly=y+100; if(!(n==p || n->left==p))  view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34)); g(n->left, lx,ly,s/1.8); }
-        if(n->right){ qreal rx=x+s, ry=y+100; if(!(n==p || n->right==p)) view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34)); g(n->right,rx,ry,s/1.8); }
-      };
-      view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除第1步 删指针域（与 p 相连的边）")); g(bst.root(),400,120,200);
-    });
+    bool found = (p != nullptr);
 
-    // 2) 不画 p，本身的左右子树原位保留
-    steps.push_back([=](){
-      std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
-      g = [=,&g,drawPlain](ds::BTNode* n,qreal x,qreal y,qreal s){
-        if(!n) return;
-        if(n==p){
-          if(n->left)  { qreal lx=x-s, ly=y+100; drawPlain(n->left, lx,ly,s/1.8); }
-          if(n->right) { qreal rx=x+s, ry=y+100; drawPlain(n->right,rx,ry,s/1.8); }
-          return;
-        }
-        view->addNode(x,y, QString::number(n->key));
-        if(n->left)  { qreal lx=x-s, ly=y+100; view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34)); g(n->left, lx,ly,s/1.8); }
-        if(n->right) { qreal rx=x+s, ry=y+100; view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34)); g(n->right,rx,ry,s/1.8); }
-      };
-      view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除第2步 删值域（移除 p 本身）")); g(bst.root(),400,120,200);
-    });
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
 
-    bool hasL = p->left!=nullptr, hasR=p->right!=nullptr;
-    if (hasL && hasR) {
-        ds::BTNode* a = p->left; while(a && a->right) a=a->right;
-        steps.push_back([=](){
-          std::function<void(ds::BTNode*, qreal, qreal, qreal)> g;
-          g = [=,&g,drawPlain](ds::BTNode* n,qreal x,qreal y,qreal s){
-            if(!n) return;
-            if(n == p){
-              if(n->left)  { qreal lx=x-s, ly=y+100; drawPlain(n->left,lx,ly,s/1.8); }
-              if(n->right) { qreal rx=x+s, ry=y+100; drawPlain(n->right,rx,ry,s/1.8); }
-              return;
-            }
-            bool hl = (n==a);
-            view->addNode(x,y, QString::number(n->key), hl);
-            if(n->left)  { qreal lx=x-s, ly=y+100; view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34)); g(n->left, lx,ly,s/1.8); }
-            if(n->right) { qreal rx=x+s, ry=y+100; view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34)); g(n->right,rx,ry,s/1.8); }
-          };
-          view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除第3步 标红左子树中序最后一个结点 a")); g(bst.root(),400,120,200);
+    if (!found) {
+        steps.push_back([this,value]() {
+            view->resetScene();
+            drawBT(bst.root(),400,120,200,0);
+            showMessage(QStringLiteral("BST：未找到 %1").arg(value));
         });
-
-        steps.push_back([=](){ bst.eraseKey(value); view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除第4步 接上并完成")); drawBT(bst.root(),400,120,200,0); });
-        timer.start(); return;
+        timer.start();
+        return;
     }
 
-    steps.push_back([=](){ bst.eraseKey(value); view->resetScene(); view->setTitle(QStringLiteral("二叉搜索树：删除完成")); drawBT(bst.root(),400,120,200,0); });
+    // 高亮查找路径
+    for (int i=0;i<path.size();++i) {
+        ds::BTNode* node = path[i];
+        steps.push_back([this,i,path,node,value]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("BST 删除 %1：路径（%2/%3）")
+                           .arg(value).arg(i+1).arg(path.size()));
+
+            g_btHighlightNode = node;    // ★按指针高亮
+            drawBT(bst.root(),400,120,200,0);
+            g_btHighlightNode = nullptr;
+
+            showMessage(QStringLiteral("访问结点 %1").arg(node->key));
+        });
+    }
+
+    // 删除并重新绘制
+    steps.push_back([this,value]() {
+        bst.eraseKey(value);
+        view->resetScene();
+        drawBT(bst.root(),400,120,200,0);
+        showMessage(QStringLiteral("BST 删除完成：%1").arg(value));
+    });
+
     timer.start();
 }
+
 
 void MainWindow::bstClear() { bst.clear(); view->resetScene(); view->setTitle(QStringLiteral("BST（空）")); }
 
@@ -1904,12 +2014,59 @@ void MainWindow::drawStack(const ds::Stack& st){
     S->setSceneRect(S->itemsBoundingRect().adjusted(-40, -40, 160, 80));
 }
 
-void MainWindow::drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey){
-    if(!root) return;
-    bool hl = (root->key == highlightKey);
-    view->addNode(x, y, QString::number(root->key), hl);
-    if(root->left)  { qreal lx = x - distance, ly = y + 100; view->addEdge(QPointF(x,y+34), QPointF(lx,ly-34)); drawBT(root->left,  lx, ly, distance/1.8, highlightKey); }
-    if(root->right) { qreal rx = x + distance, ry = y + 100; view->addEdge(QPointF(x,y+34), QPointF(rx,ry-34)); drawBT(root->right, rx, ry, distance/1.8, highlightKey); }
+void MainWindow::drawBT(ds::BTNode* root, qreal x, qreal y, qreal /*distance*/, int /*highlightKey*/)
+{
+    if (!root) return;
+
+    // 1) 中序遍历：为每个结点分配一个唯一的横向序号 idx（0,1,2,...）
+    QHash<ds::BTNode*, int> xIndex;     // 结点 -> 横向序号
+    QHash<ds::BTNode*, int> depth;      // 结点 -> 层深
+    int idx = 0;
+
+    std::function<void(ds::BTNode*, int)> inorder = [&](ds::BTNode* p, int d){
+        if (!p) return;
+        inorder(p->left,  d + 1);
+        xIndex[p] = idx++;
+        depth[p]  = d;
+        inorder(p->right, d + 1);
+    };
+    inorder(root, 0);
+    if (idx <= 0) return;
+
+    // 2) 把“序号坐标”映射为像素坐标，并整体居中
+    const qreal stepX   = 80.0;   // 横向固定步长
+    const qreal levelH  = 100.0;  // 纵向层间距
+    const qreal mid     = ( (idx - 1) * stepX ) / 2.0; // 全体宽度的中心，用来居中到 x
+
+    QHash<ds::BTNode*, QPointF> pos;    // 结点 -> 像素坐标
+    for (auto it = xIndex.constBegin(); it != xIndex.constEnd(); ++it) {
+        ds::BTNode* n = it.key();
+        qreal px = x + it.value() * stepX - mid;   // 居中平移
+        qreal py = y + depth[n] * levelH;
+        pos[n] = QPointF(px, py);
+    }
+
+    // 3) 先画边再画点（确保连线在底层，圆点在上层）
+    std::function<void(ds::BTNode*)> drawRec = [&](ds::BTNode* p){
+        if (!p) return;
+        const QPointF cp = pos[p];
+
+        if (p->left) {
+            const QPointF cl = pos[p->left];
+            view->addEdge(QPointF(cp.x(), cp.y() + 34), QPointF(cl.x(), cl.y() - 34));
+            drawRec(p->left);
+        }
+        if (p->right) {
+            const QPointF cr = pos[p->right];
+            view->addEdge(QPointF(cp.x(), cp.y() + 34), QPointF(cr.x(), cr.y() - 34));
+            drawRec(p->right);
+        }
+
+        // ✅ 关键改动：只按“结点指针”高亮，完全不再看 key
+        const bool hl = (p == g_btHighlightNode);
+        view->addNode(cp.x(), cp.y(), QString::number(p->key), hl);
+    };
+    drawRec(root);
 }
 
 void MainWindow::animateBTOrder(const int* order, int n, const QString& title)
@@ -1951,9 +2108,9 @@ void MainWindow::animateBTOrder(const int* order, int n, const QString& title)
 
 // ================== 文件保存/打开/导出 ==================
 void MainWindow::saveDoc() {
-    QFileDialog dialog(this, QStringLiteral("保存为"), "", "DS Visualizer (*.dsviz)");
+    QFileDialog dialog(this, QStringLiteral("保存为"), "", "XPR's DS Visualizer (*.xpr)");
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDefaultSuffix("dsviz");
+    dialog.setDefaultSuffix("xpr");
     dialog.setStyleSheet(
         "QFileDialog { background: #f8fafc; }"
         "QLabel { color: #334155; font-weight: 600; }"
@@ -2051,7 +2208,7 @@ void MainWindow::saveDoc() {
 }
 
 void MainWindow::openDoc() {
-    QFileDialog dialog(this, QStringLiteral("打开"), "", "DS Visualizer (*.dsviz)");
+    QFileDialog dialog(this, QStringLiteral("打开"), "", "XPR's DS Visualizer (*.xpr)");
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setStyleSheet(
         "QFileDialog { background: #f8fafc; }"
@@ -2351,8 +2508,7 @@ avl.insert x
 avl.clear
 </code></pre>
 
-<hr/>
-<p style="color:#6b7280">小贴士：若要批量运行多结构示例，可直接把右下角“插入示例”粘贴到编辑框后点击“执行脚本”。</p>
+
 )HTML");
 
     doc->setHtml(html);

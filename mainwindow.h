@@ -1,10 +1,7 @@
 //
 // Created by xiang on 25-9-28.
 //
-//
-// Reworked by ChatGPT on 2025-11-06
-// 拆分：base/pages/ops 三个实现文件，后端逻辑完全保留
-//
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
