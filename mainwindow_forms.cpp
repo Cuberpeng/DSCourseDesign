@@ -1,10 +1,7 @@
 //
 // Created by xiang on 25-11-6.
 //
-//
-// mainwindow_pages.cpp
-// 右侧彩色表单页与控件（仅负责构建 UI）
-//
+
 #include "mainwindow.h"
 #include <QPushButton>
 #include <QGroupBox>
@@ -12,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QHeaderView>
 
 static QWidget* wrapGroup(const QString& title, QWidget* inner) {
     auto* box = new QGroupBox(title);
@@ -195,23 +193,107 @@ QWidget* MainWindow::buildBSTPage() {
 
 QWidget* MainWindow::buildHuffmanPage() {
     auto* root = new QWidget;
-    auto* v = new QVBoxLayout(root); v->setSpacing(10);
+    auto* v = new QVBoxLayout(root);
+    v->setContentsMargins(0, 0, 0, 0);
+    v->setSpacing(10);
 
-    auto* form = new QWidget; auto* f = new QFormLayout(form);
-    huffmanInput = new QLineEdit; huffmanInput->setPlaceholderText("权值序列，如: 5 7 2 9 3");
-    f->addRow("权值序列", huffmanInput);
+    // ===== 权值输入 =====
+    auto* form = new QWidget;
+    auto* f = new QFormLayout(form);
+    f->setContentsMargins(6, 6, 6, 6);
+    f->setSpacing(6);
 
-    auto* row0 = new QWidget; auto* hb0 = new QHBoxLayout(row0);
-    auto* btnBuild = new QPushButton("建立"); btnBuild->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
-    auto* btnClear = new QPushButton("清空"); btnClear->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
-    hb0->addWidget(btnBuild); hb0->addWidget(btnClear);
+    huffmanInput = new QLineEdit;
+    huffmanInput->setPlaceholderText(QStringLiteral("例如：5 7 2 13 9（用空格或逗号分隔）"));
+    f->addRow(QStringLiteral("权值序列"), huffmanInput);
 
-    v->addWidget(wrapGroup("哈夫曼树", form));
-    v->addWidget(wrapGroup("构建/清空", row0));
+    // ===== 构建 / 清空 按钮行 =====
+    auto* row0 = new QWidget;
+    auto* hb0 = new QHBoxLayout(row0);
+    hb0->setContentsMargins(6, 6, 6, 6);
+    hb0->setSpacing(8);
+
+    auto* btnBuild = new QPushButton(QStringLiteral("构建哈夫曼树"));
+    auto* btnClear = new QPushButton(QStringLiteral("清空"));
+
+    btnBuild->setMinimumHeight(32);
+    btnClear->setMinimumHeight(32);
+
+    btnBuild->setStyleSheet(
+        "QPushButton{background:#3b82f6;color:white;border-radius:6px;padding:6px 12px;}"
+        "QPushButton:hover{background:#2563eb;}"
+    );
+    btnClear->setStyleSheet(
+        "QPushButton{background:#e11d48;color:white;border-radius:6px;padding:6px 12px;}"
+        "QPushButton:hover{background:#be123c;}"
+    );
+
+    hb0->addWidget(btnBuild, 1);
+    hb0->addWidget(btnClear, 0);
+
+    // ===== 新增：编码结果表格 =====
+    auto* codeWidget = new QWidget;
+    auto* codeLayout = new QVBoxLayout(codeWidget);
+    codeLayout->setContentsMargins(6, 6, 6, 6);
+    codeLayout->setSpacing(6);
+
+    auto* codeHint = new QLabel(
+        QStringLiteral("构建完成后，将自动列出每个原始权值对应的哈夫曼编码，"
+                       "方便对照树形结构理解编码体系。"));
+    codeHint->setWordWrap(true);
+    codeHint->setStyleSheet(
+        "QLabel{color:#64748b;font-size:11px;}"
+    );
+    codeLayout->addWidget(codeHint);
+
+    // 表格本体
+    huffmanCodeTable = new QTableWidget(0, 3, codeWidget);
+    QStringList headers;
+    headers << QStringLiteral("序号")
+            << QStringLiteral("权值")
+            << QStringLiteral("哈夫曼编码");
+    huffmanCodeTable->setHorizontalHeaderLabels(headers);
+
+    huffmanCodeTable->horizontalHeader()->setStretchLastSection(true);
+    huffmanCodeTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    huffmanCodeTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    huffmanCodeTable->verticalHeader()->setVisible(false);
+
+    huffmanCodeTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    huffmanCodeTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    huffmanCodeTable->setSelectionMode(QAbstractItemView::SingleSelection);
+    huffmanCodeTable->setAlternatingRowColors(true);
+    huffmanCodeTable->setMinimumHeight(140);
+
+    huffmanCodeTable->setStyleSheet(
+        "QTableWidget{"
+        " border:1px solid #e2e8f0;"
+        " border-radius:6px;"
+        " gridline-color:#e2e8f0;"
+        " font-size:11px;"
+        "}"
+        "QHeaderView::section{"
+        " background:#f1f5f9;"
+        " border:0px;"
+        " padding:4px 6px;"
+        " color:#475569;"
+        " font-weight:600;"
+        " font-size:11px;"
+        "}"
+    );
+
+    codeLayout->addWidget(huffmanCodeTable, 1);
+
+    // ===== 组装到整体布局 =====
+    v->addWidget(wrapGroup(QStringLiteral("哈夫曼树"), form));
+    v->addWidget(wrapGroup(QStringLiteral("构建 / 清空"), row0));
+    v->addWidget(wrapGroup(QStringLiteral("编码结果（原始权值 → 哈夫曼码）"), codeWidget));
     v->addStretch(1);
 
-    connect(btnBuild,&QPushButton::clicked,this,&MainWindow::huffmanBuild);
-    connect(btnClear,&QPushButton::clicked,this,&MainWindow::huffmanClear);
+    // 信号连接
+    connect(btnBuild, &QPushButton::clicked, this, &MainWindow::huffmanBuild);
+    connect(btnClear, &QPushButton::clicked, this, &MainWindow::huffmanClear);
+
     return root;
 }
 

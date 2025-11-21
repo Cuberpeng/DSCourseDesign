@@ -27,6 +27,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFileDialog>
+#include <QTableWidget>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -151,7 +152,7 @@ private:
     // BST
     QLineEdit* bstInput{}; QLineEdit* bstValue{};
     // 哈夫曼
-    QLineEdit* huffmanInput{};
+    QLineEdit* huffmanInput{}; QTableWidget* huffmanCodeTable{};
     // AVL树
     QLineEdit* avlInput{}; QLineEdit* avlValue{};
 

@@ -19,6 +19,8 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QHash>
+#include <QTableWidget>
+#include <QHeaderView>
 
 static ds::BTNode* g_btHighlightNode = nullptr;
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
@@ -1631,7 +1633,7 @@ void MainWindow::bstFind() {
             view->setTitle(QStringLiteral("BST 查找 %1（%2/%3）")
                 .arg(value).arg(i+1).arg(path.size()));
 
-            g_btHighlightNode = node;      // ★按指针高亮
+            g_btHighlightNode = node;      // 按指针高亮
             drawBT(bst.root(), 400, 120, 200, 0);
             g_btHighlightNode = nullptr;
 
@@ -1640,7 +1642,7 @@ void MainWindow::bstFind() {
         });
     }
 
-    // 最后一帧：结果展示
+    // 最后一帧：结果展示 + 弹窗提示
     steps.push_back([this, value, found]() {
         view->resetScene();
         if (found) {
@@ -1652,11 +1654,25 @@ void MainWindow::bstFind() {
         view->setTitle(QStringLiteral("BST 查找 %1：%2")
                        .arg(value).arg(found?QStringLiteral("找到"):QStringLiteral("未找到")));
         showMessage(found ? QStringLiteral("查找成功") : QStringLiteral("查找失败"));
+
+        // 弹窗提示
+        if (found) {
+            QMessageBox::information(
+                this,
+                QStringLiteral("二叉搜索树查找"),
+                QStringLiteral("查找成功：已找到元素 %1").arg(value)
+            );
+        } else {
+            QMessageBox::information(
+                this,
+                QStringLiteral("二叉搜索树查找"),
+                QStringLiteral("查找失败：未找到元素 %1").arg(value)
+            );
+        }
     });
 
     timer.start();
 }
-
 
 void MainWindow::bstInsert() {
     bool ok = false;
@@ -1666,9 +1682,14 @@ void MainWindow::bstInsert() {
         return;
     }
 
-    // 若已存在则退出
+    // 若已存在则弹窗并退出
     if (bst.find(value) != nullptr) {
         showMessage(QStringLiteral("BST：键值 %1 已存在").arg(value));
+        QMessageBox::information(
+            this,
+            QStringLiteral("二叉搜索树插入"),
+            QStringLiteral("插入失败：元素 %1 已经存在于树中").arg(value)
+        );
         return;
     }
 
@@ -1706,7 +1727,7 @@ void MainWindow::bstInsert() {
             view->setTitle(QStringLiteral("BST 插入 %1：查找位置（%2/%3）")
                            .arg(value).arg(i+1).arg(path.size()));
 
-            g_btHighlightNode = node;   // ★按指针高亮
+            g_btHighlightNode = node;   // 按指针高亮
             drawBT(bst.root(),400,120,200,0);
             g_btHighlightNode = nullptr;
 
@@ -1729,7 +1750,6 @@ void MainWindow::bstInsert() {
 
     timer.start();
 }
-
 
 void MainWindow::bstErase() {
     bool ok = false;
@@ -1754,11 +1774,17 @@ void MainWindow::bstErase() {
     steps.clear();
     stepIndex = 0;
 
+    // 未找到要删除的元素：直接弹窗提示
     if (!found) {
         steps.push_back([this,value]() {
             view->resetScene();
             drawBT(bst.root(),400,120,200,0);
             showMessage(QStringLiteral("BST：未找到 %1").arg(value));
+            QMessageBox::information(
+                this,
+                QStringLiteral("二叉搜索树删除"),
+                QStringLiteral("删除失败：未找到要删除的元素 %1").arg(value)
+            );
         });
         timer.start();
         return;
@@ -1772,7 +1798,7 @@ void MainWindow::bstErase() {
             view->setTitle(QStringLiteral("BST 删除 %1：路径（%2/%3）")
                            .arg(value).arg(i+1).arg(path.size()));
 
-            g_btHighlightNode = node;    // ★按指针高亮
+            g_btHighlightNode = node;    // 按指针高亮
             drawBT(bst.root(),400,120,200,0);
             g_btHighlightNode = nullptr;
 
@@ -1780,7 +1806,7 @@ void MainWindow::bstErase() {
         });
     }
 
-    // 删除并重新绘制
+    // 删除并重新绘制（删除成功这里就不再额外弹窗了，按你原来的需求只对失败弹窗）
     steps.push_back([this,value]() {
         bst.eraseKey(value);
         view->resetScene();
@@ -1791,89 +1817,241 @@ void MainWindow::bstErase() {
     timer.start();
 }
 
-
 void MainWindow::bstClear() { bst.clear(); view->resetScene(); view->setTitle(QStringLiteral("BST（空）")); }
 
 // ===== 哈夫曼树（含合并动画） =====
 void MainWindow::huffmanBuild() {
     auto w = parseIntList(huffmanInput->text());
-    if (w.isEmpty()) { view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树：请输入权值序列")); showMessage(QStringLiteral("哈夫曼树：无有效输入")); return; }
-    huff.clear(); timer.stop(); steps.clear(); stepIndex = 0;
+    if (w.isEmpty()) {
+        view->resetScene();
+        view->setTitle(QStringLiteral("哈夫曼树：请输入权值序列"));
+        showMessage(QStringLiteral("哈夫曼树：无有效输入"));
+        return;
+    }
+
+    // 记录最后一次权值序列，便于保存/恢复
+    huffLastWeights_ = w;
+
+    huff.clear();
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
 
     auto addEdgeLabel = [this](const QPointF& a, const QPointF& b, const QString& text, qreal offset = 12.0) {
-        QPointF mid((a.x()+b.x())/2.0, (a.y()+b.y())/2.0);
-        qreal vx = b.x() - a.x(), vy = b.y() - a.y(); qreal L  = std::sqrt(vx*vx + vy*vy);
-        qreal nx = 0.0, ny = -1.0; if (L > 1e-6) { nx = -vy / L; ny =  vx / L; }
-        QPointF pos = mid + QPointF(nx*offset, ny*offset);
-        auto* t = view->Scene()->addText(text); t->setDefaultTextColor(QColor("#111")); QRectF tb = t->boundingRect(); t->setPos(pos.x() - tb.width()/2.0, pos.y() - tb.height()/2.0);
+        QPointF mid((a.x() + b.x()) / 2.0, (a.y() + b.y()) / 2.0);
+        qreal vx = b.x() - a.x(), vy = b.y() - a.y();
+        qreal L  = std::sqrt(vx * vx + vy * vy);
+        qreal nx = 0.0, ny = -1.0;
+        if (L > 1e-6) {
+            nx = -vy / L;
+            ny =  vx / L;
+        }
+        QPointF pos = mid + QPointF(nx * offset, ny * offset);
+        auto* t = view->Scene()->addText(text);
+        t->setDefaultTextColor(QColor("#111"));
+        QRectF tb = t->boundingRect();
+        t->setPos(pos.x() - tb.width() / 2.0, pos.y() - tb.height() / 2.0);
     };
 
     const qreal R = 34;
     using DrawFn = std::function<void(ds::BTNode*, qreal, qreal, qreal, const QString&, bool)>;
     auto drawHuffTree = std::make_shared<DrawFn>();
-    *drawHuffTree = [this, drawHuffTree, addEdgeLabel, R](ds::BTNode* n, qreal x, qreal y, qreal dist, const QString& prefix, bool annotateCodes) {
-        if (!n) return; bool isLeaf = (!n->left && !n->right);
+    *drawHuffTree = [this, drawHuffTree, addEdgeLabel, R](ds::BTNode* n,
+                                                          qreal x, qreal y, qreal dist,
+                                                          const QString& prefix,
+                                                          bool annotateCodes) {
+        if (!n) return;
+        bool isLeaf = (!n->left && !n->right);
+
+        // 叶结点高亮，内部结点普通（颜色由 Canvas::addNode 控制）
         view->addNode(x, y, QString::number(n->key), isLeaf);
-        if (n->left)  { qreal lx = x - dist, ly = y + 100; QPointF a(x,  y + R), b(lx, ly - R); view->addEdge(a, b); addEdgeLabel(a, b, "0", 12.0); (*drawHuffTree)(n->left,  lx, ly, dist/1.8, prefix + "0", annotateCodes); }
-        if (n->right) { qreal rx = x + dist, ry = y + 100; QPointF a(x,  y + R), b(rx, ry - R); view->addEdge(a, b); addEdgeLabel(a, b, "1", 12.0); (*drawHuffTree)(n->right, rx, ry, dist/1.8, prefix + "1", annotateCodes); }
-        if (annotateCodes && isLeaf) { QString code = prefix.isEmpty() ? QString("0") : prefix; auto* t = view->Scene()->addText(code); t->setDefaultTextColor(QColor("#065f46")); QRectF tb = t->boundingRect(); t->setPos(x - tb.width()/2.0, y - R - 12 - tb.height()); }
+
+        if (n->left) {
+            qreal lx = x - dist, ly = y + 100;
+            QPointF a(x, y + R), b(lx, ly - R);
+            view->addEdge(a, b);
+            addEdgeLabel(a, b, "0", 12.0);
+            (*drawHuffTree)(n->left, lx, ly, dist / 1.8, prefix + "0", annotateCodes);
+        }
+        if (n->right) {
+            qreal rx = x + dist, ry = y + 100;
+            QPointF a(x, y + R), b(rx, ry - R);
+            view->addEdge(a, b);
+            addEdgeLabel(a, b, "1", 12.0);
+            (*drawHuffTree)(n->right, rx, ry, dist / 1.8, prefix + "1", annotateCodes);
+        }
+
+        // 叶子上方标出码字
+        if (annotateCodes && isLeaf) {
+            QString code = prefix.isEmpty() ? QString("0") : prefix;
+            auto* t = view->Scene()->addText(code);
+            t->setDefaultTextColor(QColor("#065f46"));
+            QRectF tb = t->boundingRect();
+            t->setPos(x - tb.width() / 2.0, y - R - 12 - tb.height());
+        }
     };
 
-    QVector<ds::BTNode*> forest; forest.reserve(w.size()); for (int x : w) forest.push_back(ds::Huffman::makeNode(x));
+    // 小工具：从已构建好的 Huffman 树中收集所有叶子的 (权值, 编码)
+    using CodePair = QPair<int, QString>;
+    auto collectCodes = [](ds::BTNode* n, const QString& prefix, QVector<CodePair>& out,
+                           auto&& self) -> void {
+        if (!n) return;
+        bool isLeaf = (!n->left && !n->right);
+        if (isLeaf) {
+            QString code = prefix.isEmpty() ? QString("0") : prefix;
+            out.push_back(qMakePair(n->key, code));
+            return;
+        }
+        self(n->left,  prefix + "0", out, self);
+        self(n->right, prefix + "1", out, self);
+    };
+
+    QVector<ds::BTNode*> forest;
+    forest.reserve(w.size());
+    for (int x : w) forest.push_back(ds::Huffman::makeNode(x));
 
     auto drawForestFixed = [=](const QVector<ds::BTNode*>& F, const QString& title) {
-        view->resetScene(); view->setTitle(title);
-        qreal x = 150; for (int i = 0; i < F.size(); ++i) { (*drawHuffTree)(F[i], x, 120, 60, "", false); x += 180; }
+        view->resetScene();
+        view->setTitle(title);
+        qreal x = 150;
+        for (int i = 0; i < F.size(); ++i) {
+            (*drawHuffTree)(F[i], x, 120, 60, "", false);
+            x += 180;
+        }
     };
 
-    auto tweenTwo = [=](const QVector<ds::BTNode*>& F, int i1, int i2, qreal t, const QString& title){
-        view->resetScene(); view->setTitle(title);
-        QVector<qreal> xs(F.size()); qreal x0 = 150; for (int i=0;i<F.size();++i){ xs[i] = x0 + i*180; }
-        qreal mid = (xs[i1] + xs[i2]) / 2.0; qreal xi1 = lerp(xs[i1], mid-40, t); qreal xi2 = lerp(xs[i2], mid+40, t);
-        for (int i=0;i<F.size();++i){ qreal x = xs[i]; if (i==i1) x = xi1; if (i==i2) x = xi2; (*drawHuffTree)(F[i], x, 120, 60, "", false); }
+    auto tweenTwo = [=](const QVector<ds::BTNode*>& F, int i1, int i2, qreal t, const QString& title) {
+        view->resetScene();
+        view->setTitle(title);
+        QVector<qreal> xs(F.size());
+        qreal x0 = 150;
+        for (int i = 0; i < F.size(); ++i) {
+            xs[i] = x0 + i * 180;
+        }
+        qreal mid = (xs[i1] + xs[i2]) / 2.0;
+        qreal xi1 = lerp(xs[i1], mid - 40, t);
+        qreal xi2 = lerp(xs[i2], mid + 40, t);
+        for (int i = 0; i < F.size(); ++i) {
+            qreal x = xs[i];
+            if (i == i1) x = xi1;
+            if (i == i2) x = xi2;
+            (*drawHuffTree)(F[i], x, 120, 60, "", false);
+        }
     };
 
     QVector<ds::BTNode*> cur = forest;
-    steps.push_back([=]() { drawForestFixed(cur, QStringLiteral("哈夫曼树：初始森林（%1 棵）").arg(cur.size())); statusBar()->showMessage(QStringLiteral("哈夫曼树：开始构建")); });
+    steps.push_back([=]() {
+        drawForestFixed(cur, QStringLiteral("哈夫曼树：初始森林（%1 棵）").arg(cur.size()));
+        statusBar()->showMessage(QStringLiteral("哈夫曼树：开始构建"));
+    });
 
-    const int tweenFrames = 8; const int oldInterval = timer.interval();
+    const int tweenFrames = 8;
+    const int oldInterval = timer.interval();
 
+    // 逐步合并两棵最小树，加入动画
     while (cur.size() > 1) {
         int i1 = -1, i2 = -1;
-        for (int i = 0; i < cur.size(); ++i) if (i1 == -1 || cur[i]->key < cur[i1]->key) i1 = i;
-        for (int i = 0; i < cur.size(); ++i) if (i != i1 && (i2 == -1 || cur[i]->key < cur[i2]->key)) i2 = i;
+        for (int i = 0; i < cur.size(); ++i)
+            if (i1 == -1 || cur[i]->key < cur[i1]->key) i1 = i;
+        for (int i = 0; i < cur.size(); ++i)
+            if (i != i1 && (i2 == -1 || cur[i]->key < cur[i2]->key)) i2 = i;
         if (i1 > i2) std::swap(i1, i2);
 
         int a = cur[i1]->key, b = cur[i2]->key;
         ds::BTNode* parent = ds::Huffman::makeNode(a + b);
-        parent->left  = cur[i1]; parent->right = cur[i2];
+        parent->left  = cur[i1];
+        parent->right = cur[i2];
 
         QVector<ds::BTNode*> before = cur;
-        QVector<ds::BTNode*> after  = cur; after[i1] = parent; after.remove(i2);
+        QVector<ds::BTNode*> after  = cur;
+        after[i1] = parent;
+        after.remove(i2);
 
-        steps.push_back([=](){ drawForestFixed(before, QStringLiteral("哈夫曼树：选择最小两棵：%1 与 %2").arg(a).arg(b)); });
+        steps.push_back([=]() {
+            drawForestFixed(before, QStringLiteral("哈夫曼树：选择最小两棵：%1 与 %2").arg(a).arg(b));
+        });
 
-        for (int f=0; f<=tweenFrames; ++f){
-            qreal t = qreal(f)/tweenFrames;
-            steps.push_back([=](){ timer.setInterval(60); tweenTwo(before, i1, i2, t, QStringLiteral("哈夫曼树：合并中（移动）")); });
+        for (int f = 0; f <= tweenFrames; ++f) {
+            qreal t = qreal(f) / tweenFrames;
+            steps.push_back([=]() {
+                timer.setInterval(60);
+                tweenTwo(before, i1, i2, t, QStringLiteral("哈夫曼树：合并中（移动）"));
+            });
         }
 
-        steps.push_back([=](){ drawForestFixed(after, QStringLiteral("哈夫曼树：合并 %1 + %2 -> %3").arg(a).arg(b).arg(parent->key)); timer.setInterval(oldInterval); });
+        steps.push_back([=]() {
+            drawForestFixed(after, QStringLiteral("哈夫曼树：合并 %1 + %2 -> %3").arg(a).arg(b).arg(parent->key));
+            timer.setInterval(oldInterval);
+        });
 
-        cur[i1] = parent; cur.remove(i2);
+        cur[i1] = parent;
+        cur.remove(i2);
     }
 
     if (!cur.isEmpty()) huff.rootNode = cur[0];
 
+    // 最终：整棵树 + 叶子码字 + 右侧编码表
     steps.push_back([=]() {
-        view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树：构建完成（边标 0/1；叶子上方显示码字）"));
+        view->resetScene();
+        view->setTitle(QStringLiteral("哈夫曼树：构建完成（边标 0/1；叶子上方显示码字）"));
         (*drawHuffTree)(huff.root(), 400, 120, 200, "", true);
-        auto* legend = view->Scene()->addText(QStringLiteral("图例：黄色=原始叶结点   蓝绿色=内部结点（合并产生）"));
-        legend->setDefaultTextColor(QColor("#444")); legend->setPos(16, 54);
+
+        auto* legend = view->Scene()->addText(
+            QStringLiteral("图例：黄色=原始叶结点   蓝绿色=内部结点（合并产生）"));
+        legend->setDefaultTextColor(QColor("#444"));
+        legend->setPos(16, 54);
+
+        // ===== 同步更新右侧编码表 =====
+        if (huffmanCodeTable) {
+            huffmanCodeTable->setRowCount(0);
+
+            QVector<CodePair> codes;
+            collectCodes(huff.root(), "", codes, collectCodes);
+
+            // 为了展示更整齐：按权值从小到大排序，同权值按码长排序
+            std::sort(codes.begin(), codes.end(), [](const CodePair& a, const CodePair& b) {
+                if (a.first != b.first) return a.first < b.first;
+                return a.second.length() < b.second.length();
+            });
+
+            huffmanCodeTable->setRowCount(codes.size());
+            for (int i = 0; i < codes.size(); ++i) {
+                const int wVal = codes[i].first;
+                const QString code = codes[i].second;
+
+                auto* itemIdx = new QTableWidgetItem(QString::number(i + 1));
+                itemIdx->setTextAlignment(Qt::AlignCenter);
+
+                auto* itemW = new QTableWidgetItem(QString::number(wVal));
+                itemW->setTextAlignment(Qt::AlignCenter);
+
+                auto* itemCode = new QTableWidgetItem(code);
+                itemCode->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+                huffmanCodeTable->setItem(i, 0, itemIdx);
+                huffmanCodeTable->setItem(i, 1, itemW);
+                huffmanCodeTable->setItem(i, 2, itemCode);
+            }
+        }
+
         showMessage(QStringLiteral("哈夫曼树：完成"));
     });
 
     timer.start();
+}
+
+void MainWindow::huffmanClear() {
+    huff.clear();
+    huffLastWeights_.clear();
+
+    // 清空右侧编码表
+    if (huffmanCodeTable) {
+        huffmanCodeTable->setRowCount(0);
+    }
+
+    view->resetScene();
+    view->setTitle(QStringLiteral("哈夫曼树（空）"));
+    statusBar()->showMessage(QStringLiteral("哈夫曼树：已清空"));
 }
 
 // ===== AVL树 =====
@@ -1918,8 +2096,6 @@ void MainWindow::avlClear() {
     view->setTitle(QStringLiteral("AVL树（空）"));
     showMessage(QStringLiteral("AVL树：已清空"));
 }
-
-void MainWindow::huffmanClear() { huff.clear(); view->resetScene(); view->setTitle(QStringLiteral("哈夫曼树（空）")); statusBar()->showMessage(QStringLiteral("哈夫曼树：已清空")); }
 
 // ===== 绘制基础 =====
 void MainWindow::drawSeqlist(const ds::Seqlist& sl){
@@ -2513,51 +2689,6 @@ avl.clear
 
     doc->setHtml(html);
 
-    // 一键写入示例脚本
-//     const QString sample = QString::fromUtf8(
-// R"(# —— 顺序表 ——
-// seq 1 3 5 7
-// seq.insert 2 99
-// seq.erase 1
-// seq.clear
-//
-// # —— 单链表 ——
-// link 2 4 6 8
-// link.insert 1 42
-// link.erase 3
-// link.clear
-//
-// # —— 栈 ——
-// stack 3 8 13
-// stack.push 21
-// stack.pop
-// stack.clear
-//
-// # —— 普通二叉树（层序 + 哨兵）——
-// bt 15 6 23 4 -1 -1 7  null=-1
-// bt.preorder
-// bt.inorder
-// bt.postorder
-// bt.levelorder
-// bt.clear
-//
-// # —— BST ——
-// bst 15 6 23 4 7 17 71
-// bst.find 7
-// bst.insert 50
-// bst.erase 23
-// bst.clear
-//
-// # —— Huffman ——
-// huff 5 9 12 13 16 45
-// huff.clear
-//
-// # —— AVL ——
-// avl 10 20 30 40 50 25
-// avl.insert 35
-// avl.clear
-// )");
-
     auto* btnBar = new QHBoxLayout;
     auto* btnClose = new QPushButton(QStringLiteral("关闭"));
     btnClose->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
@@ -2991,26 +3122,36 @@ void MainWindow::runDSL() {
 void MainWindow::runNLI() {
     const QString raw = nliEdit->toPlainText();
     const QString low = raw.trimmed().toLower();
-    if (low.isEmpty()) { showMessage(QStringLiteral("NLI：请输入自然语言指令")); return; }
+    if (low.isEmpty()) {
+        showMessage(QStringLiteral("NLI：请输入自然语言指令"));
+        return;
+    }
 
-    // —— 仅检测 NLI 内部是否混用了多种数据结构 ——
+    // —— 仅检测 NLI 内部是否混用了多种数据结构（保持原有逻辑） ——
     QSet<QString> hits;
     auto hitIf = [&](const QString& key, std::initializer_list<QString> kws){
-        for (const auto& k : kws) if (low.contains(k)) { hits.insert(key); break; }
+        for (const auto& k : kws) {
+            if (low.contains(k)) {
+                hits.insert(key);
+                break;
+            }
+        }
     };
-    hitIf("seq",  {"顺序表","顺序","seqlist","seq"});
-    hitIf("link", {"链表","linklist","link"});
+    hitIf("seq",  {"顺序表","顺序","数组","seqlist","seq"});
+    hitIf("link", {"链表","链","linklist","link"});
     hitIf("stack",{"栈","stack"});
     hitIf("bt",   {"二叉树","普通二叉树","binary tree","bt"});
     hitIf("bst",  {"二叉搜索树","binary search tree","bst"});
     hitIf("huff", {"哈夫曼","huffman","huff"});
-    hitIf("avl",  {"avl"});
+    hitIf("avl",  {"平衡二叉树","avl"});
 
     if (hits.size() > 1) {
-        // 拼接提示用的家族名（Qt6：QSet没有toList，这里手动拼）
-        QStringList fam; for (const auto& s : hits) fam << s;
+        // 拼接提示用的家族名
+        QStringList fam;
+        for (const auto& s : hits) fam << s;
         QMessageBox::warning(this, QStringLiteral("输入不合法"),
-            QStringLiteral("NLI：同一条指令内只能包含一种数据结构（检测到：%1），请重新输入。").arg(fam.join(", ")));
+            QStringLiteral("NLI：同一条指令内只能包含一种数据结构（检测到：%1），请重新输入。")
+                .arg(fam.join(", ")));
         return;
     }
     if (hits.isEmpty()) {
@@ -3020,91 +3161,164 @@ void MainWindow::runNLI() {
     }
     const QString kind = *hits.begin();
 
-    // 提取所有整数（支持空格/逗号/混排）
-    const QVector<int> nums = parseIntList(low);
+    // ================== 按“然后/接着/之后/并且/同时/句号”等拆成多个子句 ==================
+    QString normalized = low;
+
+    // 这些词一般用来串联多个操作；替换成句号，便于 split
+    const QStringList connectors = {
+        QStringLiteral("然后"),
+        QStringLiteral("接着"),
+        QStringLiteral("之后"),
+        QStringLiteral("并"),
+        QStringLiteral("并且"),
+        QStringLiteral("最后"),
+        QStringLiteral("同时")
+    };
+    for (const QString& w : connectors) {
+        normalized.replace(w, QStringLiteral("。"));
+    }
+
+    // 按句号、问号、感叹号、分号和换行分割；注意不要用“，”以免把数字拆散
+    QStringList clauses = normalized.split(
+        QRegularExpression("[。！？;；\\n]+"),
+        Qt::SkipEmptyParts
+    );
+
+    // 工具：把整数列表拼成 "1 2 3" 的形式
     auto joinNums = [&](const QVector<int>& a){
-        QString s; for (int i=0;i<a.size();++i){ if(i) s+=' '; s+=QString::number(a[i]); } return s;
+        QString s;
+        for (int i = 0; i < a.size(); ++i) {
+            if (i) s += ' ';
+            s += QString::number(a[i]);
+        }
+        return s;
     };
-    auto hasAny = [&](std::initializer_list<QString> kws)->bool{
-        for (const auto& k : kws) if (low.contains(k)) return true;
-        return false;
-    };
 
-    QString dsl;  // 输出的 DSL 一行
+    QStringList dslLines;   // 多个子句生成的多行 DSL
 
-    if (kind == "seq") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "seq.clear"; }
-        else if (hasAny({"插入","插","insert"})) {
-            if (nums.size() >= 2) dsl = QString("seq.insert %1 %2").arg(nums[0]).arg(nums[1]);
-        } else if (hasAny({"删除","删","移除","erase","remove"})) {
-            if (nums.size() >= 1) dsl = QString("seq.erase %1").arg(nums[0]);
-        } else if (!nums.isEmpty()) {
-            dsl = "seq " + joinNums(nums);
+    // ================== 对每个子句单独生成一条 DSL ==================
+    for (QString clause : clauses) {
+        clause = clause.trimmed();
+        if (clause.isEmpty())
+            continue;
+
+        // 只在当前子句中找关键字和数字
+        const QVector<int> nums = parseIntList(clause);
+        auto hasAny = [&](std::initializer_list<QString> kws)->bool{
+            for (const auto& k : kws)
+                if (clause.contains(k))
+                    return true;
+            return false;
+        };
+
+        QString dsl;  // 当前子句对应的一条 DSL
+
+        if (kind == "seq") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "seq.clear";
+            } else if (hasAny({"插入","插","增","insert"})) {
+                if (nums.size() >= 2)
+                    dsl = QString("seq.insert %1 %2").arg(nums[0]).arg(nums[1]);
+            } else if (hasAny({"删除","删","移除","erase","remove"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("seq.erase %1").arg(nums[0]);
+            } else if (!nums.isEmpty()) {
+                dsl = "seq " + joinNums(nums);
+            }
         }
-    }
-    else if (kind == "link") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "link.clear"; }
-        else if (hasAny({"插入","插","insert"})) {
-            if (nums.size() >= 2) dsl = QString("link.insert %1 %2").arg(nums[0]).arg(nums[1]);
-        } else if (hasAny({"删除","删","移除","erase","remove"})) {
-            if (nums.size() >= 1) dsl = QString("link.erase %1").arg(nums[0]);
-        } else if (!nums.isEmpty()) {
-            dsl = "link " + joinNums(nums);
+        else if (kind == "link") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "link.clear";
+            } else if (hasAny({"插入","插","增","insert"})) {
+                if (nums.size() >= 2)
+                    dsl = QString("link.insert %1 %2").arg(nums[0]).arg(nums[1]);
+            } else if (hasAny({"删除","删","移除","erase","remove"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("link.erase %1").arg(nums[0]);
+            } else if (!nums.isEmpty()) {
+                dsl = "link " + joinNums(nums);
+            }
         }
-    }
-    else if (kind == "stack") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "stack.clear"; }
-        else if (hasAny({"出栈","弹栈","pop"})) { dsl = "stack.pop"; }
-        else if (hasAny({"入栈","压栈","push","加入","添加"})) {
-            if (nums.size() >= 1) dsl = QString("stack.push %1").arg(nums[0]);
-        } else if (!nums.isEmpty()) {
-            dsl = "stack " + joinNums(nums);
+        else if (kind == "stack") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "stack.clear";
+            } else if (hasAny({"出栈","弹栈","pop"})) {
+                dsl = "stack.pop";
+            } else if (hasAny({"入栈","压栈","push","加入","添加","增"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("stack.push %1").arg(nums[0]);
+            } else if (!nums.isEmpty()) {
+                dsl = "stack " + joinNums(nums);
+            }
         }
-    }
-    else if (kind == "bt") {
-        if (hasAny({"先序","前序","preorder"}))      dsl = "bt.preorder";
-        else if (hasAny({"中序","inorder"}))          dsl = "bt.inorder";
-        else if (hasAny({"后序","postorder"}))        dsl = "bt.postorder";
-        else if (hasAny({"层序","层次","广度","levelorder"})) dsl = "bt.levelorder";
-        else if (hasAny({"清空","清除","clear"}))     dsl = "bt.clear";
-        else if (!nums.isEmpty())                     dsl = "bt " + joinNums(nums) + " null=-1";
-    }
-    else if (kind == "bst") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "bst.clear"; }
-        else if (hasAny({"查找","寻找","搜索","find","search"})) {
-            if (nums.size() >= 1) dsl = QString("bst.find %1").arg(nums[0]);
-        } else if (hasAny({"插入","插","加入","添加","insert","add"})) {
-            if (nums.size() >= 1) dsl = QString("bst.insert %1").arg(nums[0]);
-        } else if (hasAny({"删除","删","移除","erase","remove"})) {
-            if (nums.size() >= 1) dsl = QString("bst.erase %1").arg(nums[0]);
-        } else if (!nums.isEmpty()) {
-            dsl = "bst " + joinNums(nums);
+        else if (kind == "bt") {
+            if (hasAny({"先序","前序","preorder"})) {
+                dsl = "bt.preorder";
+            } else if (hasAny({"中序","inorder"})) {
+                dsl = "bt.inorder";
+            } else if (hasAny({"后序","postorder"})) {
+                dsl = "bt.postorder";
+            } else if (hasAny({"层序","层次","广度","levelorder"})) {
+                dsl = "bt.levelorder";
+            } else if (hasAny({"清空","清除","clear"})) {
+                dsl = "bt.clear";
+            } else if (!nums.isEmpty()) {
+                // 默认哨兵 -1（与 BT DSL 约定保持一致）
+                dsl = "bt " + joinNums(nums) + " null=-1";
+            }
         }
-    }
-    else if (kind == "huff") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "huff.clear"; }
-        else if (!nums.isEmpty())           { dsl = "huff " + joinNums(nums); }
-    }
-    else if (kind == "avl") {
-        if (hasAny({"清空","清除","clear"})) { dsl = "avl.clear"; }
-        else if (hasAny({"插入","插","加入","添加","insert","add"})) {
-            if (nums.size() >= 1) dsl = QString("avl.insert %1").arg(nums[0]);
-        } else if (!nums.isEmpty()) {
-            dsl = "avl " + joinNums(nums);
+        else if (kind == "bst") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "bst.clear";
+            } else if (hasAny({"查找","寻找","搜索","find","search"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("bst.find %1").arg(nums[0]);
+            } else if (hasAny({"插入","插","加入","添加","insert","add"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("bst.insert %1").arg(nums[0]);
+            } else if (hasAny({"删除","删","移除","erase","remove"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("bst.erase %1").arg(nums[0]);
+            } else if (!nums.isEmpty()) {
+                dsl = "bst " + joinNums(nums);
+            }
         }
+        else if (kind == "huff") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "huff.clear";
+            } else if (!nums.isEmpty()) {
+                dsl = "huff " + joinNums(nums);
+            }
+        }
+        else if (kind == "avl") {
+            if (hasAny({"清空","清除","clear"})) {
+                dsl = "avl.clear";
+            } else if (hasAny({"插入","插","加入","添加","insert","add"})) {
+                if (nums.size() >= 1)
+                    dsl = QString("avl.insert %1").arg(nums[0]);
+            } else if (!nums.isEmpty()) {
+                dsl = "avl " + joinNums(nums);
+            }
+        }
+
+        if (!dsl.isEmpty())
+            dslLines << dsl;
     }
 
-    if (dsl.isEmpty()) {
+    // 如果所有子句都没生成有效 DSL，则给出提示
+    if (dslLines.isEmpty()) {
         QMessageBox::information(this, QStringLiteral("信息不足"),
             QStringLiteral("NLI：无法从该句生成 DSL，请补充必要的信息（例如位置/值/遍历方式等）。"));
         return;
     }
 
-    // 写回 DSL 并直接执行
-    dslEdit->setPlainText(dsl);
-    statusBar()->showMessage(QStringLiteral("NLI → DSL：%1").arg(dsl));
-    runDSL();  // 依赖 DSL 端已有的完整执行逻辑（插入/删除/查找/遍历/清空等）
+    // 把多条 DSL 写回编辑框并执行（每条一行，由 runDSL 负责统一校验和动画）
+    QString allDsl = dslLines.join("\n");
+    dslEdit->setPlainText(allDsl);
+    statusBar()->showMessage(QStringLiteral("NLI → DSL：%1").arg(allDsl.replace('\n'," | ")));
+    runDSL();
 }
+
 
 // ================== 辅助函数 ==================
 QVector<int> MainWindow::dumpBTLevel(ds::BTNode* root, int nullSentinel) const {
