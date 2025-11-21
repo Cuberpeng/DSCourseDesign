@@ -2452,9 +2452,9 @@ void MainWindow::insertDSLExample() {
 
     const QString html = QString::fromUtf8(R"HTML(
 <h2 style="margin:0 0 12px 0;">DSL 使用说明</h2>
-<p>本 DSL 只做“解析 → 设置控件 → 调用已有槽函数”，<b>动画与绘制复用现有实现</b>。规则：</p>
+<p>规则：</p>
 <ul>
-  <li>每行一条命令；<code>#</code> 开头为注释；大小写不敏感；数字可用空格或逗号分隔。</li>
+  <li>每行一条命令；大小写不敏感；数字可用空格或逗号分隔。</li>
   <li>普通二叉树层序构建支持哨兵：<code>null=-1</code>，可省略（默认 -1）。</li>
   <li>命令按顺序逐条执行；一条命令的动画结束后自动进入下一条。</li>
 </ul>
@@ -2514,49 +2514,49 @@ avl.clear
     doc->setHtml(html);
 
     // 一键写入示例脚本
-    const QString sample = QString::fromUtf8(
-R"(# —— 顺序表 ——
-seq 1 3 5 7
-seq.insert 2 99
-seq.erase 1
-seq.clear
-
-# —— 单链表 ——
-link 2 4 6 8
-link.insert 1 42
-link.erase 3
-link.clear
-
-# —— 栈 ——
-stack 3 8 13
-stack.push 21
-stack.pop
-stack.clear
-
-# —— 普通二叉树（层序 + 哨兵）——
-bt 15 6 23 4 -1 -1 7  null=-1
-bt.preorder
-bt.inorder
-bt.postorder
-bt.levelorder
-bt.clear
-
-# —— BST ——
-bst 15 6 23 4 7 17 71
-bst.find 7
-bst.insert 50
-bst.erase 23
-bst.clear
-
-# —— Huffman ——
-huff 5 9 12 13 16 45
-huff.clear
-
-# —— AVL ——
-avl 10 20 30 40 50 25
-avl.insert 35
-avl.clear
-)");
+//     const QString sample = QString::fromUtf8(
+// R"(# —— 顺序表 ——
+// seq 1 3 5 7
+// seq.insert 2 99
+// seq.erase 1
+// seq.clear
+//
+// # —— 单链表 ——
+// link 2 4 6 8
+// link.insert 1 42
+// link.erase 3
+// link.clear
+//
+// # —— 栈 ——
+// stack 3 8 13
+// stack.push 21
+// stack.pop
+// stack.clear
+//
+// # —— 普通二叉树（层序 + 哨兵）——
+// bt 15 6 23 4 -1 -1 7  null=-1
+// bt.preorder
+// bt.inorder
+// bt.postorder
+// bt.levelorder
+// bt.clear
+//
+// # —— BST ——
+// bst 15 6 23 4 7 17 71
+// bst.find 7
+// bst.insert 50
+// bst.erase 23
+// bst.clear
+//
+// # —— Huffman ——
+// huff 5 9 12 13 16 45
+// huff.clear
+//
+// # —— AVL ——
+// avl 10 20 30 40 50 25
+// avl.insert 35
+// avl.clear
+// )");
 
     auto* btnBar = new QHBoxLayout;
     auto* btnClose = new QPushButton(QStringLiteral("关闭"));

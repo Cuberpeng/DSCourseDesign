@@ -13,7 +13,7 @@
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
-    resize(1280, 800);
+    resize(1440, 960);
     setWindowTitle(QStringLiteral("数据结构可视化"));
     statusBar()->showMessage(QStringLiteral("就绪"));
 
@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
     //QAction* actPng = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), QStringLiteral("导出PNG"));
 
-    // 添加分隔符
+    // 分隔符
     canvasBar->addSeparator();
 
     // 缩放按钮
@@ -40,57 +40,35 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     QAction* actFit     = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("适配"));
     QAction* actReset   = canvasBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("重置"));
 
-    // 连接文件操作信号
+    // 文件操作信号
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
     connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
     //connect(actPng,  &QAction::triggered, this, &MainWindow::exportPNG);
 
-    // 连接缩放操作信号
+    // 缩放信号
     connect(actZoomIn,  &QAction::triggered, this, &MainWindow::onZoomIn);
-    connect(actZoomOut,  &QAction::triggered, this, &MainWindow::onZoomOut);
+    connect(actZoomOut, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(actFit,     &QAction::triggered, this, &MainWindow::onZoomFit);
     connect(actReset,   &QAction::triggered, this, &MainWindow::onZoomReset);
 
-    // 中心：左右分栏 —— 左画布优先展示
-    splitter = new QSplitter(Qt::Horizontal, this);
-    setCentralWidget(splitter);
+    // ================= 中心整体：用一个 QWidget + QVBoxLayout 包起来 =================
+    QWidget* central = new QWidget(this);
+    QVBoxLayout* centralLayout = new QVBoxLayout(central);
+    centralLayout->setContentsMargins(0, 0, 0, 0);
+    centralLayout->setSpacing(4);
+    setCentralWidget(central);
 
-    // 左：画布区域（包含画布和信息栏）
+    // ================= 顶部：左右分栏 —— 左画布 / 右控制面板 =================
+    splitter = new QSplitter(Qt::Horizontal, central);
+
+    // 左：画布区域
     QWidget* canvasArea = new QWidget(splitter);
     QVBoxLayout* canvasLayout = new QVBoxLayout(canvasArea);
     canvasLayout->setContentsMargins(0, 0, 0, 0);
     canvasLayout->setSpacing(0);
 
-    // 画布
     view = new Canvas(canvasArea);
-    canvasLayout->addWidget(view, 1); // 画布占据主要空间
-
-    // 信息栏
-    QWidget* messageBarContainer = new QWidget(canvasArea);
-    messageBarContainer->setStyleSheet("QWidget{background:#f8fafc;border-top:1px solid #e2e8f0;}");
-    QVBoxLayout* messageLayout = new QVBoxLayout(messageBarContainer);
-    messageLayout->setContentsMargins(12, 8, 12, 8);
-
-    QLabel* messageTitle = new QLabel(QStringLiteral("操作信息"));
-    messageTitle->setStyleSheet("QLabel{color:#334155;font-weight:600;font-size:12px;margin-bottom:4px;}");
-    messageLayout->addWidget(messageTitle);
-
-    messageBar = new QTextEdit(messageBarContainer);
-    messageBar->setMaximumHeight(120);
-    messageBar->setReadOnly(true);
-    messageBar->setStyleSheet(
-        "QTextEdit{"
-        "background:white;"
-        "border:1px solid #e2e8f0;"
-        "border-radius:6px;"
-        "padding:8px;"
-        "font-size:12px;"
-        "color:#475569;"
-        "}"
-    );
-    messageLayout->addWidget(messageBar);
-
-    canvasLayout->addWidget(messageBarContainer);
+    canvasLayout->addWidget(view, 1);
 
     splitter->addWidget(canvasArea);
 
@@ -110,40 +88,47 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     );
     splitter->addWidget(controlPanel);
 
-    // 设置分割器的属性，确保左右相邻显示
-    splitter->setChildrenCollapsible(false); // 防止子部件被完全折叠
-    splitter->setHandleWidth(2); // 设置分割条宽度
-    splitter->setStyleSheet("QSplitter::handle { background: #cbd5e1; }"); // 分割条颜色
+    // 分割条设置（左右）
+    splitter->setChildrenCollapsible(false);
+    splitter->setHandleWidth(2);
+    splitter->setStyleSheet("QSplitter::handle { background: #cbd5e1; }");
+    splitter->setStretchFactor(0, 4); // 左：画布区域
+    splitter->setStretchFactor(1, 1); // 右：控制面板
 
-    // 设置拉伸因子和初始大小
-    splitter->setStretchFactor(0, 3); // 画布拉伸因子更大
-    splitter->setStretchFactor(1, 1); // 控制面板拉伸因子较小
-
-    // 设置初始大小，确保画布有足够空间
     QList<int> initialSizes;
     initialSizes << width() * 2 / 3 << width() * 1 / 3;
     splitter->setSizes(initialSizes);
 
-    // 设置最小尺寸
     view->setMinimumWidth(400);
-    controlPanel->setMinimumWidth(280);
+    controlPanel->setMinimumWidth(220);
 
-    // 右侧容器
+    // 右侧控制面板内容
     auto* v = new QVBoxLayout(controlPanel);
     v->setContentsMargins(12, 10, 12, 10);
     v->setSpacing(10);
 
+    // 模块选择：仅数据结构模块（不再包含“脚本 / DSL”）
     moduleCombo = new QComboBox(controlPanel);
-    moduleCombo->addItems({QStringLiteral("顺序表"), QStringLiteral("链表"), QStringLiteral("栈"),
-                           QStringLiteral("二叉树"), QStringLiteral("二叉搜索树"), QStringLiteral("哈夫曼树"), QStringLiteral("AVL树"), QStringLiteral("脚本/DSL")});
-    moduleCombo->setStyleSheet("QComboBox{padding:6px;border:2px solid #e2e8f0;border-radius:10px;}");
+    moduleCombo->addItems({
+        QStringLiteral("顺序表"),
+        QStringLiteral("链表"),
+        QStringLiteral("栈"),
+        QStringLiteral("二叉树"),
+        QStringLiteral("二叉搜索树"),
+        QStringLiteral("哈夫曼树"),
+        QStringLiteral("AVL树")
+    });
+    moduleCombo->setStyleSheet(
+        "QComboBox{padding:6px;border:2px solid #e2e8f0;border-radius:10px;background:white;}"
+    );
     v->addWidget(new QLabel(QStringLiteral("模块选择："), controlPanel));
     v->addWidget(moduleCombo);
 
+    // 右侧模块堆栈
     moduleStack = new QStackedWidget(controlPanel);
     v->addWidget(moduleStack, 1);
 
-    // 构建每个模块页（见 pages 文件）
+    // 构建每个模块页
     moduleStack->addWidget(makeScrollPage(buildSeqlistPage()));
     moduleStack->addWidget(makeScrollPage(buildLinklistPage()));
     moduleStack->addWidget(makeScrollPage(buildStackPage()));
@@ -151,26 +136,82 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     moduleStack->addWidget(makeScrollPage(buildBSTPage()));
     moduleStack->addWidget(makeScrollPage(buildHuffmanPage()));
     moduleStack->addWidget(makeScrollPage(buildAVLPage()));
-    moduleStack->addWidget(makeScrollPage(buildDSLPage()));
+    // 注意：不再把 buildDSLPage() 加到 moduleStack 里
 
-    // 原有：只切右侧页面
+    // 切换模块：只切右侧面板 + 同步画布
     connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            moduleStack, &QStackedWidget::setCurrentIndex);  // 只切页面
-
-    // 新增：同步画布到对应数据结构的上一次状态
+            moduleStack, &QStackedWidget::setCurrentIndex);
     connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &MainWindow::onModuleChanged);
 
-    // 动画计时
+    // ================= 中间：公共 DSL / NLI 区域 =================
+    QWidget* dslContainer = buildDSLPage();          // 只构建界面，逻辑在 mainwindow_actions 里
+    QWidget* dslScroll    = makeScrollPage(dslContainer);
+    dslScroll->setMinimumHeight(160);
+
+    // ================= 底部：操作信息栏（1 行 + 可滚动） =================
+    QWidget* messageBarContainer = new QWidget(central);
+    messageBarContainer->setStyleSheet(
+        "QWidget{background:#f1f5f9;border-top:1px solid #e2e8f0;}"
+    );
+    QHBoxLayout* messageLayout = new QHBoxLayout(messageBarContainer);
+    messageLayout->setContentsMargins(8, 2, 8, 2);
+    messageLayout->setSpacing(8);
+
+    QLabel* messageTitle = new QLabel(QStringLiteral("操作信息"));
+    messageTitle->setStyleSheet(
+        "QLabel{color:#64748b;font-weight:600;font-size:11px;}"
+    );
+    messageLayout->addWidget(messageTitle);
+
+    messageBar = new QTextEdit(messageBarContainer);
+    messageBar->setReadOnly(true);
+    // ★ 关键修改：允许垂直滚动（有滚轮），方便查看历史
+    messageBar->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    messageBar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    messageBar->setLineWrapMode(QTextEdit::NoWrap);
+    messageBar->setFixedHeight(24);  // 仍然只占据一行高度
+    messageBar->setStyleSheet(
+        "QTextEdit{"
+        "background:white;"
+        "border:1px solid #e2e8f0;"
+        "border-radius:6px;"
+        "padding:2px 6px;"
+        "font-size:11px;"
+        "color:#475569;"
+        "}"
+    );
+    messageLayout->addWidget(messageBar, 1);
+
+    // ================= 新增：纵向 QSplitter，将三块上下可调 =================
+    QSplitter* vSplit = new QSplitter(Qt::Vertical, central);
+    vSplit->setChildrenCollapsible(false);
+    vSplit->setHandleWidth(2);
+    vSplit->setStyleSheet("QSplitter::handle { background: #cbd5e1; }");
+
+    // 上：画布 + 右侧控制面板
+    vSplit->addWidget(splitter);
+    // 中：DSL / NLI 公共区域
+    vSplit->addWidget(dslScroll);
+    // 下：操作信息栏（1 行，但有滚动条）
+    vSplit->addWidget(messageBarContainer);
+
+    // 初始高度比例，和之前 centralLayout->addWidget(splitter,5/2/1) 对应
+    vSplit->setStretchFactor(0, 5);
+    vSplit->setStretchFactor(1, 3);
+    vSplit->setStretchFactor(2, 1);
+
+    centralLayout->addWidget(vSplit);
+
+    // 动画计时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
     timer.setInterval(500);
 
     // 初始画布提示
     view->setTitle(QStringLiteral("请选择右侧模块并操作"));
-    showMessage(QStringLiteral("欢迎使用数据结构可视化工具！请从右侧选择数据结构模块开始操作。"));
+    showMessage(QStringLiteral("欢迎使用数据结构可视化工具！上方为模块，中间为 DSL/NLI，底部为操作信息栏。"));
 }
 
-// 新增：显示消息到信息栏
 void MainWindow::showMessage(const QString& message) {
     QString timestamp = QTime::currentTime().toString("hh:mm:ss");
     QString formattedMessage = QString("[%1] %2").arg(timestamp, message);
@@ -181,11 +222,10 @@ void MainWindow::showMessage(const QString& message) {
     cursor.movePosition(QTextCursor::End);
     messageBar->setTextCursor(cursor);
 
-    // 同时更新状态栏（简短提示）
+    // 状态栏简短提示
     statusBar()->showMessage(message, 3000);
 }
 
-// 新增：清空信息栏
 void MainWindow::clearMessages() {
     messageBar->clear();
 }
@@ -202,7 +242,8 @@ QVector<int> MainWindow::parseIntList(const QString& text) const {
     QVector<int> out; out.reserve(64);
     QRegularExpression re("[-+]?\\d+");
     auto it = re.globalMatch(text);
-    while (it.hasNext()) out.push_back(it.next().captured(0).toInt());
+    while (it.hasNext())
+        out.push_back(it.next().captured(0).toInt());
     return out;
 }
 

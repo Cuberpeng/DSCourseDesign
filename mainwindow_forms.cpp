@@ -247,16 +247,23 @@ QWidget* MainWindow::buildAVLPage() {
 
 QWidget* MainWindow::buildDSLPage() {
     auto* root = new QWidget;
-    auto* v = new QVBoxLayout(root); v->setSpacing(10);
+    auto* h = new QHBoxLayout(root);
+    h->setSpacing(12);
 
-    // 上半：DSL 脚本编辑与执行
+    //
+    // 左侧：DSL 脚本编辑与执行
+    //
+    auto* dslGroup = new QGroupBox(QStringLiteral("DSL 脚本"));
+    auto* dslLayout = new QVBoxLayout(dslGroup);
+    dslLayout->setSpacing(8);
+
     dslEdit = new QTextEdit;
     dslEdit->setPlaceholderText(
         "指令格式可点击下侧“DSL使用说明”查看\n"
         "每行只能填写一条语句"
         "只能输入同一种数据结构中的指令"
     );
-    dslEdit->setFixedHeight(120);
+    dslEdit->setFixedHeight(100);
     dslEdit->setStyleSheet(
         "QTextEdit {"
         "   border: 2px solid #e2e8f0;"
@@ -270,17 +277,29 @@ QWidget* MainWindow::buildDSLPage() {
         "}"
     );
 
-    auto* hb0 = new QHBoxLayout;
-    auto* btnRun  = new QPushButton("执行脚本");
+    auto* btnRun  = new QPushButton(QStringLiteral("执行脚本"));
     btnRun->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
-    auto* btnHelp = new QPushButton("DSL 使用说明");   // ← 新按钮
+    auto* btnHelp = new QPushButton(QStringLiteral("DSL 使用说明"));   // 打开说明页
     btnHelp->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
-    hb0->addWidget(btnRun);
-    hb0->addWidget(btnHelp);
 
-    // 下半：自然语言输入（保持原逻辑）
+    auto* dslBtns = new QHBoxLayout;
+    dslBtns->addWidget(btnRun);
+    dslBtns->addWidget(btnHelp);
+
+    dslLayout->addWidget(new QLabel(QStringLiteral("DSL 脚本：")));
+    dslLayout->addWidget(dslEdit);
+    dslLayout->addLayout(dslBtns);
+    dslLayout->addStretch(1);
+
+    //
+    // 右侧：自然语言输入
+    //
+    auto* nliGroup = new QGroupBox(QStringLiteral("自然语言指令"));
+    auto* nliLayout = new QVBoxLayout(nliGroup);
+    nliLayout->setSpacing(8);
+
     nliEdit = new QTextEdit;
-    nliEdit->setPlaceholderText("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树，注意只能对同一种数据结构进行操作");
+    nliEdit->setPlaceholderText(QStringLiteral("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树，注意只能对同一种数据结构进行操作"));
     nliEdit->setMaximumHeight(100);
     nliEdit->setStyleSheet(
         "QTextEdit {"
@@ -294,20 +313,22 @@ QWidget* MainWindow::buildDSLPage() {
         "   border-color: #3b82f6;"
         "}"
     );
-    auto* btnNLI = new QPushButton("理解并执行");
+
+    auto* btnNLI = new QPushButton(QStringLiteral("理解并执行"));
     btnNLI->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
 
-    v->addWidget(new QLabel("DSL 脚本："));
-    v->addWidget(dslEdit);
-    v->addLayout(hb0);
-    v->addWidget(new QLabel("自然语言（将自动转为 DSL 后执行）："));
-    v->addWidget(nliEdit);
-    v->addWidget(btnNLI);
-    v->addStretch(1);
+    nliLayout->addWidget(new QLabel(QStringLiteral("自然语言（将自动转为 DSL 后执行）：")));
+    nliLayout->addWidget(nliEdit);
+    nliLayout->addWidget(btnNLI);
+    nliLayout->addStretch(1);
 
-    // 事件连接
+    // 总体左右排布
+    h->addWidget(dslGroup, 1);
+    h->addWidget(nliGroup, 1);
+
+    // 事件连接（逻辑保持不变）
     connect(btnRun,  &QPushButton::clicked, this, &MainWindow::runDSL);
-    connect(btnHelp, &QPushButton::clicked, this, &MainWindow::insertDSLExample); // ← 打开说明页
+    connect(btnHelp, &QPushButton::clicked, this, &MainWindow::insertDSLExample);
     connect(btnNLI,  &QPushButton::clicked, this, &MainWindow::runNLI);
 
     return root;
