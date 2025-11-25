@@ -21,6 +21,7 @@
 #include <QHash>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QPointF>
 
 static ds::BTNode* g_btHighlightNode = nullptr;
 static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
@@ -41,108 +42,200 @@ void MainWindow::seqlistBuild(){
 
 void MainWindow::seqlistInsert(){
     int pos = seqlistPosition->value();
-    bool ok = false; int val = seqlistValue->text().toInt(&ok);
-    if(!ok) { showMessage(QStringLiteral("顺序表：请输入有效的值")); return; }
+    bool ok = false;
+    int val = seqlistValue->text().toInt(&ok);
+    if (!ok) {
+        showMessage(QStringLiteral("顺序表：请输入有效的值"));
+        return;
+    }
 
     const int n = seq.size();
     if (pos < 0) pos = 0;
     if (pos > n) pos = n;
 
+    // 先把当前顺序表的值拷出来，用于纯前端动画
     QVector<QString> arr(n);
-    for (int i=0;i<n;++i) arr[i] = QString::number(seq.get(i));
+    for (int i = 0; i < n; ++i)
+        arr[i] = QString::number(seq.get(i));
 
-    const qreal cellW = 68, cellH = 54, gap = 14;
-    const qreal startX = 80, startY = 180;
-    const int prevInterval = timer.interval();
-    int frames = 10; if (n - pos > 300) frames = 6; if (n - pos > 800) frames = 4;
+    const qreal cellW  = 68;
+    const qreal cellH  = 54;
+    const qreal gap    = 14;
+    const qreal startX = 80;
+    const qreal startY = 180;
+
+    const int oldInterval = timer.interval();
     const int animInterval = 60;
 
-    timer.stop(); steps.clear(); stepIndex = 0;
+    // 根据尾部长度控制每个“小动画”的帧数，避免元素过多时太慢
+    int tail = n - pos;
+    int framesShift = 10;
+    if (tail > 80)  framesShift = 6;
+    if (tail > 200) framesShift = 4;
 
-    // 步骤1：显示当前状态，高亮插入位置
-    steps.push_back([=](){
-        view->resetScene(); view->setTitle(QStringLiteral("顺序表：插入前（pos=%1）").arg(pos));
-        for (int i=0;i<n;++i){
-            qreal x = startX + i*(cellW+gap), y = startY;
-            view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#e8eef9")));
-            auto* tItem = view->Scene()->addText(arr[i]); tItem->setDefaultTextColor(Qt::black);
-            auto r=tItem->boundingRect(); tItem->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-            auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-            idx->setPos(x+cellW/2-6, y+cellH+6);
+    const int framesDrop = 10;
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 步骤 0：显示当前状态，高亮插入位置
+    steps.push_back([=]() {
+        view->resetScene();
+        view->setTitle(QStringLiteral("顺序表：插入前（pos=%1）").arg(pos));
+
+        for (int i = 0; i < n; ++i) {
+            qreal x = startX + i * (cellW + gap);
+            qreal y = startY;
+            view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                   QPen(QColor("#5f6c7b"), 2),
+                                   QBrush(QColor("#e8eef9")));
+            auto *t = view->Scene()->addText(arr[i]);
+            t->setDefaultTextColor(Qt::black);
+            QRectF tb = t->boundingRect();
+            t->setPos(x + (cellW - tb.width()) / 2,
+                      y + (cellH - tb.height()) / 2 - 1);
+
+            auto *idx = view->Scene()->addText(QString::number(i));
+            idx->setDefaultTextColor(Qt::darkGray);
+            idx->setPos(x + cellW / 2 - 6, y + cellH + 6);
         }
+
         // 高亮插入位置
-        qreal highlightX = startX + pos*(cellW+gap);
-        view->Scene()->addRect(QRectF(highlightX,startY,cellW,cellH), QPen(QColor("#ef4444"),3), QBrush(Qt::transparent));
+        qreal hx = startX + pos * (cellW + gap);
+        view->Scene()->addRect(QRectF(hx, startY, cellW, cellH),
+                               QPen(QColor("#ef4444"), 3),
+                               QBrush(Qt::transparent));
         showMessage(QStringLiteral("顺序表：准备在位置 %1 插入").arg(pos));
     });
 
-    // 步骤2：移动插入位置之后的元素
-    for (int f = 0; f <= frames; ++f) {
-        const double t  = double(f) / frames;
-        const double dx = t * (cellW + gap);
-        steps.push_back([=](){
-            if (f == 0) timer.setInterval(animInterval);
-            view->resetScene(); view->setTitle(QStringLiteral("顺序表：插入 Step 1（移动元素）"));
+    // 步骤 1：把计时器调成动画间隔
+    steps.push_back([=]() {
+        timer.setInterval(animInterval);
+    });
 
-            // 绘制插入位置之前的元素（不移动）
-            for (int i=0;i<pos;++i){
-                qreal x = startX + i*(cellW+gap), y = startY;
-                view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#e8eef9")));
-                auto* tItem = view->Scene()->addText(arr[i]); tItem->setDefaultTextColor(Qt::black);
-                auto r=tItem->boundingRect(); tItem->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-                auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-                idx->setPos(x+cellW/2-6, y+cellH+6);
+    // 步骤 2：从右往左，一个一个挪动元素 i -> i+1
+    // k 表示当前在移动的元素下标
+    for (int k = n - 1; k >= pos; --k) {
+        for (int f = 0; f <= framesShift; ++f) {
+            const qreal t = (framesShift == 0) ? 1.0 : (qreal)f / framesShift;
+
+            steps.push_back([=]() {
+                view->resetScene();
+                view->setTitle(QStringLiteral("顺序表：移动元素 %1 → %2")
+                               .arg(k).arg(k + 1));
+
+                for (int j = 0; j < n; ++j) {
+                    // 计算“当前这一帧里，这个元素显示在第几个格子上”
+                    qreal idxPos;  // 可能是小数，用来做插值
+
+                    if (j < pos) {
+                        // 插入位置之前的元素不动
+                        idxPos = j;
+                    } else if (j > k) {
+                        // 已经完成移动的右边部分：全部在最终位置 j+1
+                        idxPos = j + 1;
+                    } else if (j == k) {
+                        // 当前要移动的这个元素：从 k 挪到 k+1
+                        idxPos = (qreal)k + t;
+                    } else {
+                        // pos <= j < k：还没轮到移动，保持在位置 j
+                        idxPos = j;
+                    }
+
+                    qreal x = startX + idxPos * (cellW + gap);
+                    qreal y = startY;
+
+                    bool highlight = (j == k);
+                    QBrush boxBrush(highlight ? QColor("#ffd166") : QColor("#e8eef9"));
+                    view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                           QPen(QColor("#5f6c7b"), 2),
+                                           boxBrush);
+
+                    auto *tItem = view->Scene()->addText(arr[j]);
+                    tItem->setDefaultTextColor(Qt::black);
+                    QRectF tb = tItem->boundingRect();
+                    tItem->setPos(x + (cellW - tb.width()) / 2,
+                                  y + (cellH - tb.height()) / 2 - 1);
+                }
+
+                // 在整个移动过程中，新元素先停在插入位置上方，不参与移动
+                qreal newX = startX + pos * (cellW + gap);
+                qreal newY = startY - 80;
+                view->Scene()->addRect(QRectF(newX, newY, cellW, cellH),
+                                       QPen(QColor("#22c55e"), 2),
+                                       QBrush(QColor("#bbf7d0")));
+                auto *newText = view->Scene()->addText(QString::number(val));
+                newText->setDefaultTextColor(Qt::black);
+                QRectF tbNew = newText->boundingRect();
+                newText->setPos(newX + (cellW - tbNew.width()) / 2,
+                                newY + (cellH - tbNew.height()) / 2 - 1);
+            });
+        }
+    }
+
+    // 步骤 3：让新元素从上往下“掉”到 pos 位置
+    for (int f = 0; f <= framesDrop; ++f) {
+        const qreal t = (framesDrop == 0) ? 1.0 : (qreal)f / framesDrop;
+
+        steps.push_back([=]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("顺序表：插入新元素"));
+
+            // 先画已经“挪完”的老元素（全都在最终位置了）
+            const int m = n + 1;
+            for (int i = 0; i < m; ++i) {
+                qreal x = startX + i * (cellW + gap);
+                qreal y = startY;
+
+                QBrush boxBrush(QColor("#e8eef9"));
+                QString text;
+
+                if (i < pos) text = arr[i];
+                else if (i == pos) {
+                    // 这里暂时留空位，让上面掉下来的块来填
+                    boxBrush = QBrush(Qt::NoBrush);
+                } else {
+                    text = arr[i - 1];
+                }
+
+                view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                       QPen(QColor("#5f6c7b"), 2),
+                                       boxBrush);
+                if (!text.isEmpty()) {
+                    auto *tItem = view->Scene()->addText(text);
+                    tItem->setDefaultTextColor(Qt::black);
+                    QRectF tb = tItem->boundingRect();
+                    tItem->setPos(x + (cellW - tb.width()) / 2,
+                                  y + (cellH - tb.height()) / 2 - 1);
+                }
             }
 
-            // 绘制正在移动的元素（插入位置及之后的元素）
-            for (int i=pos;i<n;++i){
-                qreal sx = startX + i*(cellW+gap) + dx;
-                qreal sy = startY;
-                view->Scene()->addRect(QRectF(sx,sy,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#ffd166")));
-                auto* moving = view->Scene()->addText(arr[i]); moving->setDefaultTextColor(Qt::black);
-                auto r=moving->boundingRect(); moving->setPos(sx+(cellW-r.width())/2, sy+(cellH-r.height())/2-1);
+            // 画“正在下落”的新元素
+            qreal baseX = startX + pos * (cellW + gap);
+            qreal startYTop = startY - 80;
+            qreal curY = startYTop + (startY - startYTop) * t;
 
-                // 索引也移动
-                auto* idx = view->Scene()->addText(QString::number(i+1)); // 索引+1
-                idx->setDefaultTextColor(Qt::darkGray);
-                idx->setPos(sx+cellW/2-6, sy+cellH+6);
-            }
-
-            // 绘制插入位置的新元素（从上方进入）
-            qreal newY = startY - 80 * (1-t); // 从上方进入
-            qreal newX = startX + pos*(cellW+gap);
-            view->Scene()->addRect(QRectF(newX,newY,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#22c55e")));
-            auto* newItem = view->Scene()->addText(QString::number(val)); newItem->setDefaultTextColor(Qt::black);
-            auto r=newItem->boundingRect(); newItem->setPos(newX+(cellW-r.width())/2, newY+(cellH-r.height())/2-1);
-            auto* newIdx = view->Scene()->addText(QString::number(pos)); newIdx->setDefaultTextColor(Qt::darkGray);
-            newIdx->setPos(newX+cellW/2-6, newY+cellH+6);
-
-            //showMessage(QStringLiteral("顺序表：移动元素并插入新值"));
-            if (f==frames) timer.setInterval(prevInterval);
+            view->Scene()->addRect(QRectF(baseX, curY, cellW, cellH),
+                                   QPen(QColor("#22c55e"), 2),
+                                   QBrush(QColor("#bbf7d0")));
+            auto *newText = view->Scene()->addText(QString::number(val));
+            newText->setDefaultTextColor(Qt::black);
+            QRectF tbNew = newText->boundingRect();
+            newText->setPos(baseX + (cellW - tbNew.width()) / 2,
+                            curY + (cellH - tbNew.height()) / 2 - 1);
         });
     }
 
-    // 步骤3：显示最终结果
-    steps.push_back([=](){
+    // 步骤 4：真正往后端顺序表里插入 + 恢复计时器 + 画最终结果
+    steps.push_back([=]() {
+        timer.setInterval(oldInterval);
+
         seq.insert(pos, val);
-        view->resetScene(); view->setTitle(QStringLiteral("顺序表：插入完成（pos=%1, val=%2）").arg(pos).arg(val));
-
-        const int m = n + 1;
-        for (int i=0;i<m;++i){
-            bool hi = (i==pos);
-            qreal x = startX + i*(cellW+gap), y = startY;
-            view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(hi? QColor("#22c55e"): QColor("#e8eef9")));
-
-            QString s;
-            if (i < pos) s = arr[i];
-            else if (i == pos) s = QString::number(val);
-            else if (i > pos) s = arr[i-1];
-
-            auto* tItem = view->Scene()->addText(s); tItem->setDefaultTextColor(Qt::black);
-            auto r=tItem->boundingRect(); tItem->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-            auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-            idx->setPos(x+cellW/2-6, y+cellH+6);
-        }
+        view->resetScene();
+        view->setTitle(QStringLiteral("顺序表：插入完成（pos=%1, val=%2）")
+                       .arg(pos).arg(val));
+        drawSeqlist(seq);
         showMessage(QStringLiteral("顺序表：插入完成"));
     });
 
@@ -152,111 +245,166 @@ void MainWindow::seqlistInsert(){
 void MainWindow::seqlistErase(){
     int pos = seqlistPosition->value();
     const int n = seq.size();
-    if (pos < 0 || pos >= n) { showMessage(QStringLiteral("顺序表：删除失败(位置越界)")); return; }
+    if (pos < 0 || pos >= n) {
+        showMessage(QStringLiteral("顺序表：删除失败(位置越界)"));
+        return;
+    }
 
     QVector<QString> arr(n);
-    for (int i=0;i<n;++i) arr[i] = QString::number(seq.get(i));
+    for (int i = 0; i < n; ++i)
+        arr[i] = QString::number(seq.get(i));
 
-    const qreal cellW = 68, cellH = 54, gap = 14;
-    const qreal startX = 80, startY = 180;
-    const int prevInterval = timer.interval();
-    int frames = 10; if (n - 1 - pos > 300) frames = 6; if (n - 1 - pos > 800) frames = 4;
+    const qreal cellW  = 68;
+    const qreal cellH  = 54;
+    const qreal gap    = 14;
+    const qreal startX = 80;
+    const qreal startY = 180;
+
+    const int oldInterval = timer.interval();
     const int animInterval = 60;
 
-    timer.stop(); steps.clear(); stepIndex=0;
+    int tail = n - 1 - pos;
+    int framesShift = 10;
+    if (tail > 80)  framesShift = 6;
+    if (tail > 200) framesShift = 4;
 
-    // 步骤1：显示当前状态，高亮要删除的位置
-    steps.push_back([=](){
-        timer.setInterval(animInterval);
-        view->resetScene(); view->setTitle(QStringLiteral("顺序表：删除前（pos=%1）").arg(pos));
-        for (int i=0;i<n;++i){
-            bool hi = (i==pos);
-            qreal x = startX + i*(cellW+gap), y = startY;
-            view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(hi? QColor("#ef4444"): QColor("#e8eef9")));
-            auto* t = view->Scene()->addText(arr[i]); t->setDefaultTextColor(Qt::black);
-            auto r=t->boundingRect(); t->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-            auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-            idx->setPos(x+cellW/2-6, y+cellH+6);
+    const int framesDelete = 10;
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 步骤 0：显示当前状态，高亮要删除的格子
+    steps.push_back([=]() {
+        view->resetScene();
+        view->setTitle(QStringLiteral("顺序表：删除前（pos=%1）").arg(pos));
+
+        for (int i = 0; i < n; ++i) {
+            bool hi = (i == pos);
+            qreal x = startX + i * (cellW + gap);
+            qreal y = startY;
+            view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                   QPen(QColor("#5f6c7b"), 2),
+                                   QBrush(hi ? QColor("#fecaca") : QColor("#e8eef9")));
+            auto *t = view->Scene()->addText(arr[i]);
+            t->setDefaultTextColor(Qt::black);
+            QRectF tb = t->boundingRect();
+            t->setPos(x + (cellW - tb.width()) / 2,
+                      y + (cellH - tb.height()) / 2 - 1);
+
+            auto *idx = view->Scene()->addText(QString::number(i));
+            idx->setDefaultTextColor(Qt::darkGray);
+            idx->setPos(x + cellW / 2 - 6, y + cellH + 6);
         }
+
         showMessage(QStringLiteral("顺序表：准备删除位置 %1 的元素").arg(pos));
     });
 
-    // 步骤2：删除元素并移动后续元素
-    for (int f = 0; f <= frames; ++f) {
-        const double t  = double(f) / frames;
-        const double dx = -t * (cellW + gap);
-        const bool last = (f==frames);
-        steps.push_back([=](){
-            view->resetScene(); view->setTitle(QStringLiteral("顺序表：删除 Step 2（移动元素）"));
+    // 步骤 1：把计时器调成动画间隔
+    steps.push_back([=]() {
+        timer.setInterval(animInterval);
+    });
 
-            // 绘制删除位置之前的元素（不移动）
-            for (int i=0;i<pos;++i){
-                qreal x = startX + i*(cellW+gap), y = startY;
-                view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#e8eef9")));
-                auto* tItem = view->Scene()->addText(arr[i]); tItem->setDefaultTextColor(Qt::black);
-                auto r=tItem->boundingRect(); tItem->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-                auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-                idx->setPos(x+cellW/2-6, y+cellH+6);
+    // 步骤 2：把要删除的那个格子“抬上去 + 变透明”
+    for (int f = 0; f <= framesDelete; ++f) {
+        const qreal t = (framesDelete == 0) ? 1.0 : (qreal)f / framesDelete;
+
+        steps.push_back([=]() {
+            view->resetScene();
+            view->setTitle(QStringLiteral("顺序表：删除元素"));
+
+            // 其它格子原地不动（不画 pos）
+            for (int i = 0; i < n; ++i) {
+                if (i == pos) continue;
+                qreal x = startX + i * (cellW + gap);
+                qreal y = startY;
+                view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                       QPen(QColor("#5f6c7b"), 2),
+                                       QBrush(QColor("#e8eef9")));
+                auto *tItem = view->Scene()->addText(arr[i]);
+                tItem->setDefaultTextColor(Qt::black);
+                QRectF tb = tItem->boundingRect();
+                tItem->setPos(x + (cellW - tb.width()) / 2,
+                              y + (cellH - tb.height()) / 2 - 1);
             }
 
-            // 绘制被删除的元素（逐渐消失）
-            if (!last) {
-                qreal deleteX = startX + pos*(cellW+gap);
-                qreal deleteY = startY - 80 * t; // 向上移动并消失
-                qreal alpha = 1.0 - t; // 透明度逐渐降低
+            // 被删的元素向上抬起并逐渐透明
+            qreal baseX = startX + pos * (cellW + gap);
+            qreal baseY = startY;
+            qreal curY  = baseY - 80 * t;
+            qreal alpha = 1.0 - t;
 
-                auto* rect = view->Scene()->addRect(QRectF(deleteX,deleteY,cellW,cellH),
-                                                   QPen(QColor("#ef4444"),2), QBrush(QColor("#ef4444")));
-                rect->setOpacity(alpha);
+            auto *rect = view->Scene()->addRect(QRectF(baseX, curY, cellW, cellH),
+                                                QPen(QColor("#ef4444"), 2),
+                                                QBrush(QColor("#fecaca")));
+            rect->setOpacity(alpha);
 
-                auto* text = view->Scene()->addText(arr[pos]); text->setDefaultTextColor(Qt::black);
-                text->setOpacity(alpha);
-                auto r=text->boundingRect(); text->setPos(deleteX+(cellW-r.width())/2, deleteY+(cellH-r.height())/2-1);
-
-                auto* idx = view->Scene()->addText(QString::number(pos)); idx->setDefaultTextColor(Qt::darkGray);
-                idx->setOpacity(alpha);
-                idx->setPos(deleteX+cellW/2-6, deleteY+cellH+6);
-            }
-
-            // 绘制正在移动的元素（删除位置之后的元素）
-            for (int i=pos+1;i<n;++i){
-                qreal sx = startX + i*(cellW+gap) + dx;
-                qreal sy = startY;
-                view->Scene()->addRect(QRectF(sx,sy,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(QColor("#ffd166")));
-                auto* moving = view->Scene()->addText(arr[i]); moving->setDefaultTextColor(Qt::black);
-                auto r=moving->boundingRect(); moving->setPos(sx+(cellW-r.width())/2, sy+(cellH-r.height())/2-1);
-
-                // 索引也移动
-                auto* idx = view->Scene()->addText(QString::number(i-1)); // 索引-1
-                idx->setDefaultTextColor(Qt::darkGray);
-                idx->setPos(sx+cellW/2-6, sy+cellH+6);
-            }
-
-            //showMessage(QStringLiteral("顺序表：删除元素并移动后续元素"));
-            if (f==frames) timer.setInterval(prevInterval);
+            auto *text = view->Scene()->addText(arr[pos]);
+            text->setDefaultTextColor(Qt::black);
+            text->setOpacity(alpha);
+            QRectF tb = text->boundingRect();
+            text->setPos(baseX + (cellW - tb.width()) / 2,
+                         curY + (cellH - tb.height()) / 2 - 1);
         });
     }
 
-    // 步骤3：显示最终结果
-    steps.push_back([=](){
-        seq.erase(pos);
-        view->resetScene(); view->setTitle(QStringLiteral("顺序表：删除完成（pos=%1）").arg(pos));
+    // 步骤 3：从左到右，一个一个把后面的元素往前挪：k: pos+1 -> n-1
+    for (int k = pos + 1; k < n; ++k) {
+        for (int f = 0; f <= framesShift; ++f) {
+            const qreal t = (framesShift == 0) ? 1.0 : (qreal)f / framesShift;
 
-        const int m = n - 1;
-        for (int i=0;i<m;++i){
-            bool hi = (i>=pos && i<n-1); // 高亮被移动过的元素
-            qreal x = startX + i*(cellW+gap), y = startY;
-            view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"),2), QBrush(hi? QColor("#ffd166"): QColor("#e8eef9")));
+            steps.push_back([=]() {
+                view->resetScene();
+                view->setTitle(QStringLiteral("顺序表：移动元素 %1 → %2")
+                               .arg(k).arg(k - 1));
 
-            QString s;
-            if (i < pos) s = arr[i];
-            else s = arr[i+1];
+                for (int j = 0; j < n; ++j) {
+                    if (j == pos) continue; // 被删的元素不再画
 
-            auto* tItem = view->Scene()->addText(s); tItem->setDefaultTextColor(Qt::black);
-            auto r=tItem->boundingRect(); tItem->setPos(x+(cellW-r.width())/2, y+(cellH-r.height())/2-1);
-            auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray);
-            idx->setPos(x+cellW/2-6, y+cellH+6);
+                    // 计算这一帧中 arr[j] 所在的格子索引（可能是小数）
+                    qreal idxPos;
+
+                    if (j < pos) {
+                        // 删除位置之前的元素不动
+                        idxPos = j;
+                    } else if (j > k) {
+                        // 还没轮到移动的尾部元素：一直保持原位 j
+                        idxPos = j;
+                    } else if (j == k) {
+                        // 当前正在移动的元素：从 k → k-1
+                        idxPos = (qreal)k - t;
+                    } else {
+                        // pos < j < k：已经在之前的步骤中移动过一次，停在 j-1
+                        idxPos = j - 1;
+                    }
+
+                    qreal x = startX + idxPos * (cellW + gap);
+                    qreal y = startY;
+
+                    bool highlight = (j == k);
+                    QBrush boxBrush(highlight ? QColor("#ffd166") : QColor("#e8eef9"));
+                    view->Scene()->addRect(QRectF(x, y, cellW, cellH),
+                                           QPen(QColor("#5f6c7b"), 2),
+                                           boxBrush);
+
+                    auto *tItem = view->Scene()->addText(arr[j]);
+                    tItem->setDefaultTextColor(Qt::black);
+                    QRectF tb = tItem->boundingRect();
+                    tItem->setPos(x + (cellW - tb.width()) / 2,
+                                  y + (cellH - tb.height()) / 2 - 1);
+                }
+            });
         }
+    }
+
+    // 步骤 4：真正删除后端元素 + 恢复计时器 + 画最终顺序表
+    steps.push_back([=]() {
+        timer.setInterval(oldInterval);
+
+        seq.erase(pos);
+        view->resetScene();
+        view->setTitle(QStringLiteral("顺序表：删除完成（pos=%1）").arg(pos));
+        drawSeqlist(seq);
         showMessage(QStringLiteral("顺序表：删除完成"));
     });
 
@@ -2055,36 +2203,361 @@ void MainWindow::huffmanClear() {
 }
 
 // ===== AVL树 =====
+// ===== AVL树 =====
 void MainWindow::avlBuild() {
     auto a = parseIntList(avlInput->text());
-    timer.stop(); steps.clear(); stepIndex = 0;
-    steps.push_back([this]() { avl.clear(); view->resetScene(); view->setTitle(QStringLiteral("AVL树：开始构建")); drawBT(avl.root(), 400, 120, 200, 0); });
-    for (int i = 0; i < a.size(); i++) {
-        steps.push_back([=]() { avl.insert(a[i]); view->resetScene(); view->setTitle(QStringLiteral("AVL树：插入 %1（第 %2/%3 步）").arg(a[i]).arg(i+1).arg(a.size())); drawBT(avl.root(), 400, 120, 200, 0); });
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
+    // 第 0 步：清空 + 开始构建
+    steps.push_back([this]() {
+        avl.clear();
+        view->resetScene();
+        view->setTitle(QStringLiteral("AVL树：开始构建"));
+        drawBT(avl.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("AVL树：开始构建"));
+    });
+
+    const int total = a.size();
+
+    for (int i = 0; i < total; ++i) {
+        const int v   = a[i];
+        const int idx = i;
+
+        // 步骤1：插入前的静态画面
+        steps.push_back([=]() {
+            view->resetScene();
+            view->setTitle(
+                QStringLiteral("AVL树：准备插入 %1（第 %2/%3 步）")
+                    .arg(v).arg(idx + 1).arg(total)
+            );
+            drawBT(avl.root(), 400, 120, 200, 0);
+            showMessage(QStringLiteral("AVL树：准备插入 %1").arg(v));
+        });
+
+        // 步骤2：执行插入 + 若有旋转则播放“丝滑旋转动画”
+        steps.push_back([=]() {
+            // 小工具：根据当前树结构计算结点坐标（和 drawBT 一样的布局）
+            auto computePos = [](ds::BTNode* root, qreal baseX, qreal baseY,
+                                 QHash<ds::BTNode*, QPointF>& pos) {
+                pos.clear();
+                if (!root) return;
+
+                QHash<ds::BTNode*, int> xIndex;
+                QHash<ds::BTNode*, int> depth;
+                int idx = 0;
+
+                std::function<void(ds::BTNode*, int)> inorder =
+                    [&](ds::BTNode* p, int d) {
+                        if (!p) return;
+                        inorder(p->left,  d + 1);
+                        xIndex[p] = idx++;
+                        depth[p]  = d;
+                        inorder(p->right, d + 1);
+                    };
+                inorder(root, 0);
+                if (idx <= 0) return;
+
+                const qreal stepX  = 80.0;
+                const qreal levelH = 100.0;
+                const qreal mid    = ((idx - 1) * stepX) / 2.0;
+
+                for (auto it = xIndex.constBegin(); it != xIndex.constEnd(); ++it) {
+                    ds::BTNode* n = it.key();
+                    qreal px = baseX + it.value() * stepX - mid;
+                    qreal py = baseY + depth.value(n) * levelH;
+                    pos[n]   = QPointF(px, py);
+                }
+            };
+
+            // 1）插入前布局
+            QHash<ds::BTNode*, QPointF> posBefore;
+            computePos(avl.root(), 400, 120, posBefore);
+
+            // 2）真正插入（这里会做 LL/RR/LR/RL 旋转，并记录 rotationRecords）
+            avl.insert(v);
+            const auto& recs = avl.rotationRecords();
+
+            // 3）插入后布局
+            QHash<ds::BTNode*, QPointF> posAfter;
+            computePos(avl.root(), 400, 120, posAfter);
+
+            // 4）没有失衡，直接静态显示
+            if (recs.empty()) {
+                view->resetScene();
+                view->setTitle(
+                    QStringLiteral("AVL树：插入 %1（无需旋转）").arg(v)
+                );
+                drawBT(avl.root(), 400, 120, 200, 0);
+                showMessage(
+                    QStringLiteral("AVL树：插入 %1 后仍然平衡，无需旋转").arg(v)
+                );
+                return;
+            }
+
+            // 5）有失衡：播放从 posBefore -> posAfter 的平滑动画
+            const auto& r = recs.front();
+            QString typeStr;
+            switch (r.type) {
+            case ds::AVL::RotationRecord::LL: typeStr = QStringLiteral("LL"); break;
+            case ds::AVL::RotationRecord::RR: typeStr = QStringLiteral("RR"); break;
+            case ds::AVL::RotationRecord::LR: typeStr = QStringLiteral("LR"); break;
+            case ds::AVL::RotationRecord::RL: typeStr = QStringLiteral("RL"); break;
+            }
+
+            // 暂停外层 steps 的定时器，交给 QTimeLine 播放细粒度动画
+            timer.stop();
+
+            const int frames   = 18;   // 帧数越多越丝滑
+            const int duration = 700;  // 动画总时长（毫秒）
+
+            QTimeLine* tl = new QTimeLine(duration, this);
+            tl->setFrameRange(0, frames);
+
+            // 每一帧：重画整棵树，结点按 posBefore -> posAfter 插值移动
+            connect(tl, &QTimeLine::frameChanged, this,
+                    [=](int frame) {
+                qreal t = (frames == 0) ? 1.0 : qreal(frame) / frames;
+
+                view->resetScene();
+                view->setTitle(
+                    QStringLiteral("AVL树：插入 %1（%2 旋转动画 %3/%4）")
+                        .arg(v).arg(typeStr).arg(frame).arg(frames)
+                );
+
+                // 当前帧的坐标
+                QHash<ds::BTNode*, QPointF> posNow;
+                for (auto it = posAfter.constBegin(); it != posAfter.constEnd(); ++it) {
+                    ds::BTNode* node   = it.key();
+                    QPointF pAfter     = it.value();
+                    QPointF pBefore    = posBefore.contains(node)
+                                          ? posBefore.value(node)
+                                          : pAfter; // 新结点：从最终位置“长出来”
+                    qreal xNow = lerp(pBefore.x(), pAfter.x(), t);
+                    qreal yNow = lerp(pBefore.y(), pAfter.y(), t);
+                    posNow.insert(node, QPointF(xNow, yNow));
+                }
+
+                // 画边 + 点（结构用当前真正的 AVL 树，坐标用插值后的）
+                std::function<void(ds::BTNode*)> drawRec =
+                    [&](ds::BTNode* p) {
+                        if (!p) return;
+                        QPointF cp = posNow.value(p);
+
+                        if (p->left) {
+                            QPointF cl = posNow.value(p->left);
+                            view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                          QPointF(cl.x(), cl.y() - 34));
+                            drawRec(p->left);
+                        }
+                        if (p->right) {
+                            QPointF cr = posNow.value(p->right);
+                            view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                          QPointF(cr.x(), cr.y() - 34));
+                            drawRec(p->right);
+                        }
+
+                        bool hl = (p == r.z || p == r.y || p == r.x);
+                        view->addNode(cp.x(), cp.y(), QString::number(p->key), hl);
+                    };
+                drawRec(avl.root());
+
+                if (frame == frames) {
+                    QString msg =
+                        QStringLiteral("AVL树：插入 %1 后，结点 %2 失衡，进行了 %3 旋转")
+                            .arg(v)
+                            .arg(r.z ? QString::number(r.z->key) : QStringLiteral("?"))
+                            .arg(typeStr);
+                    if (r.y) msg += QStringLiteral("，y = %1").arg(r.y->key);
+                    if (r.x) msg += QStringLiteral("，x = %1").arg(r.x->key);
+                    showMessage(msg);
+                }
+            });
+
+            // 动画结束：恢复外层 timer（如果还有后续步骤）
+            connect(tl, &QTimeLine::finished, this, [=]() {
+                tl->deleteLater();
+                if (stepIndex < steps.size()) {
+                    timer.start();          // 继续播放后面的步骤
+                } else {
+                    showMessage(QStringLiteral("播放结束"));
+                }
+            });
+
+            tl->start();
+        });
     }
+
     timer.start();
 }
 
+
 void MainWindow::avlInsert() {
-    bool ok = false; int value = avlValue->text().toInt(&ok);
-    if(!ok) { showMessage(QStringLiteral("AVL树：请输入有效的键值")); return; }
+    bool ok = false;
+    int value = avlValue->text().toInt(&ok);
+    if (!ok) {
+        showMessage(QStringLiteral("AVL树：请输入有效的键值"));
+        return;
+    }
 
-    timer.stop(); steps.clear(); stepIndex = 0;
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
 
-    // 显示插入前的树
+    // 步骤1：插入前静态画面
     steps.push_back([=]() {
         view->resetScene();
-        view->setTitle(QStringLiteral("AVL树：插入 %1 前").arg(value));
+        view->setTitle(QStringLiteral("AVL树：插入前"));
         drawBT(avl.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("AVL树：准备插入 %1").arg(value));
     });
 
-    // 插入操作
+    // 步骤2：执行插入 + 播放旋转动画
     steps.push_back([=]() {
+        auto computePos = [](ds::BTNode* root, qreal baseX, qreal baseY,
+                             QHash<ds::BTNode*, QPointF>& pos) {
+            pos.clear();
+            if (!root) return;
+
+            QHash<ds::BTNode*, int> xIndex;
+            QHash<ds::BTNode*, int> depth;
+            int idx = 0;
+
+            std::function<void(ds::BTNode*, int)> inorder =
+                [&](ds::BTNode* p, int d) {
+                    if (!p) return;
+                    inorder(p->left,  d + 1);
+                    xIndex[p] = idx++;
+                    depth[p]  = d;
+                    inorder(p->right, d + 1);
+                };
+            inorder(root, 0);
+            if (idx <= 0) return;
+
+            const qreal stepX  = 80.0;
+            const qreal levelH = 100.0;
+            const qreal mid    = ((idx - 1) * stepX) / 2.0;
+
+            for (auto it = xIndex.constBegin(); it != xIndex.constEnd(); ++it) {
+                ds::BTNode* n = it.key();
+                qreal px = baseX + it.value() * stepX - mid;
+                qreal py = baseY + depth.value(n) * levelH;
+                pos[n]   = QPointF(px, py);
+            }
+        };
+
+        // 插入前布局
+        QHash<ds::BTNode*, QPointF> posBefore;
+        computePos(avl.root(), 400, 120, posBefore);
+
+        // 执行插入
         avl.insert(value);
-        view->resetScene();
-        view->setTitle(QStringLiteral("AVL树：插入 %1 后").arg(value));
-        drawBT(avl.root(), 400, 120, 200, value);
-        showMessage(QStringLiteral("AVL树：插入 %1 完成").arg(value));
+        const auto& recs = avl.rotationRecords();
+
+        // 插入后布局
+        QHash<ds::BTNode*, QPointF> posAfter;
+        computePos(avl.root(), 400, 120, posAfter);
+
+        // 没有旋转：简单显示一下结果
+        if (recs.empty()) {
+            view->resetScene();
+            view->setTitle(
+                QStringLiteral("AVL树：插入 %1（无需旋转）").arg(value)
+            );
+            drawBT(avl.root(), 400, 120, 200, 0);
+            showMessage(
+                QStringLiteral("AVL树：插入 %1 后仍然平衡，无需旋转").arg(value)
+            );
+            return;
+        }
+
+        // 有旋转：播放平滑动画
+        const auto& r = recs.front();
+        QString typeStr;
+        switch (r.type) {
+        case ds::AVL::RotationRecord::LL: typeStr = QStringLiteral("LL"); break;
+        case ds::AVL::RotationRecord::RR: typeStr = QStringLiteral("RR"); break;
+        case ds::AVL::RotationRecord::LR: typeStr = QStringLiteral("LR"); break;
+        case ds::AVL::RotationRecord::RL: typeStr = QStringLiteral("RL"); break;
+        }
+
+        timer.stop();
+
+        const int frames   = 18;
+        const int duration = 700;
+
+        QTimeLine* tl = new QTimeLine(duration, this);
+        tl->setFrameRange(0, frames);
+
+        connect(tl, &QTimeLine::frameChanged, this,
+                [=](int frame) {
+            qreal t = (frames == 0) ? 1.0 : qreal(frame) / frames;
+
+            view->resetScene();
+            view->setTitle(
+                QStringLiteral("AVL树：插入 %1（%2 旋转动画 %3/%4）")
+                    .arg(value).arg(typeStr).arg(frame).arg(frames)
+            );
+
+            QHash<ds::BTNode*, QPointF> posNow;
+            for (auto it = posAfter.constBegin(); it != posAfter.constEnd(); ++it) {
+                ds::BTNode* node   = it.key();
+                QPointF pAfter     = it.value();
+                QPointF pBefore    = posBefore.contains(node)
+                                      ? posBefore.value(node)
+                                      : pAfter;
+                qreal xNow = lerp(pBefore.x(), pAfter.x(), t);
+                qreal yNow = lerp(pBefore.y(), pAfter.y(), t);
+                posNow.insert(node, QPointF(xNow, yNow));
+            }
+
+            std::function<void(ds::BTNode*)> drawRec =
+                [&](ds::BTNode* p) {
+                    if (!p) return;
+                    QPointF cp = posNow.value(p);
+
+                    if (p->left) {
+                        QPointF cl = posNow.value(p->left);
+                        view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                      QPointF(cl.x(), cl.y() - 34));
+                        drawRec(p->left);
+                    }
+                    if (p->right) {
+                        QPointF cr = posNow.value(p->right);
+                        view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                      QPointF(cr.x(), cr.y() - 34));
+                        drawRec(p->right);
+                    }
+
+                    bool hl = (p == r.z || p == r.y || p == r.x);
+                    view->addNode(cp.x(), cp.y(), QString::number(p->key), hl);
+                };
+            drawRec(avl.root());
+
+            if (frame == frames) {
+                QString msg =
+                    QStringLiteral("AVL树：插入 %1 后，结点 %2 失衡，进行了 %3 旋转")
+                        .arg(value)
+                        .arg(r.z ? QString::number(r.z->key) : QStringLiteral("?"))
+                        .arg(typeStr);
+                if (r.y) msg += QStringLiteral("，y = %1").arg(r.y->key);
+                if (r.x) msg += QStringLiteral("，x = %1").arg(r.x->key);
+                showMessage(msg);
+            }
+        });
+
+        connect(tl, &QTimeLine::finished, this, [=]() {
+            tl->deleteLater();
+            if (stepIndex < steps.size()) {
+                timer.start();
+            } else {
+                showMessage(QStringLiteral("播放结束"));
+            }
+        });
+
+        tl->start();
     });
 
     timer.start();
@@ -2092,6 +2565,11 @@ void MainWindow::avlInsert() {
 
 void MainWindow::avlClear() {
     avl.clear();
+
+    timer.stop();
+    steps.clear();
+    stepIndex = 0;
+
     view->resetScene();
     view->setTitle(QStringLiteral("AVL树（空）"));
     showMessage(QStringLiteral("AVL树：已清空"));
@@ -2281,6 +2759,8 @@ void MainWindow::animateBTOrder(const int* order, int n, const QString& title)
     }
     timer.start();
 }
+
+
 
 // ================== 文件保存/打开/导出 ==================
 void MainWindow::saveDoc() {

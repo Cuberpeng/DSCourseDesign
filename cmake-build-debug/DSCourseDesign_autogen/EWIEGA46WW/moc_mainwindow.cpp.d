@@ -336,6 +336,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtCore/qhashfunctions.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qiodevice.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qiodevicebase.h \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/qitemselectionmodel.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qiterable.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qiterator.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qjsonarray.h \
@@ -493,10 +494,12 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSpinBox \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitter \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QStackedWidget \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/QTableWidget \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QTextEdit \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QToolBar \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QVBoxLayout \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractitemdelegate.h \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractitemview.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractscrollarea.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractslider.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qabstractspinbox.h \
@@ -527,6 +530,8 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qstyle.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qstyleoption.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabbar.h \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtableview.h \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtablewidget.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtabwidget.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtextedit.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/qtoolbar.h \
