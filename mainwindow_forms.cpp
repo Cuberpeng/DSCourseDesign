@@ -376,14 +376,14 @@ QWidget* MainWindow::buildDSLPage() {
     //
     // 右侧：自然语言输入
     //
-    auto* nliGroup = new QGroupBox(QStringLiteral("自然语言指令"));
+    auto* nliGroup = new QGroupBox(QStringLiteral("大模型助手"));
     auto* nliLayout = new QVBoxLayout(nliGroup);
     nliLayout->setSpacing(8);
 
-    nliEdit = new QTextEdit;
-    nliEdit->setPlaceholderText(QStringLiteral("自然语言指令，如：创建一个包含数据元素[5,3,7,2,4]的二叉搜索树，注意只能对同一种数据结构进行操作"));
-    nliEdit->setMaximumHeight(100);
-    nliEdit->setStyleSheet(
+    llmEdit = new QTextEdit;
+    llmEdit->setPlaceholderText(QStringLiteral("输入自然语言指令对数据结构进行操作"));
+    llmEdit->setMaximumHeight(100);
+    llmEdit->setStyleSheet(
         "QTextEdit {"
         "   border: 2px solid #e2e8f0;"
         "   border-radius: 8px;"
@@ -399,8 +399,8 @@ QWidget* MainWindow::buildDSLPage() {
     auto* btnNLI = new QPushButton(QStringLiteral("理解并执行"));
     btnNLI->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
 
-    nliLayout->addWidget(new QLabel(QStringLiteral("自然语言（将自动转为 DSL 后执行）：")));
-    nliLayout->addWidget(nliEdit);
+    nliLayout->addWidget(new QLabel(QStringLiteral("大模型助手：")));
+    nliLayout->addWidget(llmEdit);
     nliLayout->addWidget(btnNLI);
     nliLayout->addStretch(1);
 
@@ -411,7 +411,7 @@ QWidget* MainWindow::buildDSLPage() {
     // 事件连接（逻辑保持不变）
     connect(btnRun,  &QPushButton::clicked, this, &MainWindow::runDSL);
     connect(btnHelp, &QPushButton::clicked, this, &MainWindow::insertDSLExample);
-    connect(btnNLI,  &QPushButton::clicked, this, &MainWindow::runNLI);
+    connect(btnNLI,  &QPushButton::clicked, this, &MainWindow::runLLM);
 
     return root;
 }

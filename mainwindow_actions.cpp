@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "dsl.h"
+#include "llmclient.h"
 #include <QGraphicsScene>
 #include <QApplication>
 #include <QMessageBox>
@@ -3185,59 +3187,24 @@ avl.clear
 }
 
 void MainWindow::runDSL() {
-    // 读取并按行分割
+    // 读取 DSL 文本
     const QString all = dslEdit->toPlainText();
+
+    // 统一在算法模块中做校验
+    QString errorTitle, errorDialog, statusBarMsg;
+    if (!dsl::validateDslScript(all, &errorTitle, &errorDialog, &statusBarMsg)) {
+        if (!errorTitle.isEmpty())
+            QMessageBox::warning(this, errorTitle, errorDialog);
+        else
+            QMessageBox::warning(this, QStringLiteral("输入有误"), errorDialog);
+
+        if (!statusBarMsg.isEmpty())
+            statusBar()->showMessage(statusBarMsg);
+        return;
+    }
+
+    // 校验通过，再按行拆分（后面原有解析 + 执行动画的代码全部保持不变）
     QStringList lines = all.split('\n', Qt::SkipEmptyParts);
-
-    // =============== 整体校验：一次只能操作一种数据结构 ===============
-    {
-        QSet<QString> families;
-        for (const QString& rawLine : lines) {
-            QString s = rawLine.trimmed().toLower();
-            if (s.isEmpty()) continue;
-            QRegularExpression headRe("^\\s*([a-z]+)");
-            auto mm = headRe.match(s);
-            if (!mm.hasMatch()) continue;
-            const QString head = mm.captured(1);
-            if (head == "seq" || head == "link" || head == "stack" ||
-                head == "bt"  || head == "bst"  || head == "huff" || head == "avl") {
-                families.insert(head);
-            }
-        }
-        if (families.size() > 1) {
-            QStringList lst; for (const auto& f : families) lst << f;
-            QMessageBox::warning(this, QStringLiteral("输入有误"),
-                                 QStringLiteral("检测到 DSL 同时包含多种数据结构的操作（%1）。当前版本每次仅支持一种数据结构，请修改后重新输入。")
-                                     .arg(lst.join(", ")));
-            statusBar()->showMessage(QStringLiteral("DSL 校验失败：包含多种数据结构"));
-            return;
-        }
-    }
-
-    // =============== 单行多指令校验（不允许一行包含两条或以上指令） ===============
-    static const QRegularExpression kCmdTokenRe(
-        R"((?<![a-z])(seq|link|stack|bt|bst|huff|avl)(?:\.[a-z]+)?(?![a-z]))",
-        QRegularExpression::CaseInsensitiveOption
-    );
-    for (const QString& rawLine : lines) {
-        const QString s = rawLine.trimmed();
-        if (s.isEmpty()) continue;
-
-        const bool hasBadSep = s.contains(';') || s.contains(u'；')
-                            || s.contains("&&") || s.contains("||")
-                            || s.contains(u'、') || s.contains(u'，');
-
-        int cmdCount = 0;
-        for (auto it = kCmdTokenRe.globalMatch(s); it.hasNext(); it.next()) ++cmdCount;
-
-        if (hasBadSep || cmdCount >= 2) {
-            QMessageBox::warning(this, QStringLiteral("输入有误"),
-                                 QStringLiteral("DSL 每行仅能包含一条指令，请拆分后重新输入。\n问题行：%1")
-                                     .arg(rawLine.trimmed()));
-            statusBar()->showMessage(QStringLiteral("DSL 校验失败：单行包含多条指令"));
-            return;
-        }
-    }
 
     // =============== 解析与执行计划 ===============
     QVector<std::function<void()>> ops;
@@ -3597,208 +3564,145 @@ void MainWindow::runDSL() {
     (*runNext)();
 }
 
-
-
-void MainWindow::runNLI() {
-    const QString raw = nliEdit->toPlainText();
-    const QString low = raw.trimmed().toLower();
-    if (low.isEmpty()) {
-        showMessage(QStringLiteral("NLI：请输入自然语言指令"));
+void MainWindow::runLLM()
+{
+    if (!llmEdit) {
+        QMessageBox::warning(this, QStringLiteral("LLM"), QStringLiteral("LLM：界面未初始化"));
         return;
     }
 
-    // —— 仅检测 NLI 内部是否混用了多种数据结构（保持原有逻辑） ——
-    QSet<QString> hits;
-    auto hitIf = [&](const QString& key, std::initializer_list<QString> kws){
-        for (const auto& k : kws) {
-            if (low.contains(k)) {
-                hits.insert(key);
-                break;
-            }
-        }
-    };
-    hitIf("seq",  {"顺序表","顺序","数组","seqlist","seq"});
-    hitIf("link", {"链表","链","linklist","link"});
-    hitIf("stack",{"栈","stack"});
-    hitIf("bt",   {"二叉树","普通二叉树","binary tree","bt"});
-    hitIf("bst",  {"二叉搜索树","binary search tree","bst"});
-    hitIf("huff", {"哈夫曼","huffman","huff"});
-    hitIf("avl",  {"平衡二叉树","avl"});
-
-    if (hits.size() > 1) {
-        // 拼接提示用的家族名
-        QStringList fam;
-        for (const auto& s : hits) fam << s;
-        QMessageBox::warning(this, QStringLiteral("输入不合法"),
-            QStringLiteral("NLI：同一条指令内只能包含一种数据结构（检测到：%1），请重新输入。")
-                .arg(fam.join(", ")));
-        return;
-    }
-    if (hits.isEmpty()) {
-        QMessageBox::information(this, QStringLiteral("未识别"),
-            QStringLiteral("NLI：未能识别数据结构类型，请补充如“顺序表/链表/栈/二叉树/BST/哈夫曼/AVL”等关键词。"));
-        return;
-    }
-    const QString kind = *hits.begin();
-
-    // ================== 按“然后/接着/之后/并且/同时/句号”等拆成多个子句 ==================
-    QString normalized = low;
-
-    // 这些词一般用来串联多个操作；替换成句号，便于 split
-    const QStringList connectors = {
-        QStringLiteral("然后"),
-        QStringLiteral("接着"),
-        QStringLiteral("之后"),
-        QStringLiteral("并"),
-        QStringLiteral("并且"),
-        QStringLiteral("最后"),
-        QStringLiteral("同时")
-    };
-    for (const QString& w : connectors) {
-        normalized.replace(w, QStringLiteral("。"));
-    }
-
-    // 按句号、问号、感叹号、分号和换行分割；注意不要用“，”以免把数字拆散
-    QStringList clauses = normalized.split(
-        QRegularExpression("[。！？;；\\n]+"),
-        Qt::SkipEmptyParts
-    );
-
-    // 工具：把整数列表拼成 "1 2 3" 的形式
-    auto joinNums = [&](const QVector<int>& a){
-        QString s;
-        for (int i = 0; i < a.size(); ++i) {
-            if (i) s += ' ';
-            s += QString::number(a[i]);
-        }
-        return s;
-    };
-
-    QStringList dslLines;   // 多个子句生成的多行 DSL
-
-    // ================== 对每个子句单独生成一条 DSL ==================
-    for (QString clause : clauses) {
-        clause = clause.trimmed();
-        if (clause.isEmpty())
-            continue;
-
-        // 只在当前子句中找关键字和数字
-        const QVector<int> nums = parseIntList(clause);
-        auto hasAny = [&](std::initializer_list<QString> kws)->bool{
-            for (const auto& k : kws)
-                if (clause.contains(k))
-                    return true;
-            return false;
-        };
-
-        QString dsl;  // 当前子句对应的一条 DSL
-
-        if (kind == "seq") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "seq.clear";
-            } else if (hasAny({"插入","插","增","insert"})) {
-                if (nums.size() >= 2)
-                    dsl = QString("seq.insert %1 %2").arg(nums[0]).arg(nums[1]);
-            } else if (hasAny({"删除","删","移除","erase","remove"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("seq.erase %1").arg(nums[0]);
-            } else if (!nums.isEmpty()) {
-                dsl = "seq " + joinNums(nums);
-            }
-        }
-        else if (kind == "link") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "link.clear";
-            } else if (hasAny({"插入","插","增","insert"})) {
-                if (nums.size() >= 2)
-                    dsl = QString("link.insert %1 %2").arg(nums[0]).arg(nums[1]);
-            } else if (hasAny({"删除","删","移除","erase","remove"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("link.erase %1").arg(nums[0]);
-            } else if (!nums.isEmpty()) {
-                dsl = "link " + joinNums(nums);
-            }
-        }
-        else if (kind == "stack") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "stack.clear";
-            } else if (hasAny({"出栈","弹栈","pop"})) {
-                dsl = "stack.pop";
-            } else if (hasAny({"入栈","压栈","push","加入","添加","增"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("stack.push %1").arg(nums[0]);
-            } else if (!nums.isEmpty()) {
-                dsl = "stack " + joinNums(nums);
-            }
-        }
-        else if (kind == "bt") {
-            if (hasAny({"先序","前序","preorder"})) {
-                dsl = "bt.preorder";
-            } else if (hasAny({"中序","inorder"})) {
-                dsl = "bt.inorder";
-            } else if (hasAny({"后序","postorder"})) {
-                dsl = "bt.postorder";
-            } else if (hasAny({"层序","层次","广度","levelorder"})) {
-                dsl = "bt.levelorder";
-            } else if (hasAny({"清空","清除","clear"})) {
-                dsl = "bt.clear";
-            } else if (!nums.isEmpty()) {
-                // 默认哨兵 -1（与 BT DSL 约定保持一致）
-                dsl = "bt " + joinNums(nums) + " null=-1";
-            }
-        }
-        else if (kind == "bst") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "bst.clear";
-            } else if (hasAny({"查找","寻找","搜索","find","search"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("bst.find %1").arg(nums[0]);
-            } else if (hasAny({"插入","插","加入","添加","insert","add"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("bst.insert %1").arg(nums[0]);
-            } else if (hasAny({"删除","删","移除","erase","remove"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("bst.erase %1").arg(nums[0]);
-            } else if (!nums.isEmpty()) {
-                dsl = "bst " + joinNums(nums);
-            }
-        }
-        else if (kind == "huff") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "huff.clear";
-            } else if (!nums.isEmpty()) {
-                dsl = "huff " + joinNums(nums);
-            }
-        }
-        else if (kind == "avl") {
-            if (hasAny({"清空","清除","clear"})) {
-                dsl = "avl.clear";
-            } else if (hasAny({"插入","插","加入","添加","insert","add"})) {
-                if (nums.size() >= 1)
-                    dsl = QString("avl.insert %1").arg(nums[0]);
-            } else if (!nums.isEmpty()) {
-                dsl = "avl " + joinNums(nums);
-            }
-        }
-
-        if (!dsl.isEmpty())
-            dslLines << dsl;
-    }
-
-    // 如果所有子句都没生成有效 DSL，则给出提示
-    if (dslLines.isEmpty()) {
-        QMessageBox::information(this, QStringLiteral("信息不足"),
-            QStringLiteral("NLI：无法从该句生成 DSL，请补充必要的信息（例如位置/值/遍历方式等）。"));
+    QString llmText = llmEdit->toPlainText().trimmed();
+    if (llmText.isEmpty()) {
+        QMessageBox::warning(this, QStringLiteral("LLM"), QStringLiteral("LLM：请输入自然语言指令"));
         return;
     }
 
-    // 把多条 DSL 写回编辑框并执行（每条一行，由 runDSL 负责统一校验和动画）
-    QString allDsl = dslLines.join("\n");
-    dslEdit->setPlainText(allDsl);
-    statusBar()->showMessage(QStringLiteral("NLI → DSL：%1").arg(allDsl.replace('\n'," | ")));
+    if (!llmClient) {
+        QMessageBox::warning(this, QStringLiteral("LLM"), QStringLiteral("LLM：大模型客户端未初始化"));
+        return;
+    }
+
+    // 清空旧的 DSL 内容，方便观察新生成的脚本
+    if (dslEdit) dslEdit->clear();
+
+    showMessage(QStringLiteral("LLM：正在调用大模型，将自然语言转换为DSL，请稍后。"));
+
+    // ====== 显示“正在调用大模型”的提示弹窗 ======
+    if (!llmProgressDialog) {
+        llmProgressDialog = new QDialog(this);
+        llmProgressDialog->setWindowTitle(QStringLiteral("LLM"));
+        llmProgressDialog->setModal(true);                     // 调用期间禁止其它操作
+        llmProgressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false); // 不允许手动关
+        llmProgressDialog->setFixedSize(260, 100);
+
+        auto* layout = new QVBoxLayout(llmProgressDialog);
+        layout->setContentsMargins(10, 10, 10, 10);
+        layout->addStretch(1);
+
+        auto* label = new QLabel(QStringLiteral("正在调用大模型，请稍候..."), llmProgressDialog);
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+
+        layout->addStretch(1);
+    }
+
+    llmProgressDialog->show();
+    llmProgressDialog->raise();
+    llmProgressDialog->activateWindow();
+
+    // 调用大模型，把自然语言转成 DSL
+    llmClient->callModel(llmText);
+}
+
+// 大模型成功返回 DSL 时调用
+void MainWindow::onLlmDslReady(const QString& dslText)
+{
+    // 先关闭“正在调用”的弹窗
+    if (llmProgressDialog) {
+        llmProgressDialog->hide();
+    }
+
+    // 有些模型可能会把 DSL 包在 ``` 里，这里简单做一下清理
+    QString cleaned = dslText.trimmed();
+
+    if (cleaned.startsWith("```")) {
+        int firstNewline = cleaned.indexOf('\n');
+        if (firstNewline != -1) {
+            cleaned = cleaned.mid(firstNewline + 1);
+        }
+        int lastFence = cleaned.lastIndexOf("```");
+        if (lastFence != -1) {
+            cleaned = cleaned.left(lastFence);
+        }
+        cleaned = cleaned.trimmed();
+    }
+
+    if (cleaned.isEmpty()) {
+        QMessageBox::warning(this, QStringLiteral("LLM"),
+                             QStringLiteral("LLM：大模型返回的DSL为空"));
+        showMessage(QStringLiteral("LLM：大模型返回为空，未生成DSL"));
+        return;
+    }
+
+    // 把 DSL 显示到编辑框中，方便用户查看/修改
+    if (dslEdit) {
+        dslEdit->setPlainText(cleaned);
+    }
+
+    showMessage(QStringLiteral("LLM：已由大模型生成DSL，开始执行脚本。"));
+
+    // 直接复用现有 runDSL()
     runDSL();
 }
 
+// 大模型调用失败时的处理：提示 + 使用本地规则兜底（可选）
+void MainWindow::onLlmError(const QString& message)
+{
+    // 先关闭“正在调用”的弹窗
+    if (llmProgressDialog) {
+        llmProgressDialog->hide();
+    }
+
+    QString msg = QStringLiteral("LLM：调用大模型失败：%1").arg(message);
+    QMessageBox::warning(this, QStringLiteral("LLM错误"), msg);
+    showMessage(msg);
+
+    // —— 兜底逻辑：自动使用原来的规则 NLI → DSL ——
+    // 如果你不想兜底，可以这里直接 return。
+    if (!llmEdit) return;
+    QString nliText = llmEdit->toPlainText().trimmed();
+    if (nliText.isEmpty()) return;
+
+    // 转小写，符合 dsl::nliToDsl 的预期
+    QString low = nliText.toLower();
+
+    // 复用已有的数字解析逻辑（和 runDSL 里 asNumbers 一样）
+    auto parseIntListFn = [this](const QString& s) -> QVector<int> {
+        return parseIntList(s);   // 已有成员函数
+    };
+
+    QString errorTitle;
+    QString errorDialog;
+    QStringList dslLines = dsl::nliToDsl(low, parseIntListFn, &errorTitle, &errorDialog);
+
+    if (dslLines.isEmpty()) {
+        if (!errorTitle.isEmpty()) {
+            QMessageBox::warning(this, errorTitle, errorDialog);
+        } else {
+            QMessageBox::warning(this, QStringLiteral("NLI"),
+                                 QStringLiteral("NLI：本地规则也无法解析这句话"));
+        }
+        return;
+    }
+
+    // 把兜底生成的 DSL 填到编辑框里，并执行
+    if (dslEdit) {
+        dslEdit->setPlainText(dslLines.join('\n'));
+    }
+
+    showMessage(QStringLiteral("NLI：已由本地规则生成 DSL，开始执行脚本..."));
+    runDSL();
+}
 
 // ================== 辅助函数 ==================
 QVector<int> MainWindow::dumpBTLevel(ds::BTNode* root, int nullSentinel) const {

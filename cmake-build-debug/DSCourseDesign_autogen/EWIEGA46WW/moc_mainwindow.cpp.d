@@ -259,15 +259,22 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/vadefs.h \
   D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wchar.h \
   D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wctype.h \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QFlags \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QIODevice \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonArray \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonDocument \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonObject \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QList \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QMetaType \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QObject \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QRect \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QSharedDataPointer \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSize \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSizeF \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QString \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QTimer \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QUrl \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QVariant \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QVector \
   D:/Qt/6.9.2/mingw_64/include/QtCore/q17memory.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/q20functional.h \
@@ -276,6 +283,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtCore/q20type_traits.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/q20utility.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/q23utility.h \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/q26numeric.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qabstracteventdispatcher.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qabstractitemmodel.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qalgorithms.h \
@@ -310,6 +318,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtCore/qcoreapplication.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qcoreapplication_platform.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qcoreevent.h \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/qcryptographichash.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qdarwinhelpers.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qdatastream.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qdatetime.h \
@@ -478,7 +487,29 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Qt/6.9.2/mingw_64/include/QtGui/qvectornd.h \
   D:/Qt/6.9.2/mingw_64/include/QtGui/qwindowdefs.h \
   D:/Qt/6.9.2/mingw_64/include/QtGui/qwindowdefs_win.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/QNetworkAccessManager \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/QNetworkReply \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/QNetworkRequest \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/QSslConfiguration \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/QSslPreSharedKeyAuthenticator \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qabstractsocket.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qhostaddress.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qhttpheaders.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qnetworkaccessmanager.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qnetworkreply.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qnetworkrequest.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qssl.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qsslcertificate.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qsslconfiguration.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qsslerror.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qsslpresharedkeyauthenticator.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qsslsocket.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qtcpsocket.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qtnetwork-config.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qtnetworkexports.h \
+  D:/Qt/6.9.2/mingw_64/include/QtNetwork/qtnetworkglobal.h \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QComboBox \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/QDialog \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QFileDialog \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QFormLayout \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QGraphicsEllipseItem \
@@ -545,5 +576,6 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_aut
   D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h \
+  D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h \
   D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h

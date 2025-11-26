@@ -12,6 +12,7 @@ find_package(Qt6 COMPONENTS
   Core
   Gui
   Widgets
+        Network
   REQUIRED)
 
 add_executable(DSCourseDesign main.cpp
@@ -35,11 +36,16 @@ add_executable(DSCourseDesign main.cpp
         mainwindow_forms.cpp
         mainwindow_actions.cpp
         avl.h
-        avl.cpp)
+        avl.cpp
+        dsl.h
+        dsl.cpp
+        llmclient.h
+        llmclient.cpp)
 target_link_libraries(DSCourseDesign
   Qt::Core
   Qt::Gui
   Qt::Widgets
+        Qt::Network
 )
 
 if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)

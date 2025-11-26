@@ -28,6 +28,8 @@
 #include <QJsonArray>
 #include <QFileDialog>
 #include <QTableWidget>
+#include <QDialog>
+#include <QVBoxLayout>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -37,6 +39,7 @@
 #include "binarysearchtree.h"
 #include "huffman.h"
 #include "avl.h"
+#include "llmclient.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -104,7 +107,11 @@ private slots:
     //DSL
     void insertDSLExample();
     void runDSL();
-    void runNLI();
+    void runLLM();
+
+    // 处理大模型结果
+    void onLlmDslReady(const QString& dslText);
+    void onLlmError(const QString& message);
 
     //辅助函数
     QVector<int> dumpBTLevel(ds::BTNode* root, int nullSentinel) const;
@@ -165,10 +172,16 @@ private:
 
     // DSL/NLI 相关
     QTextEdit* dslEdit{};
-    QTextEdit* nliEdit{};
+    QTextEdit* llmEdit{};
 
     //信息显示栏
     QTextEdit* messageBar{};
+
+    //大模型客户端
+    LLMClient* llmClient{};
+
+    // NLI 调用中的提示弹窗
+    QDialog* llmProgressDialog{};
 
 
     // 工具
