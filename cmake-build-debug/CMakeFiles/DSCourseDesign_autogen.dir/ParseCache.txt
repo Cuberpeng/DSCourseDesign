@@ -893,6 +893,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.h
  mdp:D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.h
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_actions.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h
+D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_animations.cpp
 D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mmc:Q_OBJECT
  mdp:D:/Program Files/JetBrains/CLion-2024.3.4.win/bin/mingw/lib/gcc/x86_64-w64-mingw32/13.1.0/include/c++/algorithm

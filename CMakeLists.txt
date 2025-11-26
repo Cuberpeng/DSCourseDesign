@@ -17,30 +17,23 @@ find_package(Qt6 COMPONENTS
 
 add_executable(DSCourseDesign main.cpp
         seqlist.h
-        seqlist.cpp
         canvas.h
         canvas.cpp
         mainwindow.h
-        tool.h
         linklist.h
-        linklist.cpp
         stack.h
-        stack.cpp
         binarytree.h
-        binarytree.cpp
         binarysearchtree.h
-        binarysearchtree.cpp
         huffman.h
-        huffman.cpp
         mainwindow_layout.cpp
         mainwindow_forms.cpp
         mainwindow_actions.cpp
         avl.h
-        avl.cpp
         dsl.h
         dsl.cpp
         llmclient.h
-        llmclient.cpp)
+        llmclient.cpp
+        mainwindow_animations.cpp)
 target_link_libraries(DSCourseDesign
   Qt::Core
   Qt::Gui

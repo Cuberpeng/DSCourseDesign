@@ -47,7 +47,7 @@ bool validateDslScript(const QString& all, QString* errorTitle, QString* errorDi
                 *errorTitle = QStringLiteral("输入有误");
             if (errorDialogText) {
                 *errorDialogText =
-                    QStringLiteral("检测到 DSL 同时包含多种数据结构的操作（%1）。当前版本每次仅支持一种数据结构，请修改后重新输入。")
+                    QStringLiteral("检测到 DSL 同时包含多种数据结构的操作（%1）。同时对两种数据结构进行操作的视觉效果欠佳，请您谨慎选择。")
                         .arg(lst.join(", "));
             }
             if (statusBarMessage)

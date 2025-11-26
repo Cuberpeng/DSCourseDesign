@@ -812,11 +812,8 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Qt/6.9.2/mingw_64/lib/cmake/Qt6ZlibPrivate/Qt6ZlibPrivateTargets.cmake \
 	D:/Qt/6.9.2/mingw_64/lib/cmake/Qt6ZlibPrivate/Qt6ZlibPrivateVersionlessAliasTargets.cmake \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/CMakeLists.txt \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/avl.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/avl.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.h \
@@ -827,20 +824,17 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/DSCourseDesign_autogen/moc_predefs.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/dsl.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/dsl.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/main.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_actions.cpp \
+	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_animations.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_forms.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h \
 	D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/cmake/win/x64/bin/cmake.exe

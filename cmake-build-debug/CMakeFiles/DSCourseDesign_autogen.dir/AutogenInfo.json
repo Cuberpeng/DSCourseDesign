@@ -482,25 +482,8 @@
 	"SETTINGS_FILE" : "D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-debug/CMakeFiles/DSCourseDesign_autogen.dir/AutogenUsed.txt",
 	"SOURCES" : 
 	[
-		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/avl.cpp", "MU", null ],
-		[
-			"D:/Users/xiang/CLionProjects/DSCourseDesign/binarysearchtree.cpp",
-			"MU",
-			null
-		],
-		[
-			"D:/Users/xiang/CLionProjects/DSCourseDesign/binarytree.cpp",
-			"MU",
-			null
-		],
 		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/canvas.cpp", "MU", null ],
 		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/dsl.cpp", "MU", null ],
-		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/huffman.cpp", "MU", null ],
-		[
-			"D:/Users/xiang/CLionProjects/DSCourseDesign/linklist.cpp",
-			"MU",
-			null
-		],
 		[
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/llmclient.cpp",
 			"MU",
@@ -513,6 +496,11 @@
 			null
 		],
 		[
+			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_animations.cpp",
+			"MU",
+			null
+		],
+		[
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_forms.cpp",
 			"MU",
 			null
@@ -521,9 +509,7 @@
 			"D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp",
 			"MU",
 			null
-		],
-		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.cpp", "MU", null ],
-		[ "D:/Users/xiang/CLionProjects/DSCourseDesign/stack.cpp", "MU", null ]
+		]
 	],
 	"UIC_OPTIONS" : [],
 	"UIC_SEARCH_PATHS" : [],

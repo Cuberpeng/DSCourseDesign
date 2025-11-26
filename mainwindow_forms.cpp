@@ -24,28 +24,27 @@ QWidget* MainWindow::buildSeqlistPage() {
     auto* v = new QVBoxLayout(root); v->setSpacing(10);
 
     auto* form = new QWidget; auto* f = new QFormLayout(form);
-    seqlistInput = new QLineEdit; seqlistInput->setPlaceholderText("例如: 1 3 5 7");
+    seqlistInput = new QLineEdit; seqlistInput->setPlaceholderText("例如: 1 2 3 4");
     f->addRow("初始序列", seqlistInput);
 
     auto* row0 = new QWidget; auto* hb0 = new QHBoxLayout(row0);
-    auto* btnRebuild = new QPushButton("建立"); btnRebuild->setProperty("class","primary"); btnRebuild->setObjectName("btnSLBuild");
-    auto* btnClear   = new QPushButton("清空"); btnClear->setProperty("class","warn");
-    btnRebuild->setStyleSheet("QPushButton{background:#22c55e;}"); // 绿
-    btnClear->setStyleSheet("QPushButton{background:#ef4444;}");   // 红
+    auto* btnRebuild = new QPushButton("建立"); btnRebuild->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
+    auto* btnClear   = new QPushButton("清空"); btnClear->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
+
     hb0->addWidget(btnRebuild); hb0->addWidget(btnClear);
 
     auto* row1 = new QWidget; auto* hb1 = new QHBoxLayout(row1);
     seqlistValue = new QLineEdit; seqlistValue->setPlaceholderText("值");
     seqlistPosition = new QSpinBox; seqlistPosition->setRange(0, 1000000);
-    auto* btnInsert = new QPushButton("插入"); btnInsert->setStyleSheet("QPushButton{background:#3b82f6;}");
-    auto* btnErase  = new QPushButton("删除"); btnErase->setStyleSheet("QPushButton{background:#f59e0b;}");
+    auto* btnInsert = new QPushButton("插入"); btnInsert->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    auto* btnErase  = new QPushButton("删除"); btnErase->setStyleSheet("QPushButton{background:#f59e0b;color:white;}");
     hb1->addWidget(new QLabel("值:")); hb1->addWidget(seqlistValue);
     hb1->addWidget(new QLabel("位置:")); hb1->addWidget(seqlistPosition);
     hb1->addWidget(btnInsert); hb1->addWidget(btnErase);
 
     v->addWidget(wrapGroup("顺序表建立", form));
     v->addWidget(wrapGroup("顺序表操作", row0));
-    v->addWidget(wrapGroup("插入/删除", row1));
+    v->addWidget(wrapGroup("插入删除", row1));
     v->addStretch(1);
 
     connect(btnRebuild,&QPushButton::clicked,this,&MainWindow::seqlistBuild);
@@ -60,7 +59,7 @@ QWidget* MainWindow::buildLinklistPage() {
     auto* v = new QVBoxLayout(root); v->setSpacing(10);
 
     auto* form = new QWidget; auto* f = new QFormLayout(form);
-    linklistInput = new QLineEdit; linklistInput->setPlaceholderText("例如: 1 3 5 7");
+    linklistInput = new QLineEdit; linklistInput->setPlaceholderText("例如: 1 2 3 4");
     f->addRow("初始序列", linklistInput);
 
     auto* row0 = new QWidget; auto* hb0 = new QHBoxLayout(row0);
@@ -79,7 +78,7 @@ QWidget* MainWindow::buildLinklistPage() {
 
     v->addWidget(wrapGroup("单链表建立", form));
     v->addWidget(wrapGroup("单链表操作", row0));
-    v->addWidget(wrapGroup("插入/删除", row1));
+    v->addWidget(wrapGroup("插入删除", row1));
     v->addStretch(1);
 
     connect(btnRebuild,&QPushButton::clicked,this,&MainWindow::linklistBuild);
@@ -94,7 +93,7 @@ QWidget* MainWindow::buildStackPage() {
     auto* v = new QVBoxLayout(root); v->setSpacing(10);
 
     auto* form = new QWidget; auto* f = new QFormLayout(form);
-    stackInput = new QLineEdit; stackInput->setPlaceholderText("例如: 1 3 5 7");
+    stackInput = new QLineEdit; stackInput->setPlaceholderText("例如: 1 2 3 4");
     f->addRow("初始序列", stackInput);
 
     auto* row0 = new QWidget; auto* hb0 = new QHBoxLayout(row0);
@@ -111,7 +110,7 @@ QWidget* MainWindow::buildStackPage() {
 
     v->addWidget(wrapGroup("顺序栈建立", form));
     v->addWidget(wrapGroup("顺序栈操作", row0));
-    v->addWidget(wrapGroup("入栈/出栈", row1));
+    v->addWidget(wrapGroup("入栈出栈", row1));
     v->addStretch(1);
 
     connect(btnRebuild,&QPushButton::clicked,this,&MainWindow::stackBuild);
@@ -126,7 +125,7 @@ QWidget* MainWindow::buildBTPage() {
     auto* v = new QVBoxLayout(root); v->setSpacing(10);
 
     auto* form = new QWidget; auto* f = new QFormLayout(form);
-    btInput = new QLineEdit; btInput->setPlaceholderText("层序，空位用哨兵，如: 15 6 23 4 7 17 71 5 -1 -1 50");
+    btInput = new QLineEdit; btInput->setPlaceholderText("层序，空位用哨兵，如: 1 2 3 -1 5 6 7 8");
     btNull  = new QSpinBox; btNull->setRange(-1000000,1000000); btNull->setValue(-1);
     f->addRow("层序数组", btInput);
     f->addRow("空位哨兵", btNull);
@@ -180,7 +179,7 @@ QWidget* MainWindow::buildBSTPage() {
 
     v->addWidget(wrapGroup("BST 建立", form));
     v->addWidget(wrapGroup("BST 操作", row0));
-    v->addWidget(wrapGroup("查找/插入/删除", row1)); // 修改组标题
+    v->addWidget(wrapGroup("查找插入删除", row1)); // 修改组标题
     v->addStretch(1);
 
     connect(btnBuild,&QPushButton::clicked,this,&MainWindow::bstBuild);
@@ -204,7 +203,7 @@ QWidget* MainWindow::buildHuffmanPage() {
     f->setSpacing(6);
 
     huffmanInput = new QLineEdit;
-    huffmanInput->setPlaceholderText(QStringLiteral("例如：5 7 2 13 9（用空格或逗号分隔）"));
+    huffmanInput->setPlaceholderText(QStringLiteral("例如：1 2 3 4 5（用空格或逗号分隔）"));
     f->addRow(QStringLiteral("权值序列"), huffmanInput);
 
     // ===== 构建 / 清空 按钮行 =====
@@ -216,20 +215,14 @@ QWidget* MainWindow::buildHuffmanPage() {
     auto* btnBuild = new QPushButton(QStringLiteral("构建哈夫曼树"));
     auto* btnClear = new QPushButton(QStringLiteral("清空"));
 
-    btnBuild->setMinimumHeight(32);
-    btnClear->setMinimumHeight(32);
+    //btnBuild->setMinimumHeight(32);
+    //btnClear->setMinimumHeight(32);
 
-    btnBuild->setStyleSheet(
-        "QPushButton{background:#3b82f6;color:white;border-radius:6px;padding:6px 12px;}"
-        "QPushButton:hover{background:#2563eb;}"
-    );
-    btnClear->setStyleSheet(
-        "QPushButton{background:#e11d48;color:white;border-radius:6px;padding:6px 12px;}"
-        "QPushButton:hover{background:#be123c;}"
-    );
+    btnBuild->setStyleSheet("QPushButton{background:#22c55e;color:white;}");
+    btnClear->setStyleSheet("QPushButton{background:#ef4444;color:white;}");
 
-    hb0->addWidget(btnBuild, 1);
-    hb0->addWidget(btnClear, 0);
+    hb0->addWidget(btnBuild);
+    hb0->addWidget(btnClear);
 
     // ===== 新增：编码结果表格 =====
     auto* codeWidget = new QWidget;
@@ -286,8 +279,8 @@ QWidget* MainWindow::buildHuffmanPage() {
 
     // ===== 组装到整体布局 =====
     v->addWidget(wrapGroup(QStringLiteral("哈夫曼树"), form));
-    v->addWidget(wrapGroup(QStringLiteral("构建 / 清空"), row0));
-    v->addWidget(wrapGroup(QStringLiteral("编码结果（原始权值 → 哈夫曼码）"), codeWidget));
+    v->addWidget(wrapGroup(QStringLiteral("哈夫曼树操作"), row0));
+    v->addWidget(wrapGroup(QStringLiteral("哈夫曼编码"), codeWidget));
     v->addStretch(1);
 
     // 信号连接
@@ -376,9 +369,9 @@ QWidget* MainWindow::buildDSLPage() {
     //
     // 右侧：自然语言输入
     //
-    auto* nliGroup = new QGroupBox(QStringLiteral("大模型助手"));
-    auto* nliLayout = new QVBoxLayout(nliGroup);
-    nliLayout->setSpacing(8);
+    auto* llmGroup = new QGroupBox(QStringLiteral("大模型助手"));
+    auto* llmLayout = new QVBoxLayout(llmGroup);
+    llmLayout->setSpacing(8);
 
     llmEdit = new QTextEdit;
     llmEdit->setPlaceholderText(QStringLiteral("输入自然语言指令对数据结构进行操作"));
@@ -396,22 +389,22 @@ QWidget* MainWindow::buildDSLPage() {
         "}"
     );
 
-    auto* btnNLI = new QPushButton(QStringLiteral("理解并执行"));
-    btnNLI->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
+    auto* btnLLM = new QPushButton(QStringLiteral("理解并执行"));
+    btnLLM->setStyleSheet("QPushButton{background:#8b5cf6;color:white;}");
 
-    nliLayout->addWidget(new QLabel(QStringLiteral("大模型助手：")));
-    nliLayout->addWidget(llmEdit);
-    nliLayout->addWidget(btnNLI);
-    nliLayout->addStretch(1);
+    llmLayout->addWidget(new QLabel(QStringLiteral("大模型助手：")));
+    llmLayout->addWidget(llmEdit);
+    llmLayout->addWidget(btnLLM);
+    llmLayout->addStretch(1);
 
     // 总体左右排布
     h->addWidget(dslGroup, 1);
-    h->addWidget(nliGroup, 1);
+    h->addWidget(llmGroup, 1);
 
     // 事件连接（逻辑保持不变）
     connect(btnRun,  &QPushButton::clicked, this, &MainWindow::runDSL);
     connect(btnHelp, &QPushButton::clicked, this, &MainWindow::insertDSLExample);
-    connect(btnNLI,  &QPushButton::clicked, this, &MainWindow::runLLM);
+    connect(btnLLM,  &QPushButton::clicked, this, &MainWindow::runLLM);
 
     return root;
 }

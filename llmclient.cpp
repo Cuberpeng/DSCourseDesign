@@ -14,23 +14,10 @@
 LLMClient::LLMClient(QObject* parent)
     : QObject(parent)
 {
-    // 1. API Key：优先用环境变量，没有再用你在代码里手动写的
-    if (apiKey_.isEmpty()) {
-        QByteArray envKey = qgetenv("DEEPSEEK_API_KEY");
-        if (!envKey.isEmpty()) {
-            apiKey_ = QString::fromLocal8Bit(envKey);
-        } else {
-            // 这里保持你现在的写法：直接写死 key
-            // !!! 注意：提交作业前记得删掉真实 key !!!
-            apiKey_ = "sk-f450ccf8fcc3487eb6b3e4612ded2619"; // <-- 换成你的
-            //apiKey_ = QString::fromLocal8Bit(qgetenv("sk-d8c61f93a7ae4f77b096ce42b7efd426"));
-        }
-    }
+    apiKey_ = "sk-KwnEs8GYvlNsj4dWcS39ksITuPsfK3D57ZIeWc2oSusk9DbX";
+    apiUrl_ = "https://yunwu.ai/v1/chat/completions";
+    model_  = "gpt-4o";
 
-    // 2. DeepSeek API 地址 & 模型
-    // 官方文档示例：POST https://api.deepseek.com/chat/completions
-    apiUrl_ = "https://api.deepseek.com/chat/completions";
-    model_  = "deepseek-chat";
 }
 
 QString LLMClient::buildSystemPrompt() const
@@ -41,9 +28,15 @@ QString LLMClient::buildSystemPrompt() const
         "并且严格遵守规则：\n"
         "1. 只输出 DSL 代码，不能输出解释、注释或其他文字。\n"
         "2. 每行一条命令，命令不区分大小写。\n"
-        "3. 一次脚本中，只能操作一种数据结构（顺序表 / 单链表 / 栈 / 普通二叉树 / BST / 哈夫曼树 / AVL）。\n"
-        "   如果用户同时提了多种结构，请选择其中最核心的一种来生成脚本，忽略其他结构。\n"
         "4. 不要使用你没见过的命令名，只用下面给出的命令。\n"
+        "5. 请你输出完整DSL语句，不要只生成一个数据结构类型，例如'seq','link','stack','bt','bst','huff','avl',不能单独输出这七个字符串\n"
+        "6. 如果用户没有写出具体的结点 / 元素数值，你要自己选择 3~8 个 1~99 的整数来构造一个合理的示例，"
+        "   绝对不能只输出数据结构名字（例如不能只输出 seq 或 bst）。\n"
+        "7. 你输出的每一行都必须是完整的 DSL，比如：\n"
+        "   用户：帮我建立一个顺序表\n"
+        "   你：  seq 2 4 6 8\n"
+        "   用户：画一棵简单的二叉搜索树\n"
+        "   你：  bst 15 6 23 4 7 17 71\n"
         "\n"
         "【顺序表 Seqlist】\n"
         "  初始建立:    seq 1 3 5 7\n"
@@ -89,7 +82,8 @@ QString LLMClient::buildSystemPrompt() const
         "  清空:        avl.clear\n"
         "\n"
         "请根据用户的自然语言，选择一种最合适的数据结构，并用上述 DSL 命令写出脚本。\n"
-        "再次强调：一次脚本只操作一种数据结构；只输出 DSL 代码本身。\n"
+        "只要我提到了任何上述数据结构，你必须输出一个完整的DSL，不能只有一个类型（例如只输出seq），而是必须是完整DSL语句（例如seq 1 3 5 7）。\n"
+        "再次强调：一次脚本只操作一种数据结构；只输出DSL代码本身。\n"
     );
     return prompt;
 }

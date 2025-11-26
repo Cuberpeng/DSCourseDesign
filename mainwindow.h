@@ -102,7 +102,6 @@ private slots:
     //文件保存
     void saveDoc();
     void openDoc();
-    void exportPNG();
 
     //DSL
     void insertDSLExample();

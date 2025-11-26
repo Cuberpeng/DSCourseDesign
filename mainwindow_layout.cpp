@@ -210,7 +210,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     // 初始画布提示
     view->setTitle(QStringLiteral("请选择右侧模块并操作"));
-    showMessage(QStringLiteral("欢迎使用数据结构可视化工具！上方为模块，中间为 DSL/NLI，底部为操作信息栏。"));
+    showMessage(QStringLiteral("欢迎使用数据结构可视化工具！"));
 
     // ====== 初始化大模型客户端（NLI → DSL）======
     llmClient = new LLMClient(this);

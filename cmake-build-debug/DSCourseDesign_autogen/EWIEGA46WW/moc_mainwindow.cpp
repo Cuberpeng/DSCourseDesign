@@ -84,7 +84,6 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "index",
         "saveDoc",
         "openDoc",
-        "exportPNG",
         "insertDSLExample",
         "runDSL",
         "runLLM",
@@ -181,33 +180,31 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(41, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'openDoc'
         QtMocHelpers::SlotData<void()>(42, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'exportPNG'
-        QtMocHelpers::SlotData<void()>(43, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'insertDSLExample'
-        QtMocHelpers::SlotData<void()>(44, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(43, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'runDSL'
-        QtMocHelpers::SlotData<void()>(45, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(44, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'runLLM'
-        QtMocHelpers::SlotData<void()>(46, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(45, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onLlmDslReady'
-        QtMocHelpers::SlotData<void(const QString &)>(47, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 48 },
+        QtMocHelpers::SlotData<void(const QString &)>(46, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 47 },
         }}),
         // Slot 'onLlmError'
-        QtMocHelpers::SlotData<void(const QString &)>(49, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 50 },
+        QtMocHelpers::SlotData<void(const QString &)>(48, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 49 },
         }}),
         // Slot 'dumpBTLevel'
-        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(51, 2, QMC::AccessPrivate, 0x80000000 | 52, {{
-            { 0x80000000 | 53, 54 }, { QMetaType::Int, 55 },
+        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(50, 2, QMC::AccessPrivate, 0x80000000 | 51, {{
+            { 0x80000000 | 52, 53 }, { QMetaType::Int, 54 },
         }}),
         // Slot 'dumpPreorder'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(56, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 53, 57 }, { 0x80000000 | 58, 59 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(55, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 52, 56 }, { 0x80000000 | 57, 58 },
         }}),
         // Slot 'collectLeafWeights'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(60, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 53, 57 }, { 0x80000000 | 58, 59 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(59, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 52, 56 }, { 0x80000000 | 57, 58 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -268,16 +265,15 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 33: _t->onModuleChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 34: _t->saveDoc(); break;
         case 35: _t->openDoc(); break;
-        case 36: _t->exportPNG(); break;
-        case 37: _t->insertDSLExample(); break;
-        case 38: _t->runDSL(); break;
-        case 39: _t->runLLM(); break;
-        case 40: _t->onLlmDslReady((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 41: _t->onLlmError((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 42: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
+        case 36: _t->insertDSLExample(); break;
+        case 37: _t->runDSL(); break;
+        case 38: _t->runLLM(); break;
+        case 39: _t->onLlmDslReady((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 40: _t->onLlmError((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 41: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
             if (_a[0]) *reinterpret_cast< QList<int>*>(_a[0]) = std::move(_r); }  break;
-        case 43: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
-        case 44: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 42: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 43: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
         default: ;
         }
     }
@@ -302,14 +298,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 45)
+        if (_id < 44)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 45;
+        _id -= 44;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 45)
+        if (_id < 44)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 45;
+        _id -= 44;
     }
     return _id;
 }
