@@ -8,7 +8,6 @@
 #include <cstdlib>
 
 namespace ds {
-
     class Seqlist {
         int *a;   // 头指针
         int n;    // 元素个数

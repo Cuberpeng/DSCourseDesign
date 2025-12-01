@@ -558,6 +558,7 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMainWindow \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMenuBar \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QScrollArea \
+	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSlider \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSpinBox \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitter \
 	D:/Qt/6.9.2/mingw_64/include/QtWidgets/QStackedWidget \
@@ -836,5 +837,4 @@ DSCourseDesign_autogen/timestamp: \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow_layout.cpp \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/seqlist.h \
 	D:/Users/xiang/CLionProjects/DSCourseDesign/stack.h \
-	D:/Users/xiang/CLionProjects/DSCourseDesign/tool.h \
 	D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/cmake/win/x64/bin/cmake.exe

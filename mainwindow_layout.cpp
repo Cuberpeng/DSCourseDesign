@@ -30,7 +30,6 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     // 文件操作按钮
     QAction* actOpen = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("打开"));
     QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
-    //QAction* actPng = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView), QStringLiteral("导出PNG"));
 
     // 分隔符
     canvasBar->addSeparator();
@@ -40,6 +39,64 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     QAction* actZoomOut = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowDown), QStringLiteral("缩小"));
     QAction* actFit     = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("适配"));
     QAction* actReset   = canvasBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("重置"));
+
+    // ★ 新增：动画控制按钮
+    canvasBar->addSeparator();
+
+    // 播放暂停、重播按钮
+    actAnimPlayToggle = canvasBar->addAction(style()->standardIcon(QStyle::SP_MediaPlay), QStringLiteral("播放"));
+    actAnimReplay = canvasBar->addAction(style()->standardIcon(QStyle::SP_MediaSkipBackward), QStringLiteral("重播"));
+
+    // 速度调节滑块（左慢右快）
+    canvasBar->addSeparator();
+    QLabel* speedLabel = new QLabel(QStringLiteral("速度"), canvasBar);
+    speedLabel->setStyleSheet("QLabel{color:white;font-weight:600;margin-left:6px;}");
+    canvasBar->addWidget(speedLabel);
+
+    // 新增：左侧“慢”文字
+    QLabel* slowLabel = new QLabel(QStringLiteral("慢"), canvasBar);
+    slowLabel->setStyleSheet("QLabel{color:rgba(255,255,255,0.8);font-size:10px;margin-left:4px;}");
+    canvasBar->addWidget(slowLabel);
+
+    // 连续型滑块：0 ~ 100（0 最慢，100 最快）
+    animSpeedSlider = new QSlider(Qt::Horizontal, canvasBar);
+    animSpeedSlider->setRange(0, 100);          // 连续型调节
+    animSpeedSlider->setValue(40);              // 默认偏慢一点，比之前 3/5 接近
+    animSpeedSlider->setFixedWidth(140);
+    animSpeedSlider->setToolTip(QStringLiteral("调整动画播放速度（左慢右快）"));
+
+    // ★ 美化样式 + 颜色渐变：右边越亮表示越快
+    animSpeedSlider->setStyleSheet(
+        "QSlider::groove:horizontal {"
+        "  height:6px;"
+        "  border-radius:3px;"
+        "  margin:0 6px;"
+        "  background: qlineargradient(x1:0,y1:0,x2:1,y2:0,"
+        "    stop:0 #e5e7eb, stop:0.5 #bae6fd, stop:1 #0ea5e9);"
+        "}"
+        "QSlider::handle:horizontal {"
+        "  width:14px;"
+        "  height:14px;"
+        "  margin:-4px 0;"
+        "  border-radius:7px;"
+        "  background:white;"
+        "  border:2px solid #0ea5e9;"
+        "}"
+        "QSlider::sub-page:horizontal {"
+        "  background:rgba(14,165,233,0.35);"
+        "  border-radius:3px;"
+        "}"
+        "QSlider::add-page:horizontal {"
+        "  background:transparent;"
+        "}"
+    );
+    canvasBar->addWidget(animSpeedSlider);
+
+    // 右侧“快”文字
+    QLabel* fastLabel = new QLabel(QStringLiteral("快"), canvasBar);
+    fastLabel->setStyleSheet("QLabel{color:rgba(255,255,255,0.9);font-size:10px;margin-right:4px;}");
+    canvasBar->addWidget(fastLabel);
+
 
     // 文件操作信号
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
@@ -51,6 +108,13 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     connect(actZoomOut, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(actFit,     &QAction::triggered, this, &MainWindow::onZoomFit);
     connect(actReset,   &QAction::triggered, this, &MainWindow::onZoomReset);
+
+    // 动画控制信号
+    connect(actAnimPlayToggle, &QAction::triggered, this, &MainWindow::onAnimPlay);
+    connect(actAnimReplay,     &QAction::triggered, this, &MainWindow::onAnimReplay);
+
+    // 速度滑块信号
+    connect(animSpeedSlider, &QSlider::valueChanged, this, &MainWindow::onAnimSpeedChanged);
 
     // ================= 中心整体：用一个 QWidget + QVBoxLayout 包起来 =================
     QWidget* central = new QWidget(this);
@@ -206,7 +270,14 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     // 动画计时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
-    timer.setInterval(500);
+    // 根据当前滑块值设置初始速度
+    if (animSpeedSlider) {
+        onAnimSpeedChanged(animSpeedSlider->value());
+    } else {
+        timer.setInterval(500);
+    }
+    // 初始化动画按钮状态（刚启动时没有动画可播）
+    updateAnimUiState();
 
     // 初始画布提示
     view->setTitle(QStringLiteral("请选择右侧模块并操作"));
@@ -254,14 +325,150 @@ QVector<int> MainWindow::parseIntList(const QString& text) const {
     return out;
 }
 
-void MainWindow::playSteps(){
-    if (stepIndex < steps.size()){
+void MainWindow::playSteps()
+{
+    if (stepIndex < steps.size()) {
+        // 执行当前步骤
         steps[stepIndex++]();
-    }else{
-        timer.stop();
-        showMessage(QStringLiteral("播放结束"));
+
+        // 如果刚好执行到最后一步，立刻停掉定时器
+        if (stepIndex >= steps.size()) {
+            timer.stop();
+            showMessage(QStringLiteral("播放结束"));
+        }
+    }
+    // 每执行 / 结束一次，都刷新按钮状态
+    updateAnimUiState();
+}
+
+//根据当前状态刷新按钮的辅助函数
+void MainWindow::updateAnimUiState()
+{
+    // 工具栏未初始化时（比如构造早期）直接返回
+    if (!actAnimPlayToggle) return;
+
+    const bool hasSteps = !steps.isEmpty();
+    const bool playing  = timer.isActive();
+
+    // 播放 / 暂停 合并按钮
+    actAnimPlayToggle->setEnabled(hasSteps);
+    if (!hasSteps) {
+        // 没有动画可播：灰色播放图标，不可点击
+        actAnimPlayToggle->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+        actAnimPlayToggle->setText(QStringLiteral("播放"));
+        actAnimPlayToggle->setToolTip(QStringLiteral("当前没有可播放的动画"));
+    } else {
+        // 有动画：根据是否在播放切换图标和文字
+        actAnimPlayToggle->setIcon(
+            style()->standardIcon(
+                playing ? QStyle::SP_MediaPause : QStyle::SP_MediaPlay
+            )
+        );
+        actAnimPlayToggle->setText(playing ? QStringLiteral("暂停")
+                                           : QStringLiteral("播放"));
+        actAnimPlayToggle->setToolTip(
+            playing
+            ? QStringLiteral("暂停当前动画")
+            : QStringLiteral("播放 / 继续当前动画")
+        );
+    }
+
+    // 重播：有动画且没在自动播放时允许（播放时禁用成浅色）
+    if (actAnimReplay) {
+        actAnimReplay->setEnabled(hasSteps && !playing);
     }
 }
+
+// 动画播放控制槽函数
+// 播放 / 暂停
+void MainWindow::onAnimPlay()
+{
+    if (steps.isEmpty()) {
+        showMessage(QStringLiteral("当前没有可播放的动画"));
+        updateAnimUiState();
+        return;
+    }
+
+    if (timer.isActive()) {
+        // 正在播放 -> 暂停
+        timer.stop();
+        showMessage(QStringLiteral("动画：已暂停"));
+    } else {
+        // 暂停 / 未播放 -> 开始 / 继续
+        if (stepIndex >= steps.size()) {
+            // 如果已经播完，从头开始
+            stepIndex = 0;
+        }
+        timer.start();
+        showMessage(QStringLiteral("动画：开始 / 继续播放"));
+    }
+
+    updateAnimUiState();
+}
+
+void MainWindow::onAnimPause()
+{
+    if (timer.isActive()) {
+        timer.stop();
+        showMessage(QStringLiteral("动画：已暂停"));
+    }
+    updateAnimUiState();
+}
+
+void MainWindow::onAnimReplay()
+{
+    if (steps.isEmpty()) {
+        showMessage(QStringLiteral("当前没有可重播的动画"));
+        updateAnimUiState();
+        return;
+    }
+
+    // 正在播放时，本来按钮就被禁用，这里再做一层保护
+    if (timer.isActive()) {
+        timer.stop();
+    }
+
+    stepIndex = 0;
+    showMessage(QStringLiteral("动画：从头重新播放"));
+
+    timer.start();
+    updateAnimUiState();
+}
+
+
+void MainWindow::onAnimSpeedChanged(int value)
+{
+    if (value < 0)  value = 0;
+    if (value > 100) value = 100;
+
+    // t = 0 慢端，t = 1 快端
+    qreal t = value / 100.0;
+
+    // 1）控制所有使用 QTimer 的动画（顺序表 / 链表 / 栈 / 普通二叉树 / BST / Huffman 等）
+    const int maxInterval = 800;   // 最慢：0 档
+    const int minInterval = 80;    // 最快：100 档
+    int interval = static_cast<int>(maxInterval + (minInterval - maxInterval) * t);
+    timer.setInterval(interval);
+
+    // 2）控制所有用 QTimeLine 的树类动画（目前主要是 AVL 旋转）
+    const int maxDuration = 1600;  // t = 0 时 duration 最长（最慢）
+    const int minDuration = 300;   // t = 1 时 duration 最短（最快）
+    animTimelineDurationMs_ = static_cast<int>(maxDuration + (minDuration - maxDuration) * t);
+
+    // 可选：给一点文本反馈，方便调试 / 体验
+    if (value <= 5) {
+        statusBar()->showMessage(QStringLiteral("动画速度：最慢"), 1500);
+    } else if (value >= 95) {
+        statusBar()->showMessage(QStringLiteral("动画速度：最快"), 1500);
+    } else {
+        statusBar()->showMessage(
+            QStringLiteral("动画速度：%1%").arg(value),
+            1500
+        );
+    }
+}
+
+
 
 // 缩放按钮
 void MainWindow::onZoomIn()   { view->zoomIn();   }

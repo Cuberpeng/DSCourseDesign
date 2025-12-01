@@ -3,17 +3,13 @@
 //
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
-
 #include "binarytree.h"
 #include <cstdlib>
-
 namespace ds {
-
     class Huffman : public BinaryTree {
     public:
         Huffman() : BinaryTree() {}
         ~Huffman() override = default;
-
         // 根据权值数组构建 Huffman 树
         void buildFromWeights(const int* weights, int n) {
             clear();
@@ -23,8 +19,7 @@ namespace ds {
             }
 
             // 初始森林：每个权值一棵单结点树
-            BTNode** forest = static_cast<BTNode**>(
-                    std::malloc(sizeof(BTNode*) * static_cast<std::size_t>(n)));
+            BTNode** forest = static_cast<BTNode**>( std::malloc(sizeof(BTNode*) * static_cast<std::size_t>(n)));
             if (!forest) {
                 rootNode = nullptr;
                 return;
@@ -33,12 +28,10 @@ namespace ds {
             for (int i = 0; i < n; ++i) {
                 forest[i] = buildNode(weights[i]);
                 if (!forest[i]) {
-                    // 分配失败，简单清理已经建好的若干棵
+                    // 分配失败，简单清理已经建好的若干棵，递归释放每棵树
                     for (int k = 0; k < i; ++k) {
-                        // 递归释放每棵树
                         BTNode* r = forest[k];
-                        // 直接调用 BinaryTree::clear() 无法逐棵清理，
-                        // 这里简化：泄露这些少量内存风险可以接受（课设场景）。
+                        // 直接调用 BinaryTree::clear() 无法逐棵清理，这里简化：泄露这些少量内存风险可以接受（课设场景）。
                         (void)r;
                     }
                     std::free(forest);
@@ -88,12 +81,7 @@ namespace ds {
         }
 
         // 直接造一个结点（可能给外面用）
-        static BTNode* makeNode(int key) {
-            return buildNode(key);
-        }
-
+        static BTNode* makeNode(int key) { return buildNode(key); }
     };
-
 } // namespace ds
-
 #endif // HUFFMAN_H

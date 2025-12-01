@@ -1418,6 +1418,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/mainwindow.h
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMainWindow
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMenuBar
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QScrollArea
+ mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSlider
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSpinBox
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitter
  mdp:D:/Qt/6.9.2/mingw_64/include/QtWidgets/QStackedWidget

@@ -30,6 +30,7 @@
 #include <QTableWidget>
 #include <QDialog>
 #include <QVBoxLayout>
+#include <QSlider>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -96,6 +97,12 @@ private slots:
     void onZoomFit();
     void onZoomReset();
 
+    // 动画播放控制
+    void onAnimPlay();
+    void onAnimPause();
+    void onAnimStep();
+    void onAnimReplay();
+
     // 模块切换时同步画布
     void onModuleChanged(int index);
 
@@ -134,11 +141,19 @@ private:
     QStackedWidget* moduleStack{};   // 每个模块一页
     QToolBar* canvasBar{};           // 顶部工具栏（缩放）
 
+    // 动画控制相关
+    QAction* actAnimPlayToggle{};    // 播放 / 暂停 合并按钮
+    QAction* actAnimStep{};          // 单步
+    QAction* actAnimReplay{};        // 重播
+    QSlider* animSpeedSlider{};      // 速度调节滑块
+
     // 播放队列
     QTimer timer;
     QVector<std::function<void()>> steps;
     int stepIndex = 0;
     void playSteps();
+    void updateAnimUiState();        // 根据当前状态刷新按钮
+    void onAnimSpeedChanged(int value); // 速度滑块回调
 
     // 绘制助手
     void drawSeqlist(const ds::Seqlist& sl);
@@ -168,6 +183,9 @@ private:
     DocKind currentKind_ = DocKind::None;
     int btLastNullSentinel_ = -1;
     QVector<int> huffLastWeights_;
+
+    // ★ 新增：树类细粒度动画（QTimeLine）统一用的时长，受速度滑块控制
+    int animTimelineDurationMs_ = 700;
 
     // DSL/NLI 相关
     QTextEdit* dslEdit{};

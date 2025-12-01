@@ -75,22 +75,11 @@ namespace ds {
 
     public:
         BTNode* rootNode;
-
         BinaryTree() : rootNode(nullptr) {}
+        virtual ~BinaryTree() { clear(); }
 
-        virtual ~BinaryTree() {
-            clear();
-        }
-
-        void clear() {
-            destroy(rootNode);
-            rootNode = nullptr;
-        }
-
-        BTNode* root() const {
-            return rootNode;
-        }
-
+        void clear() { destroy(rootNode); rootNode = nullptr; }
+        BTNode* root() const { return rootNode; }
         // 用层序数组建树，null 表示空结点
         void buildTree(const int* arr, int n, int null) {
             clear();
@@ -138,19 +127,14 @@ namespace ds {
                 }
                 ++idx;
             }
-
             std::free(q);
         }
 
         // 高度
-        int height() const {
-            return height(rootNode);
-        }
+        int height() const { return height(rootNode); }
 
         // 结点总数
-        int count() const {
-            return countRec(rootNode);
-        }
+        int count() const { return countRec(rootNode); }
 
         // 先序遍历，返回写入个数；out==nullptr 或 maxn<=0 时仅返回应写入个数
         int preorder(int* out, int maxn) const {

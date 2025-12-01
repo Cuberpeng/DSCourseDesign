@@ -110,9 +110,7 @@ namespace ds {
 
         // 删除 position 位置结点（0..length-1）
         bool erase(int position) {
-            if (position < 0 || position >= length || !head)
-                return false;
-
+            if (position < 0 || position >= length || !head) return false;
             if (position == 0) {
                 LLNode* q = head->next;
                 std::free(head);
@@ -124,36 +122,25 @@ namespace ds {
 
             int i = 0;
             LLNode* prev = head;
-            while (prev && prev->next && i < position - 1) {
-                prev = prev->next;
-                ++i;
-            }
-            if (!prev || !prev->next)
-                return false;
+            while (prev && prev->next && i < position - 1) { prev = prev->next; ++i; }
+            if (!prev || !prev->next) return false;
 
             LLNode* cur = prev->next;
             prev->next = cur->next;
-            if (cur == tail)
-                tail = prev;
+            if (cur == tail) tail = prev;
             std::free(cur);
             --length;
             return true;
         }
-
         // 获取 position 位置的值，不合法返回 0
         int get(int position) const {
-            if (position < 0 || position >= length)
-                return 0;
+            if (position < 0 || position >= length) return 0;
             int i = 0;
             LLNode* p = head;
-            while (p && i < position) {
-                p = p->next;
-                ++i;
-            }
+            while (p && i < position) { p = p->next; ++i; }
             return p ? p->value : 0;
         }
     };
-
 } // namespace ds
 
 #endif // LINKLIST_H

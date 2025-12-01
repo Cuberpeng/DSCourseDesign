@@ -4,12 +4,9 @@
 
 #ifndef AVL_H
 #define AVL_H
-
 #include "binarytree.h"
 #include <vector>
-
 namespace ds {
-
 class AVL : public BinaryTree {
 public:
     // 一次插入过程中，可能发生 0~多次旋转，这里记录每一次
@@ -21,7 +18,6 @@ public:
     };
 
     AVL() = default;
-
     // 对外插入接口：每次插入前先清空旋转记录
     void insert(int key) {
         rotationRecords_.clear();
@@ -29,9 +25,7 @@ public:
     }
 
     // 读取本次插入过程中记录下来的旋转信息（只读）
-    const std::vector<RotationRecord>& rotationRecords() const {
-        return rotationRecords_;
-    }
+    const std::vector<RotationRecord>& rotationRecords() const { return rotationRecords_; }
 
 private:
     std::vector<RotationRecord> rotationRecords_;
@@ -122,8 +116,6 @@ private:
                     doubleRotateLeft(rt);
                 }
             }
-        } else {
-            // key == rt->key：不重复插入，保持树结构不变
         }
     }
 };
