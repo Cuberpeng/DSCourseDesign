@@ -406,15 +406,6 @@ void MainWindow::onAnimPlay()
     updateAnimUiState();
 }
 
-void MainWindow::onAnimPause()
-{
-    if (timer.isActive()) {
-        timer.stop();
-        showMessage(QStringLiteral("动画：已暂停"));
-    }
-    updateAnimUiState();
-}
-
 void MainWindow::onAnimReplay()
 {
     if (steps.isEmpty()) {
@@ -444,31 +435,17 @@ void MainWindow::onAnimSpeedChanged(int value)
     // t = 0 慢端，t = 1 快端
     qreal t = value / 100.0;
 
-    // 1）控制所有使用 QTimer 的动画（顺序表 / 链表 / 栈 / 普通二叉树 / BST / Huffman 等）
+    // 1）控制所有使用 QTimer 的动画（顺序表，链表，栈，普通二叉树，BST，Huffman 等）
     const int maxInterval = 800;   // 最慢：0 档
     const int minInterval = 80;    // 最快：100 档
     int interval = static_cast<int>(maxInterval + (minInterval - maxInterval) * t);
     timer.setInterval(interval);
 
-    // 2）控制所有用 QTimeLine 的树类动画（目前主要是 AVL 旋转）
-    const int maxDuration = 1600;  // t = 0 时 duration 最长（最慢）
-    const int minDuration = 300;   // t = 1 时 duration 最短（最快）
+    // 2）控制所有用 QTimeLine 的树类动画（主要是 AVL 旋转）
+    const int maxDuration = 1600;  // 最慢
+    const int minDuration = 300;   // 最快
     animTimelineDurationMs_ = static_cast<int>(maxDuration + (minDuration - maxDuration) * t);
-
-    // 可选：给一点文本反馈，方便调试 / 体验
-    if (value <= 5) {
-        statusBar()->showMessage(QStringLiteral("动画速度：最慢"), 1500);
-    } else if (value >= 95) {
-        statusBar()->showMessage(QStringLiteral("动画速度：最快"), 1500);
-    } else {
-        statusBar()->showMessage(
-            QStringLiteral("动画速度：%1%").arg(value),
-            1500
-        );
-    }
 }
-
-
 
 // 缩放按钮
 void MainWindow::onZoomIn()   { view->zoomIn();   }

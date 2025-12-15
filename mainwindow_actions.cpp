@@ -82,7 +82,7 @@ void MainWindow::saveDoc() {
         QString path = dialog.selectedFiles().first();
         if(path.isEmpty()) return;
 
-        // 新格式：一次性保存所有数据结构的状态，方便下次直接恢复
+        // 一次性保存所有数据结构的状态，方便下次直接恢复
         QJsonObject root;
         root["kind"] = "all";
 
@@ -194,73 +194,8 @@ void MainWindow::openDoc() {
             return;
         }
 
+        // 一次性恢复所有数据结构，但不强制切换右侧模块；画布按当前模块刷新
         auto o = doc.object();
-        QString k = o.value("kind").toString();
-
-        // 向后兼容：老文件只保存一种结构（原实现即是按 currentKind_ 导出一种）
-        if (k != "all") {
-            if(k == "seqlist") {
-                seq.clear();
-                for(auto v : o["values"].toArray()) seq.insert(seq.size(), v.toInt());
-                currentKind_ = DocKind::SeqList;
-                drawSeqlist(seq);
-                view->setTitle("顺序表（已从文件恢复）");
-            } else if(k == "linkedlist") {
-                link.clear();
-                for(auto v : o["values"].toArray()) link.insert(link.size(), v.toInt());
-                currentKind_ = DocKind::LinkedList;
-                drawLinklist(link);
-                view->setTitle("单链表（已从文件恢复）");
-            } else if(k == "stack") {
-                st.clear();
-                for(auto v : o["values"].toArray()) st.push(v.toInt());
-                currentKind_ = DocKind::Stack;
-                drawStack(st);
-                view->setTitle("顺序栈（已从文件恢复）");
-            } else if(k == "binarytree") {
-                int sent = o["null"].toInt(-1);
-                auto ja = o["level"].toArray();
-                QVector<int> a; a.reserve(ja.size());
-                for(auto v: ja) a.push_back(v.toInt());
-                bt.clear();
-                bt.buildTree(a.data(), a.size(), sent);
-                btLastNullSentinel_ = sent;
-                currentKind_ = DocKind::BinaryTree;
-                view->resetScene();
-                view->setTitle("二叉树（已从文件恢复）");
-                drawBT(bt.root(), 400, 120, 200, 0);
-            } else if(k == "bst") {
-                bst.clear();
-                for(auto v : o["preorder"].toArray()) bst.insert(v.toInt());
-                currentKind_ = DocKind::BST;
-                view->resetScene();
-                view->setTitle("BST（已从文件恢复）");
-                drawBT(bst.root(), 400, 120, 200, 0);
-            } else if(k == "avl") {
-                avl.clear();
-                for(auto v : o["preorder"].toArray()) avl.insert(v.toInt());
-                currentKind_ = DocKind::AVL;
-                view->resetScene();
-                view->setTitle("AVL（已从文件恢复）");
-                drawBT(avl.root(), 400, 120, 200, 0);
-            } else if(k == "huffman") {
-                huff.clear();
-                QVector<int> w; for(auto v : o["weights"].toArray()) w.push_back(v.toInt());
-                huff.buildFromWeights(w.data(), w.size());
-                huffLastWeights_ = w;
-                currentKind_ = DocKind::Huffman;
-                view->resetScene();
-                view->setTitle("哈夫曼树（已从文件恢复）");
-                drawBT(huff.root(), 400, 120, 200, 0);
-            } else {
-                statusBar()->showMessage("未知 kind，无法打开");
-                return;
-            }
-            statusBar()->showMessage(QString("已打开：%1").arg(path));
-            return;
-        }
-
-        // 新格式：一次性恢复所有数据结构，但不强制切换右侧模块；画布按当前模块刷新
         if (o.contains("seqlist")) {
             QJsonObject s = o["seqlist"].toObject();
             seq.clear();
@@ -585,7 +520,10 @@ void MainWindow::runDSL() {
         }
         if (s.startsWith("seq ")) {
             auto a = asNumbers(s);
-            QString numbers; for (int i=0;i<a.size();++i){ if(i) numbers+=' '; numbers+=QString::number(a[i]); }
+            QString numbers; for (int i=0;i<a.size();++i) {
+                if(i) numbers+=' ';
+                numbers+=QString::number(a[i]);
+            }
             ops.push_back([=, this](){
                 currentKind_ = DocKind::SeqList;
                 seqlistInput->setText(numbers);

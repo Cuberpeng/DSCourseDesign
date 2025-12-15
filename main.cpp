@@ -1,10 +1,7 @@
 #include <QApplication>
 #include <QPushButton>
-
 #include <QApplication>
 #include "mainwindow.h"
-
-
 #include <QSslSocket>
 #include <QDebug>
 

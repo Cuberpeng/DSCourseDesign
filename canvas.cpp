@@ -42,9 +42,7 @@ QGraphicsEllipseItem* Canvas::addNode(qreal x, qreal y, const QString& text, boo
     QColor nodeColor = highlight ? QColor("#f59e0b") : QColor("#3b82f6"); // 橙色高亮，蓝色普通
     QColor borderColor = highlight ? QColor("#d97706") : QColor("#1d4ed8"); // 深色边框
 
-    auto* n = scene->addEllipse(QRectF(x-35, y-35, 70, 70),
-                               QPen(borderColor, 3),
-                               QBrush(nodeColor));
+    auto* n = scene->addEllipse(QRectF(x-35, y-35, 70, 70), QPen(borderColor, 3), QBrush(nodeColor));
 
     auto* label = scene->addText(text);
     label->setDefaultTextColor(Qt::white);
@@ -151,7 +149,7 @@ void Canvas::zoomFit() {
     currentZoom = 1.0;
 }
 
-// ========== 交互：Ctrl+滚轮、空格/中键拖拽 ==========
+// ========== 交互：Ctrl+滚轮、空格中键拖拽 ==========
 void Canvas::wheelEvent(QWheelEvent* e) {
     if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
         const QPoint numDeg = e->angleDelta();

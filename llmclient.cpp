@@ -11,13 +11,19 @@
 #include <QJsonArray>
 #include <QProcessEnvironment>
 
-LLMClient::LLMClient(QObject* parent)
-    : QObject(parent)
-{
-    apiKey_ = "sk-KwnEs8GYvlNsj4dWcS39ksITuPsfK3D57ZIeWc2oSusk9DbX";
+LLMClient::LLMClient(QObject* parent) : QObject(parent) {
+    // API Key：优先用环境变量
+    if (apiKey_.isEmpty()) {
+        QByteArray envKey = qgetenv("API_KEY");
+        if (!envKey.isEmpty()) {
+            apiKey_ = QString::fromLocal8Bit(envKey);
+        } else {
+            apiKey_ = "sk-KwnEs8GYvlNsj4dWcS39ksITuPsfK3D57ZIeWc2oSusk9DbX";
+        }
+    }
+    // API 地址 & 模型
     apiUrl_ = "https://yunwu.ai/v1/chat/completions";
     model_  = "gpt-4o";
-
 }
 
 QString LLMClient::buildSystemPrompt() const
@@ -131,8 +137,7 @@ void LLMClient::callModel(const QString& prompt)
     QByteArray body = doc.toJson(QJsonDocument::Compact);
 
     QNetworkReply* reply = manager_.post(request, body);
-    connect(reply, &QNetworkReply::finished,
-            this,  &LLMClient::onReplyFinished);
+    connect(reply, &QNetworkReply::finished, this,  &LLMClient::onReplyFinished);
 }
 
 void LLMClient::onReplyFinished()

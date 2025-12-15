@@ -15,7 +15,7 @@
 #include <cmath>
 #include <memory>
 
-// 这两个全局辅助变量和函数，也一起从原文件剪过来
+// 两个全局辅助变量和函数
 static ds::BTNode* g_btHighlightNode = nullptr;
 static qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
