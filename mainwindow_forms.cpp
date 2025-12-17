@@ -11,9 +11,10 @@
 #include <QLabel>
 #include <QHeaderView>
 
+//将某个内容控件统一包装进带标题的分组框
 static QWidget* wrapGroup(const QString& title, QWidget* inner) {
     auto* box = new QGroupBox(title);
-    auto* v = new QVBoxLayout(box);
+    auto* v = new QVBoxLayout(box);//垂直布局
     v->setContentsMargins(12,10,12,12);
     v->addWidget(inner);
     return box;

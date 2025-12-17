@@ -13,11 +13,12 @@ Canvas::Canvas(QWidget* parent)
       scene(new QGraphicsScene(this)) {
 
     setScene(scene);
-    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-    setBackgroundBrush(QColor("#f7f9fb"));
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    setDragMode(QGraphicsView::NoDrag);
+    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);//抗锯齿
+    setBackgroundBrush(QColor("#f7f9fb"));//背景色
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);//每次刷新都更新整个视口
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);//缩放时以鼠标位置为锚点
+    //setDragMode(QGraphicsView::NoDrag);
+    setDragMode(QGraphicsView::ScrollHandDrag);
 
     title = scene->addText("");
     title->setDefaultTextColor(Qt::darkGray);
@@ -181,10 +182,10 @@ void Canvas::mousePressEvent(QMouseEvent* e) {
 void Canvas::mouseReleaseEvent(QMouseEvent* e) {
     if (middlePanning && e->button()==Qt::MiddleButton) {
         middlePanning = false;
-        setDragMode(QGraphicsView::NoDrag);
+        //setDragMode(QGraphicsView::NoDrag);
     }
     if (spacePanning && e->button()==Qt::LeftButton) {
-        setDragMode(QGraphicsView::NoDrag);
+        //setDragMode(QGraphicsView::NoDrag);
     }
     QGraphicsView::mouseReleaseEvent(e);
 }

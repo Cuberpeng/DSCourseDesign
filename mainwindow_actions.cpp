@@ -25,45 +25,6 @@
 #include <QHeaderView>
 #include <QPointF>
 
-void MainWindow::animateBTOrder(const int* order, int n, const QString& title)
-{
-    timer.stop();
-    steps.clear();
-    stepIndex = 0;
-
-    // 选择需要绘制的树根：标题包含"BST/二叉搜索树"则优先用 BST，否则用普通二叉树
-    ds::BTNode* rootBT  = bt.root();
-    ds::BTNode* rootBST = bst.root();
-    ds::BTNode* root = nullptr;
-    if (title.contains("BST", Qt::CaseInsensitive) || title.contains(QStringLiteral("二叉搜索树"))) {
-        root = rootBST ? rootBST : rootBT;
-    } else {
-        root = rootBT ? rootBT : rootBST;
-    }
-
-    // 空序列或无树时的兜底
-    if (!order || n <= 0 || !root) {
-        view->resetScene();
-        view->setTitle(title + QStringLiteral("（空）"));
-        if (root) drawBT(root, 400, 120, 200, 0);
-        timer.start(); // 保持流程一致
-        return;
-    }
-
-    // 逐步高亮访问序列
-    for (int i = 0; i < n; ++i) {
-        const int key = order[i];
-        steps.push_back([this, i, n, key, title, root]() {
-            view->resetScene();
-            view->setTitle(QString("%1：访问 %2（%3/%4）").arg(title).arg(key).arg(i + 1).arg(n));
-            drawBT(root, 400, 120, 200, key); // 仅高亮，不移动
-        });
-    }
-    timer.start();
-}
-
-
-
 // ================== 文件保存/打开/导出 ==================
 void MainWindow::saveDoc() {
     QFileDialog dialog(this, QStringLiteral("保存为"), "", "XPR's DS Visualizer (*.xpr)");

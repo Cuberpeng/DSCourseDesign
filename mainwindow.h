@@ -73,7 +73,6 @@ private slots:
     void btInorder();
     void btPostorder();
     void btLevelorder();
-    void animateBTOrder(const int* order, int n, const QString& title);
 
     // 二叉搜索树
     void bstBuild();
@@ -99,8 +98,8 @@ private slots:
 
     // 动画播放控制
     void onAnimPlay();
-    void onAnimPause();
-    void onAnimStep();
+    //void onAnimPause();
+    //void onAnimStep();
     void onAnimReplay();
 
     // 模块切换时同步画布
@@ -160,6 +159,8 @@ private:
     void drawLinklist(const ds::Linklist& ll);
     void drawStack(const ds::Stack& st);
     void drawBT(ds::BTNode* root, qreal x, qreal y, qreal distance, int highlightKey=-99999);
+    // 追加一次 AVL 插入动画步骤（不会 stop timer / clear steps）
+    void drawAVL(int value, const QVector<int>& restoreKeys, int idx, int total);
 
     // 右侧控件
     // 顺序表

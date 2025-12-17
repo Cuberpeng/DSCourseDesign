@@ -61,11 +61,6 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "btInorder",
         "btPostorder",
         "btLevelorder",
-        "animateBTOrder",
-        "const int*",
-        "order",
-        "n",
-        "title",
         "bstBuild",
         "bstFind",
         "bstInsert",
@@ -80,6 +75,8 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         "onZoomOut",
         "onZoomFit",
         "onZoomReset",
+        "onAnimPlay",
+        "onAnimReplay",
         "onModuleChanged",
         "index",
         "saveDoc",
@@ -140,71 +137,71 @@ template <> constexpr inline auto MainWindow::qt_create_metaobjectdata<qt_meta_t
         QtMocHelpers::SlotData<void()>(18, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'btLevelorder'
         QtMocHelpers::SlotData<void()>(19, 2, QMC::AccessPrivate, QMetaType::Void),
-        // Slot 'animateBTOrder'
-        QtMocHelpers::SlotData<void(const int *, int, const QString &)>(20, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 21, 22 }, { QMetaType::Int, 23 }, { QMetaType::QString, 24 },
-        }}),
         // Slot 'bstBuild'
-        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(20, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'bstFind'
-        QtMocHelpers::SlotData<void()>(26, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(21, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'bstInsert'
-        QtMocHelpers::SlotData<void()>(27, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(22, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'bstErase'
-        QtMocHelpers::SlotData<void()>(28, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(23, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'bstClear'
-        QtMocHelpers::SlotData<void()>(29, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(24, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'huffmanBuild'
-        QtMocHelpers::SlotData<void()>(30, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(25, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'huffmanClear'
-        QtMocHelpers::SlotData<void()>(31, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(26, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'avlBuild'
-        QtMocHelpers::SlotData<void()>(32, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(27, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'avlInsert'
-        QtMocHelpers::SlotData<void()>(33, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(28, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'avlClear'
-        QtMocHelpers::SlotData<void()>(34, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(29, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onZoomIn'
-        QtMocHelpers::SlotData<void()>(35, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(30, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onZoomOut'
-        QtMocHelpers::SlotData<void()>(36, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(31, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onZoomFit'
-        QtMocHelpers::SlotData<void()>(37, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(32, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onZoomReset'
-        QtMocHelpers::SlotData<void()>(38, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(33, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onAnimPlay'
+        QtMocHelpers::SlotData<void()>(34, 2, QMC::AccessPrivate, QMetaType::Void),
+        // Slot 'onAnimReplay'
+        QtMocHelpers::SlotData<void()>(35, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onModuleChanged'
-        QtMocHelpers::SlotData<void(int)>(39, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::Int, 40 },
+        QtMocHelpers::SlotData<void(int)>(36, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::Int, 37 },
         }}),
         // Slot 'saveDoc'
-        QtMocHelpers::SlotData<void()>(41, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(38, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'openDoc'
-        QtMocHelpers::SlotData<void()>(42, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(39, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'insertDSLExample'
-        QtMocHelpers::SlotData<void()>(43, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(40, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'runDSL'
-        QtMocHelpers::SlotData<void()>(44, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(41, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'runLLM'
-        QtMocHelpers::SlotData<void()>(45, 2, QMC::AccessPrivate, QMetaType::Void),
+        QtMocHelpers::SlotData<void()>(42, 2, QMC::AccessPrivate, QMetaType::Void),
         // Slot 'onLlmDslReady'
-        QtMocHelpers::SlotData<void(const QString &)>(46, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 47 },
+        QtMocHelpers::SlotData<void(const QString &)>(43, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 44 },
         }}),
         // Slot 'onLlmError'
-        QtMocHelpers::SlotData<void(const QString &)>(48, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 49 },
+        QtMocHelpers::SlotData<void(const QString &)>(45, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 46 },
         }}),
         // Slot 'dumpBTLevel'
-        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(50, 2, QMC::AccessPrivate, 0x80000000 | 51, {{
-            { 0x80000000 | 52, 53 }, { QMetaType::Int, 54 },
+        QtMocHelpers::SlotData<QVector<int>(ds::BTNode *, int) const>(47, 2, QMC::AccessPrivate, 0x80000000 | 48, {{
+            { 0x80000000 | 49, 50 }, { QMetaType::Int, 51 },
         }}),
         // Slot 'dumpPreorder'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(55, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 52, 56 }, { 0x80000000 | 57, 58 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(52, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 49, 53 }, { 0x80000000 | 54, 55 },
         }}),
         // Slot 'collectLeafWeights'
-        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(59, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 52, 56 }, { 0x80000000 | 57, 58 },
+        QtMocHelpers::SlotData<void(ds::BTNode *, QVector<int> &) const>(56, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 49, 53 }, { 0x80000000 | 54, 55 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -247,33 +244,34 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 15: _t->btInorder(); break;
         case 16: _t->btPostorder(); break;
         case 17: _t->btLevelorder(); break;
-        case 18: _t->animateBTOrder((*reinterpret_cast< std::add_pointer_t<const int*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[3]))); break;
-        case 19: _t->bstBuild(); break;
-        case 20: _t->bstFind(); break;
-        case 21: _t->bstInsert(); break;
-        case 22: _t->bstErase(); break;
-        case 23: _t->bstClear(); break;
-        case 24: _t->huffmanBuild(); break;
-        case 25: _t->huffmanClear(); break;
-        case 26: _t->avlBuild(); break;
-        case 27: _t->avlInsert(); break;
-        case 28: _t->avlClear(); break;
-        case 29: _t->onZoomIn(); break;
-        case 30: _t->onZoomOut(); break;
-        case 31: _t->onZoomFit(); break;
-        case 32: _t->onZoomReset(); break;
-        case 33: _t->onModuleChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
-        case 34: _t->saveDoc(); break;
-        case 35: _t->openDoc(); break;
-        case 36: _t->insertDSLExample(); break;
-        case 37: _t->runDSL(); break;
-        case 38: _t->runLLM(); break;
-        case 39: _t->onLlmDslReady((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 40: _t->onLlmError((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
-        case 41: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
+        case 18: _t->bstBuild(); break;
+        case 19: _t->bstFind(); break;
+        case 20: _t->bstInsert(); break;
+        case 21: _t->bstErase(); break;
+        case 22: _t->bstClear(); break;
+        case 23: _t->huffmanBuild(); break;
+        case 24: _t->huffmanClear(); break;
+        case 25: _t->avlBuild(); break;
+        case 26: _t->avlInsert(); break;
+        case 27: _t->avlClear(); break;
+        case 28: _t->onZoomIn(); break;
+        case 29: _t->onZoomOut(); break;
+        case 30: _t->onZoomFit(); break;
+        case 31: _t->onZoomReset(); break;
+        case 32: _t->onAnimPlay(); break;
+        case 33: _t->onAnimReplay(); break;
+        case 34: _t->onModuleChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 35: _t->saveDoc(); break;
+        case 36: _t->openDoc(); break;
+        case 37: _t->insertDSLExample(); break;
+        case 38: _t->runDSL(); break;
+        case 39: _t->runLLM(); break;
+        case 40: _t->onLlmDslReady((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 41: _t->onLlmError((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
+        case 42: { QList<int> _r = _t->dumpBTLevel((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<int>>(_a[2])));
             if (_a[0]) *reinterpret_cast< QList<int>*>(_a[0]) = std::move(_r); }  break;
-        case 42: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
-        case 43: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 43: _t->dumpPreorder((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
+        case 44: _t->collectLeafWeights((*reinterpret_cast< std::add_pointer_t<ds::BTNode*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QList<int>&>>(_a[2]))); break;
         default: ;
         }
     }
@@ -298,14 +296,14 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 44)
+        if (_id < 45)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 44;
+        _id -= 45;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 44)
+        if (_id < 45)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 44;
+        _id -= 45;
     }
     return _id;
 }

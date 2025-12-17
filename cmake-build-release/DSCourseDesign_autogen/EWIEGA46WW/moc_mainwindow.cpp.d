@@ -522,6 +522,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-release/DSCourseDesign_a
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMainWindow \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QMenuBar \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QScrollArea \
+  D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSlider \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSpinBox \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QSplitter \
   D:/Qt/6.9.2/mingw_64/include/QtWidgets/QStackedWidget \

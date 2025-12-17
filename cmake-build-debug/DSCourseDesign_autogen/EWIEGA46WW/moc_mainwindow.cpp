@@ -275,6 +275,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 31: _t->onZoomFit(); break;
         case 32: _t->onZoomReset(); break;
         case 33: _t->onAnimPlay(); break;
+        case 35: _t->onAnimStep(); break;
         case 36: _t->onAnimReplay(); break;
         case 37: _t->onModuleChanged((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         case 38: _t->saveDoc(); break;
