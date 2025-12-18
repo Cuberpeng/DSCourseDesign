@@ -119,7 +119,7 @@ void MainWindow::saveDoc() {
 
         QFile f(path);
         if(f.open(QIODevice::WriteOnly)) {
-            f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+            f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));//写文件
             f.close();
             statusBar()->showMessage(QString("已保存全部数据结构：%1").arg(path));
         }
@@ -348,7 +348,7 @@ avl.clear
 
 void MainWindow::runDSL() {
     // 读取 DSL 文本
-    const QString all = dslEdit->toPlainText();
+    const QString all = dslEdit->toPlainText();//读取全文
 
     // 统一在算法模块中做校验
     QString errorTitle, errorDialog, statusBarMsg;
@@ -356,16 +356,13 @@ void MainWindow::runDSL() {
     if (!ok) {
         // 判断是否为“多种数据结构混用”的错误
         const bool isMultiFamilyError =
-            statusBarMsg.contains(QStringLiteral("包含多种数据结构"))
-            || errorDialog.contains(QStringLiteral("多种数据结构"));
+            statusBarMsg.contains(QStringLiteral("包含多种数据结构")) || errorDialog.contains(QStringLiteral("多种数据结构"));
 
         if (isMultiFamilyError) {
             // —— 多种数据结构混用：给用户一个“忽略并继续 / 取消执行”的选择 ——
             QMessageBox msgBox(this);
             msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setWindowTitle(errorTitle.isEmpty()
-                                  ? QStringLiteral("输入有误")
-                                  : errorTitle);
+            msgBox.setWindowTitle(errorTitle.isEmpty() ? QStringLiteral("输入有误") : errorTitle);
 
             QString text = errorDialog;
             if (text.isEmpty()) {
@@ -381,13 +378,11 @@ void MainWindow::runDSL() {
             }
             msgBox.setText(text);
 
-            QPushButton* ignoreButton = msgBox.addButton(
-                QStringLiteral("忽略并继续执行"), QMessageBox::AcceptRole);
-            QPushButton* cancelButton = msgBox.addButton(
-                QStringLiteral("取消执行"), QMessageBox::RejectRole);
+            QPushButton* ignoreButton = msgBox.addButton(QStringLiteral("忽略并继续执行"), QMessageBox::AcceptRole);
+            QPushButton* cancelButton = msgBox.addButton(QStringLiteral("取消执行"), QMessageBox::RejectRole);
             msgBox.setDefaultButton(cancelButton);
 
-            msgBox.exec();
+            msgBox.exec();//弹出对话框
 
             if (msgBox.clickedButton() == cancelButton) {
                 // 用户选择取消：保持原有“校验失败并已取消”的语义
@@ -421,14 +416,15 @@ void MainWindow::runDSL() {
     QVector<std::function<void()>> ops;
     ops.reserve(lines.size());
 
+    // 从字符串中抽取所有整数
     auto asNumbers = [this](const QString& s)->QVector<int>{
         return parseIntList(s); // 已有：正则抽取所有整数，支持空格/逗号
     };
 
     auto normalized = [](QString s){
-        s = s.trimmed();
+        s = s.trimmed();//去掉首尾空白
         s.replace(QRegularExpression("[\\t,]+"), " "); // 制表符/逗号 → 空格
-        return s.toLower();
+        return s.toLower();//大小写不敏感
     };
 
     for (const QString& ln : lines) {
@@ -765,9 +761,9 @@ void MainWindow::runDSL() {
         auto op = ops.takeFirst();
         op();
         QTimer::singleShot(0, this, [this, runNext](){
-            if (steps.isEmpty()) {
+            if (steps.isEmpty()) {// 该命令没有产生动画 steps，直接执行
                 (*runNext)();
-            } else {
+            } else {// 该命令产生了动画 steps，作为本条动画的最后一步塞进 steps 队列
                 steps.push_back([runNext](){ (*runNext)(); });
                 if (!timer.isActive()) timer.start();
             }
@@ -814,7 +810,7 @@ void MainWindow::runLLM()
     if (!llmProgressDialog) {
         llmProgressDialog = new QDialog(this);
         llmProgressDialog->setWindowTitle(QStringLiteral("LLM"));
-        llmProgressDialog->setModal(true);                     // 调用期间禁止其它操作
+        llmProgressDialog->setModal(true);// 调用期间禁止其它操作
         llmProgressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false); // 不允许手动关
         llmProgressDialog->setFixedSize(260, 100);
 
@@ -849,11 +845,11 @@ void MainWindow::onLlmDslReady(const QString& dslText)
     QString cleaned = dslText.trimmed();
 
     if (cleaned.startsWith("```")) {
-        int firstNewline = cleaned.indexOf('\n');
+        int firstNewline = cleaned.indexOf('\n');// 以```开头则删掉第一行
         if (firstNewline != -1) {
             cleaned = cleaned.mid(firstNewline + 1);
         }
-        int lastFence = cleaned.lastIndexOf("```");
+        int lastFence = cleaned.lastIndexOf("```");// 以```结尾则删掉最后一行
         if (lastFence != -1) {
             cleaned = cleaned.left(lastFence);
         }
@@ -861,15 +857,14 @@ void MainWindow::onLlmDslReady(const QString& dslText)
     }
 
     if (cleaned.isEmpty()) {
-        QMessageBox::warning(this, QStringLiteral("LLM"),
-                             QStringLiteral("LLM：大模型返回的DSL为空"));
+        QMessageBox::warning(this, QStringLiteral("LLM"), QStringLiteral("LLM：大模型返回的DSL为空"));
         showMessage(QStringLiteral("LLM：大模型返回为空，未生成DSL"));
         return;
     }
 
     // 把 DSL 显示到编辑框中，方便用户查看/修改
     if (dslEdit) {
-        dslEdit->setPlainText(cleaned);
+        dslEdit->setPlainText(cleaned);// 把转化成的DSL写进去
     }
 
     showMessage(QStringLiteral("LLM：已由大模型生成DSL，开始执行脚本。"));
@@ -928,6 +923,7 @@ void MainWindow::onLlmError(const QString& message)
 }
 
 // ================== 辅助函数 ==================
+// 把二叉树按层序遍历序列化为整数数组
 QVector<int> MainWindow::dumpBTLevel(ds::BTNode* root, int nullSentinel) const {
     QVector<int> level;
     if(!root) return level;
@@ -957,6 +953,7 @@ QVector<int> MainWindow::dumpBTLevel(ds::BTNode* root, int nullSentinel) const {
     return level;
 }
 
+// 把二叉树按先序遍历导出成整数数组
 void MainWindow::dumpPreorder(ds::BTNode* r, QVector<int>& out) const {
     if(!r) return;
     out.push_back(r->key);
@@ -964,6 +961,7 @@ void MainWindow::dumpPreorder(ds::BTNode* r, QVector<int>& out) const {
     dumpPreorder(r->right, out);
 }
 
+// 遍历 Huffman 树并收集所有叶子结点的权值到数组中
 void MainWindow::collectLeafWeights(ds::BTNode* r, QVector<int>& out) const {
     if(!r) return;
     if(!r->left && !r->right) out.push_back(r->key);

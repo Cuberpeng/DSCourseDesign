@@ -24,10 +24,11 @@ public:
     void setTitle(const QString& t);
 
     // 画基本元素
-    QGraphicsEllipseItem* addNode(qreal x, qreal y, const QString& text, bool highlight=false);
+    void addNode(qreal x, qreal y, const QString &text, bool highlight = false);
     void addEdge(QPointF a, QPointF b);
     void addCurveArrow(QPointF s, QPointF c1, QPointF c2, QPointF e);
-    QGraphicsRectItem* addBox(qreal x, qreal y, qreal w, qreal h, const QString& text, bool highlight=false);
+
+    void addBox(qreal x, qreal y, qreal w, qreal h, const QString &text, bool highlight = false);
 
     // 缩放控制（供工具栏按钮调用）
     void zoomIn();
@@ -38,10 +39,6 @@ public:
 protected:
     // 交互：Ctrl+滚轮缩放、空格/中键拖拽
     void wheelEvent(QWheelEvent* e) override;
-    void mousePressEvent(QMouseEvent* e) override;
-    void mouseReleaseEvent(QMouseEvent* e) override;
-    void keyPressEvent(QKeyEvent* e) override;
-    void keyReleaseEvent(QKeyEvent* e) override;
 
 private:
     QGraphicsScene* scene{};

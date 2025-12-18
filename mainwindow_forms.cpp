@@ -326,9 +326,7 @@ QWidget* MainWindow::buildDSLPage() {
     auto* h = new QHBoxLayout(root);
     h->setSpacing(12);
 
-    //
     // 左侧：DSL 脚本编辑与执行
-    //
     auto* dslGroup = new QGroupBox(QStringLiteral("DSL 脚本"));
     auto* dslLayout = new QVBoxLayout(dslGroup);
     dslLayout->setSpacing(8);
@@ -367,9 +365,7 @@ QWidget* MainWindow::buildDSLPage() {
     dslLayout->addLayout(dslBtns);
     dslLayout->addStretch(1);
 
-    //
     // 右侧：自然语言输入
-    //
     auto* llmGroup = new QGroupBox(QStringLiteral("大模型助手"));
     auto* llmLayout = new QVBoxLayout(llmGroup);
     llmLayout->setSpacing(8);

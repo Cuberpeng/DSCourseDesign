@@ -11,15 +11,14 @@
 #include <QRegularExpression>
 #include <QTime>
 
-static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
+//static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     resize(1440, 960);
     setWindowTitle(QStringLiteral("数据结构可视化"));
-    statusBar()->showMessage(QStringLiteral("就绪"));
 
     // 顶部：画布工具栏（包含文件操作和缩放操作）
-    canvasBar = addToolBar(QStringLiteral("画布"));
+    canvasBar = addToolBar(QStringLiteral("工具栏"));
     canvasBar->setMovable(false);
     canvasBar->setStyleSheet(
         "QToolBar{background:#0ea5e9;border:0;padding:4px;} "
@@ -35,10 +34,10 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     canvasBar->addSeparator();
 
     // 缩放按钮
-    QAction* actZoomIn  = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowUp),   QStringLiteral("放大"));
+    QAction* actZoomIn = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowUp), QStringLiteral("放大"));
     QAction* actZoomOut = canvasBar->addAction(style()->standardIcon(QStyle::SP_ArrowDown), QStringLiteral("缩小"));
-    QAction* actFit     = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("适配"));
-    QAction* actReset   = canvasBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("重置"));
+    QAction* actFit = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogDetailedView), QStringLiteral("适配"));
+    QAction* actReset = canvasBar->addAction(style()->standardIcon(QStyle::SP_BrowserReload), QStringLiteral("重置"));
 
     // ★ 新增：动画控制按钮
     canvasBar->addSeparator();
@@ -59,9 +58,9 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     canvasBar->addWidget(slowLabel);
 
     // 连续型滑块：0 ~ 100（0 最慢，100 最快）
-    animSpeedSlider = new QSlider(Qt::Horizontal, canvasBar);
-    animSpeedSlider->setRange(0, 100);          // 连续型调节
-    animSpeedSlider->setValue(40);              // 默认偏慢一点，比之前 3/5 接近
+    animSpeedSlider = new QSlider(Qt::Horizontal, canvasBar);// 滑杆
+    animSpeedSlider->setRange(0, 100);// 连续型调节
+    animSpeedSlider->setValue(40);// 默认偏慢一点，比之前 3/5 接近
     animSpeedSlider->setFixedWidth(140);
     animSpeedSlider->setToolTip(QStringLiteral("调整动画播放速度（左慢右快）"));
 
@@ -97,28 +96,26 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     fastLabel->setStyleSheet("QLabel{color:rgba(255,255,255,0.9);font-size:10px;margin-right:4px;}");
     canvasBar->addWidget(fastLabel);
 
-
     // 文件操作信号
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
     connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
-    //connect(actPng,  &QAction::triggered, this, &MainWindow::exportPNG);
 
     // 缩放信号
-    connect(actZoomIn,  &QAction::triggered, this, &MainWindow::onZoomIn);
+    connect(actZoomIn, &QAction::triggered, this, &MainWindow::onZoomIn);
     connect(actZoomOut, &QAction::triggered, this, &MainWindow::onZoomOut);
-    connect(actFit,     &QAction::triggered, this, &MainWindow::onZoomFit);
-    connect(actReset,   &QAction::triggered, this, &MainWindow::onZoomReset);
+    connect(actFit, &QAction::triggered, this, &MainWindow::onZoomFit);
+    connect(actReset, &QAction::triggered, this, &MainWindow::onZoomReset);
 
     // 动画控制信号
     connect(actAnimPlayToggle, &QAction::triggered, this, &MainWindow::onAnimPlay);
-    connect(actAnimReplay,     &QAction::triggered, this, &MainWindow::onAnimReplay);
+    connect(actAnimReplay, &QAction::triggered, this, &MainWindow::onAnimReplay);
 
     // 速度滑块信号
     connect(animSpeedSlider, &QSlider::valueChanged, this, &MainWindow::onAnimSpeedChanged);
 
     // ================= 中心整体：用一个 QWidget + QVBoxLayout 包起来 =================
     QWidget* central = new QWidget(this);
-    QVBoxLayout* centralLayout = new QVBoxLayout(central);
+    QVBoxLayout* centralLayout = new QVBoxLayout(central);//垂直排布
     centralLayout->setContentsMargins(0, 0, 0, 0);
     centralLayout->setSpacing(4);
     setCentralWidget(central);
@@ -154,7 +151,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     splitter->addWidget(controlPanel);
 
     // 分割条设置（左右）
-    splitter->setChildrenCollapsible(false);
+    splitter->setChildrenCollapsible(false);// 避免某一侧被拖到“完全消失
     splitter->setHandleWidth(2);
     splitter->setStyleSheet("QSplitter::handle { background: #cbd5e1; }");
     splitter->setStretchFactor(0, 4); // 左：画布区域
@@ -168,7 +165,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     controlPanel->setMinimumWidth(220);
 
     // 右侧控制面板内容
-    auto* v = new QVBoxLayout(controlPanel);
+    auto* v = new QVBoxLayout(controlPanel);// 右侧纵向排布
     v->setContentsMargins(12, 10, 12, 10);
     v->setSpacing(10);
 
@@ -189,7 +186,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     v->addWidget(new QLabel(QStringLiteral("模块选择："), controlPanel));
     v->addWidget(moduleCombo);
 
-    // 右侧模块堆栈
+    // 右侧模块堆栈，一次只显示一个页面
     moduleStack = new QStackedWidget(controlPanel);
     v->addWidget(moduleStack, 1);
 
@@ -201,17 +198,14 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     moduleStack->addWidget(makeScrollPage(buildBSTPage()));
     moduleStack->addWidget(makeScrollPage(buildHuffmanPage()));
     moduleStack->addWidget(makeScrollPage(buildAVLPage()));
-    // 注意：不再把 buildDSLPage() 加到 moduleStack 里
 
     // 切换模块：只切右侧面板 + 同步画布
-    connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            moduleStack, &QStackedWidget::setCurrentIndex);
-    connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &MainWindow::onModuleChanged);
+    connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged), moduleStack, &QStackedWidget::setCurrentIndex);//当模块页切换时发信号
+    connect(moduleCombo, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::onModuleChanged);
 
     // ================= 中间：公共 DSL / NLI 区域 =================
-    QWidget* dslContainer = buildDSLPage();          // 只构建界面，逻辑在 mainwindow_actions 里
-    QWidget* dslScroll    = makeScrollPage(dslContainer);
+    QWidget* dslContainer = buildDSLPage();// 只构建界面，逻辑在 mainwindow_actions 里
+    QWidget* dslScroll = makeScrollPage(dslContainer);
     dslScroll->setMinimumHeight(160);
 
     // ================= 底部：操作信息栏（1 行 + 可滚动） =================
@@ -291,8 +285,8 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 }
 
 void MainWindow::showMessage(const QString& message) {
-    QString timestamp = QTime::currentTime().toString("hh:mm:ss");
-    QString formattedMessage = QString("[%1] %2").arg(timestamp, message);
+    QString timestamp = QTime::currentTime().toString("hh:mm:ss");// 生成时间戳
+    QString formattedMessage = QString("[%1] %2").arg(timestamp, message);// 格式化为 "[时间] 消息"
     messageBar->append(formattedMessage);
 
     // 自动滚动到底部
@@ -312,7 +306,7 @@ QWidget* MainWindow::makeScrollPage(QWidget* content) {
     auto* sa = new QScrollArea;
     sa->setWidget(content);
     sa->setWidgetResizable(true);
-    sa->setFrameShape(QFrame::NoFrame);
+    sa->setFrameShape(QFrame::NoFrame);// 去掉边框更“扁平化”
     return sa;
 }
 
@@ -359,18 +353,9 @@ void MainWindow::updateAnimUiState()
         actAnimPlayToggle->setToolTip(QStringLiteral("当前没有可播放的动画"));
     } else {
         // 有动画：根据是否在播放切换图标和文字
-        actAnimPlayToggle->setIcon(
-            style()->standardIcon(
-                playing ? QStyle::SP_MediaPause : QStyle::SP_MediaPlay
-            )
-        );
-        actAnimPlayToggle->setText(playing ? QStringLiteral("暂停")
-                                           : QStringLiteral("播放"));
-        actAnimPlayToggle->setToolTip(
-            playing
-            ? QStringLiteral("暂停当前动画")
-            : QStringLiteral("播放 / 继续当前动画")
-        );
+        actAnimPlayToggle->setIcon(style()->standardIcon(playing ? QStyle::SP_MediaPause : QStyle::SP_MediaPlay));
+        actAnimPlayToggle->setText(playing ? QStringLiteral("暂停") : QStringLiteral("播放"));
+        actAnimPlayToggle->setToolTip(playing ? QStringLiteral("暂停当前动画") : QStringLiteral("播放 / 继续当前动画"));
     }
 
     // 重播：有动画且没在自动播放时允许（播放时禁用成浅色）
@@ -448,7 +433,7 @@ void MainWindow::onAnimSpeedChanged(int value)
 }
 
 // 缩放按钮
-void MainWindow::onZoomIn()   { view->zoomIn();   }
-void MainWindow::onZoomOut()  { view->zoomOut();  }
-void MainWindow::onZoomFit()  { view->zoomFit();  }
+void MainWindow::onZoomIn(){ view->zoomIn();   }
+void MainWindow::onZoomOut(){ view->zoomOut();  }
+void MainWindow::onZoomFit(){ view->zoomFit();  }
 void MainWindow::onZoomReset(){ view->zoomReset(); }

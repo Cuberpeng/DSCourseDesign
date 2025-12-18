@@ -98,8 +98,6 @@ private slots:
 
     // 动画播放控制
     void onAnimPlay();
-    //void onAnimPause();
-    //void onAnimStep();
     void onAnimReplay();
 
     // 模块切换时同步画布
