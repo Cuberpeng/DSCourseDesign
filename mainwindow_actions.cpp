@@ -432,36 +432,43 @@ void MainWindow::onModuleChanged(int index) {
     switch (index) {
     case 0: // 顺序表
         currentKind_ = DocKind::SeqList;
+        view->setCurrentFamily(QStringLiteral("seq"));
         if (seq.size() > 0) { drawSeqlist(seq); view->setTitle(QStringLiteral("顺序表")); }
         else { view->setTitle(QStringLiteral("顺序表（空）")); }
         break;
     case 1: // 单链表
         currentKind_ = DocKind::LinkedList;
+        view->setCurrentFamily(QStringLiteral("link"));
         if (link.size() > 0) { drawLinklist(link); view->setTitle(QStringLiteral("单链表")); }
         else { view->setTitle(QStringLiteral("单链表（空）")); }
         break;
     case 2: // 栈
         currentKind_ = DocKind::Stack;
+        view->setCurrentFamily(QStringLiteral("stack"));
         if (st.size() > 0) { drawStack(st); view->setTitle(QStringLiteral("顺序栈")); }
         else { view->setTitle(QStringLiteral("顺序栈（空）")); }
         break;
     case 3: // 普通二叉树
         currentKind_ = DocKind::BinaryTree;
+        view->setCurrentFamily(QStringLiteral("bt"));
         if (bt.root()) { drawBT(bt.root(), 400, 120, 200, 0); view->setTitle(QStringLiteral("二叉树")); }
         else { view->setTitle(QStringLiteral("二叉树（空）")); }
         break;
     case 4: // BST
         currentKind_ = DocKind::BST;
+        view->setCurrentFamily(QStringLiteral("bst"));
         if (bst.root()) { drawBT(bst.root(), 400, 120, 200, 0); view->setTitle(QStringLiteral("BST")); }
         else { view->setTitle(QStringLiteral("BST（空）")); }
         break;
     case 5: // Huffman
         currentKind_ = DocKind::Huffman;
+        view->setCurrentFamily(QStringLiteral("huff"));
         if (huff.root()) { drawBT(huff.root(), 400, 120, 200, 0); view->setTitle(QStringLiteral("哈夫曼树")); }
         else { view->setTitle(QStringLiteral("哈夫曼树（空）")); }
         break;
     case 6: // AVL
         currentKind_ = DocKind::AVL;
+        view->setCurrentFamily(QStringLiteral("avl"));
         if (avl.root()) { drawBT(avl.root(), 400, 120, 200, 0); view->setTitle(QStringLiteral("AVL")); }
         else { view->setTitle(QStringLiteral("AVL（空）")); }
         break;

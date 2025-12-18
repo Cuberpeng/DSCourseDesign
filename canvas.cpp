@@ -7,10 +7,14 @@
 #include <QGraphicsDropShadowEffect>
 #include <QApplication>
 #include <QScrollBar>
+#include <QSettings>
+
 
 Canvas::Canvas(QWidget* parent)
     : QGraphicsView(parent),
       scene(new QGraphicsScene(this)) {
+
+    initDefaultColors();
 
     setScene(scene);
     setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);//抗锯齿
@@ -37,30 +41,152 @@ void Canvas::resetScene(){
     // 保持当前缩放与视图状态，不强制 resetTransform
 }
 
+// ================= 配色 =================
+QString Canvas::normFamily(const QString& family) {
+    const QString f = family.trimmed().toLower();
+    if (f.isEmpty()) return QStringLiteral("default");
+    return f;
+}
+
+QStringList Canvas::supportedFamilies() {
+    return {
+        QStringLiteral("seq"),
+        QStringLiteral("link"),
+        QStringLiteral("stack"),
+        QStringLiteral("bt"),
+        QStringLiteral("bst"),
+        QStringLiteral("huff"),
+        QStringLiteral("avl")
+    };
+}
+
+void Canvas::initDefaultColors() {
+    normalFill_.clear();
+    highlightFill_.clear();
+
+    // 顺序表：浅底 + 暖色高亮
+    normalFill_[QStringLiteral("seq")]    = QColor("#e8eef9");
+    highlightFill_[QStringLiteral("seq")] = QColor("#ffd166");
+
+    // 链表：蓝 + 橙
+    normalFill_[QStringLiteral("link")]    = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("link")] = QColor("#f59e0b");
+
+    // 栈：蓝系
+    normalFill_[QStringLiteral("stack")]    = QColor("#93c5fd");
+    highlightFill_[QStringLiteral("stack")] = QColor("#60a5fa");
+
+    // 树：默认蓝/橙（用户可分别调）
+    normalFill_[QStringLiteral("bt")]    = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("bt")] = QColor("#f59e0b");
+
+    normalFill_[QStringLiteral("bst")]    = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("bst")] = QColor("#f59e0b");
+
+    normalFill_[QStringLiteral("huff")]    = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("huff")] = QColor("#f59e0b");
+
+    normalFill_[QStringLiteral("avl")]    = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("avl")] = QColor("#f59e0b");
+
+    // fallback
+    normalFill_[QStringLiteral("default")]   = QColor("#3b82f6");
+    highlightFill_[QStringLiteral("default")] = QColor("#f59e0b");
+}
+
+void Canvas::loadColors() {
+    QSettings s(QStringLiteral("DSCourseDesign"), QStringLiteral("DSCourseDesign"));
+
+    auto loadOne = [&](const QString& fam) {
+        const QString kN = QStringLiteral("colors/%1/normal").arg(fam);
+        const QString kH = QStringLiteral("colors/%1/highlight").arg(fam);
+        if (s.contains(kN)) {
+            const QColor c(s.value(kN).toString());
+            if (c.isValid()) normalFill_[fam] = c;
+        }
+        if (s.contains(kH)) {
+            const QColor c(s.value(kH).toString());
+            if (c.isValid()) highlightFill_[fam] = c;
+        }
+    };
+
+    loadOne(QStringLiteral("default"));
+    for (const auto& f : supportedFamilies()) loadOne(f);
+}
+
+void Canvas::saveColors() const {
+    QSettings s(QStringLiteral("DSCourseDesign"), QStringLiteral("DSCourseDesign"));
+
+    auto saveOne = [&](const QString& fam) {
+        const QString kN = QStringLiteral("colors/%1/normal").arg(fam);
+        const QString kH = QStringLiteral("colors/%1/highlight").arg(fam);
+        s.setValue(kN, normalFill_.value(fam).name(QColor::HexRgb));
+        s.setValue(kH, highlightFill_.value(fam).name(QColor::HexRgb));
+    };
+
+    saveOne(QStringLiteral("default"));
+    for (const auto& f : supportedFamilies()) saveOne(f);
+}
+
+QColor Canvas::deriveBorder(const QColor& fill) {
+    return fill.darker(140);
+}
+
+QColor Canvas::deriveText(const QColor& fill) {
+    const int lum = (fill.red()*299 + fill.green()*587 + fill.blue()*114) / 1000;
+    return (lum < 140) ? QColor(Qt::white) : QColor(Qt::black);
+}
+
+void Canvas::setCurrentFamily(const QString& family) {
+    familyKey_ = normFamily(family);
+    if (!normalFill_.contains(familyKey_)) familyKey_ = QStringLiteral("default");
+}
+
+void Canvas::setFamilyColors(const QString& family, const QColor& normalFill, const QColor& highlightFill) {
+    const QString fam = normFamily(family);
+    if (normalFill.isValid())    normalFill_[fam] = normalFill;
+    if (highlightFill.isValid()) highlightFill_[fam] = highlightFill;
+}
+
+QColor Canvas::familyFillColor(const QString& family, bool highlight) const {
+    const QString fam = normFamily(family);
+    if (highlight) {
+        return highlightFill_.value(fam, highlightFill_.value(QStringLiteral("default"), QColor("#f59e0b")));
+    }
+    return normalFill_.value(fam, normalFill_.value(QStringLiteral("default"), QColor("#3b82f6")));
+}
+
+QBrush Canvas::elementBrush(bool highlight) const {
+    return QBrush(familyFillColor(familyKey_, highlight));
+}
+
+QPen Canvas::elementPen(bool highlight, qreal width) const {
+    QColor fill = familyFillColor(familyKey_, highlight);
+    QPen pen(deriveBorder(fill), width);
+    pen.setJoinStyle(Qt::RoundJoin);
+    pen.setCapStyle(Qt::RoundCap);
+    return pen;
+}
+
 void Canvas::addNode(qreal x, qreal y, const QString &text, bool highlight){
     // 改进的节点样式
-    QColor nodeColor = highlight ? QColor("#f59e0b") : QColor("#3b82f6"); // 橙色高亮，蓝色普通
-    QColor borderColor = highlight ? QColor("#d97706") : QColor("#1d4ed8"); // 深色边框
-
+    const QColor fill = familyFillColor(familyKey_, highlight);
+    const QColor border = deriveBorder(fill);
     // 添加椭圆图元
-    auto* n = scene->addEllipse(QRectF(x-35, y-35, 70, 70), QPen(borderColor, 3), QBrush(nodeColor));
-
+    auto* n = scene->addEllipse(QRectF(x-35, y-35, 70, 70), QPen(border, 3), QBrush(fill));
     // 添加文本
     auto* label = scene->addText(text);
-    label->setDefaultTextColor(Qt::white);
+    label->setDefaultTextColor(deriveText(fill));
     label->setFont(QFont("Arial", 12, QFont::Bold));
 
     QRectF tb = label->boundingRect();
     label->setPos(x - tb.width()/2, y - tb.height()/2);
-
     // 改进的阴影效果
     auto* effect = new QGraphicsDropShadowEffect;
     effect->setBlurRadius(15);//阴影模糊半径
     effect->setOffset(3, 3);//阴影偏移
     effect->setColor(QColor(0, 0, 0, 80));//阴影颜色
     n->setGraphicsEffect(effect);// 把阴影效果挂到圆形图元 n
-
-    //return n;
 }
 
 void Canvas::addEdge(QPointF a, QPointF b){
@@ -99,12 +225,15 @@ void Canvas::addCurveArrow(QPointF s, QPointF c1, QPointF c2, QPointF e){
 }
 
 void Canvas::addBox(qreal x, qreal y, qreal w, qreal h, const QString &text, bool highlight){
-    QPen pen(QColor("#5f6c7b"), 2);
-    QBrush brush(highlight ? QColor("#ffd166") : QColor("#e8eef9"));
+    const QColor fill = familyFillColor(familyKey_, highlight);
+    const QColor border = deriveBorder(fill);
+
+    QPen pen(border, 2);
+    QBrush brush(fill);
     auto* r = scene->addRect(QRectF(x, y, w, h), pen, brush);//矩形图元
 
     auto* label = scene->addText(text);
-    label->setDefaultTextColor(Qt::black);
+    label->setDefaultTextColor(deriveText(fill));
     QRectF tb = label->boundingRect();// 取文本边界，用于居中
     label->setPos(x + (w - tb.width())/2, y + (h - tb.height())/2 - 1);// 把文本放到矩形内部居中位置；y 方向额外 -1 做细微视觉校正
 
@@ -113,7 +242,6 @@ void Canvas::addBox(qreal x, qreal y, qreal w, qreal h, const QString &text, boo
     effect->setBlurRadius(6);
     effect->setOffset(0,1);
     r->setGraphicsEffect(effect);
-    //return r;
 }
 
 // ========== 缩放 ==========

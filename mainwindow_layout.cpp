@@ -10,6 +10,9 @@
 #include <QScrollArea>
 #include <QRegularExpression>
 #include <QTime>
+#include <QColorDialog>
+#include <QHeaderView>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     resize(1440, 960);
@@ -29,6 +32,8 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     QAction* actOpen = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("打开"));
     QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
     QAction* actExportGif = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView),QStringLiteral("导出GIF"));
+    QAction* actColors = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogResetButton), QStringLiteral("配色"));
+
 
     // 分隔符
     canvasBar->addSeparator();
@@ -100,6 +105,96 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
     connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
     connect(actExportGif, &QAction::triggered, this, &MainWindow::exportGif);
+
+    // 颜色调整信号
+    connect(actColors, &QAction::triggered, this, [this]() {
+    struct Row { QString key; QString name; };
+    const QVector<Row> rows = {
+        {QStringLiteral("seq"),  QStringLiteral("顺序表")},
+        {QStringLiteral("link"), QStringLiteral("链表")},
+        {QStringLiteral("stack"),QStringLiteral("栈")},
+        {QStringLiteral("bt"),   QStringLiteral("二叉树")},
+        {QStringLiteral("bst"),  QStringLiteral("二叉搜索树")},
+        {QStringLiteral("huff"), QStringLiteral("哈夫曼树")},
+        {QStringLiteral("avl"),  QStringLiteral("AVL树")}
+    };
+
+    auto* dlg = new QDialog(this);
+    dlg->setWindowTitle(QStringLiteral("节点配色设置"));
+    dlg->resize(520, 360);
+    dlg->setModal(true);
+
+    auto* v = new QVBoxLayout(dlg);
+    auto* table = new QTableWidget(rows.size(), 2, dlg);
+    table->setHorizontalHeaderLabels({QStringLiteral("普通"), QStringLiteral("高亮")});
+    QStringList vh; for (const auto& r : rows) vh << r.name;
+    table->setVerticalHeaderLabels(vh);
+    table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->verticalHeader()->setDefaultSectionSize(34);
+    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table->setSelectionMode(QAbstractItemView::NoSelection);
+    table->setFocusPolicy(Qt::NoFocus);
+
+    QVector<QColor> normal(rows.size()), highlight(rows.size());
+    for (int i = 0; i < rows.size(); ++i) {
+        normal[i]    = view->familyFillColor(rows[i].key, false);
+        highlight[i] = view->familyFillColor(rows[i].key, true);
+    }
+
+    auto autoText = [](const QColor& fill) {
+        const int lum = (fill.red()*299 + fill.green()*587 + fill.blue()*114) / 1000;
+        return (lum < 140) ? QStringLiteral("white") : QStringLiteral("black");
+    };
+
+    auto applyBtnStyle = [&](QPushButton* b, const QColor& c) {
+        b->setText(c.name(QColor::HexRgb));
+        b->setStyleSheet(QString(
+            "QPushButton{background:%1;color:%2;border:1px solid #cbd5e1;"
+            "border-radius:8px;padding:6px 8px;font-weight:600;}")
+            .arg(c.name(QColor::HexRgb)).arg(autoText(c)));
+    };
+
+    for (int i = 0; i < rows.size(); ++i) {
+        for (int col = 0; col < 2; ++col) {
+            auto* b = new QPushButton(dlg);
+            b->setCursor(Qt::PointingHandCursor);
+            applyBtnStyle(b, col==0 ? normal[i] : highlight[i]);
+            table->setCellWidget(i, col, b);
+
+            connect(b, &QPushButton::clicked, dlg, [=, &normal, &highlight, &applyBtnStyle]() {
+                QColor cur = (col==0) ? normal[i] : highlight[i];
+                QColor picked = QColorDialog::getColor(cur, dlg, QStringLiteral("选择颜色"));
+                if (!picked.isValid()) return;
+                if (col==0) normal[i] = picked; else highlight[i] = picked;
+                applyBtnStyle(b, picked);
+            });
+        }
+    }
+
+    v->addWidget(table, 1);
+
+    auto* btnRow = new QHBoxLayout;
+    btnRow->addStretch(1);
+    auto* btnApply = new QPushButton(QStringLiteral("应用"), dlg);
+    auto* btnClose = new QPushButton(QStringLiteral("关闭"), dlg);
+    btnApply->setStyleSheet("QPushButton{background:#22c55e;color:white;border-radius:10px;padding:8px 14px;font-weight:700;}");
+    btnClose->setStyleSheet("QPushButton{background:#64748b;color:white;border-radius:10px;padding:8px 14px;font-weight:700;}");
+    btnRow->addWidget(btnApply);
+    btnRow->addWidget(btnClose);
+    v->addLayout(btnRow);
+
+    connect(btnClose, &QPushButton::clicked, dlg, &QDialog::reject);
+        connect(btnApply, &QPushButton::clicked, dlg, [this, dlg, rows, &normal, &highlight]() {
+        for (int i = 0; i < rows.size(); ++i) {
+            view->setFamilyColors(rows[i].key, normal[i], highlight[i]);
+        }
+        // 立即按当前模块重绘
+        onModuleChanged(moduleCombo ? moduleCombo->currentIndex() : 0);
+        dlg->accept();
+    });
+
+    dlg->exec();
+});
 
     // 缩放信号
     connect(actZoomIn, &QAction::triggered, this, &MainWindow::onZoomIn);

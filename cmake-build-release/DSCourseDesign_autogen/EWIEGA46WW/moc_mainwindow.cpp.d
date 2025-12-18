@@ -260,6 +260,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-release/DSCourseDesign_a
   D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wchar.h \
   D:/Program\ Files/JetBrains/CLion-2024.3.4.win/bin/mingw/x86_64-w64-mingw32/include/wctype.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QFlags \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QHash \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QIODevice \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonArray \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QJsonDocument \
@@ -272,6 +273,7 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-release/DSCourseDesign_a
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSize \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QSizeF \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QString \
+  D:/Qt/6.9.2/mingw_64/include/QtCore/QStringList \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QTimer \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QUrl \
   D:/Qt/6.9.2/mingw_64/include/QtCore/QVariant \
@@ -437,8 +439,12 @@ D:/Users/xiang/CLionProjects/DSCourseDesign/cmake-build-release/DSCourseDesign_a
   D:/Qt/6.9.2/mingw_64/include/QtCore/qxptype_traits.h \
   D:/Qt/6.9.2/mingw_64/include/QtCore/qyieldcpu.h \
   D:/Qt/6.9.2/mingw_64/include/QtGui/QAction \
+  D:/Qt/6.9.2/mingw_64/include/QtGui/QBrush \
+  D:/Qt/6.9.2/mingw_64/include/QtGui/QColor \
+  D:/Qt/6.9.2/mingw_64/include/QtGui/QImage \
   D:/Qt/6.9.2/mingw_64/include/QtGui/QKeyEvent \
   D:/Qt/6.9.2/mingw_64/include/QtGui/QMouseEvent \
+  D:/Qt/6.9.2/mingw_64/include/QtGui/QPen \
   D:/Qt/6.9.2/mingw_64/include/QtGui/QTransform \
   D:/Qt/6.9.2/mingw_64/include/QtGui/QWheelEvent \
   D:/Qt/6.9.2/mingw_64/include/QtGui/qaction.h \

@@ -58,6 +58,7 @@ void MainWindow::seqlistBuild()
 
 
 void MainWindow::seqlistInsert(){
+    view->setCurrentFamily(QStringLiteral("seq"));
     int pos = seqlistPosition->value();
     bool ok = false;
     int val = seqlistValue->text().toInt(&ok);
@@ -160,8 +161,7 @@ void MainWindow::seqlistInsert(){
 
                     bool highlight = (j == k);  //是否是当前插入的元素
 
-                    QBrush boxBrush(highlight ? QColor("#ffd166") : QColor("#e8eef9"));  //逐个逐帧画方块
-                    view->Scene()->addRect(QRectF(x, y, cellW, cellH), QPen(QColor("#5f6c7b"), 2), boxBrush);
+                    view->addBox(x, y, cellW, cellH, arr[j], highlight);
 
                     auto *tItem = view->Scene()->addText(arr[j]);  //逐个逐帧写值
                     tItem->setDefaultTextColor(Qt::black);
@@ -242,6 +242,7 @@ void MainWindow::seqlistInsert(){
 }
 
 void MainWindow::seqlistErase(){
+    view->setCurrentFamily(QStringLiteral("seq"));
     int pos = seqlistPosition->value();
     const int n = seq.size();
     if (pos < 0 || pos >= n) {
@@ -375,8 +376,7 @@ void MainWindow::seqlistErase(){
                     qreal y = startY;
 
                     bool highlight = (j == k);
-                    QBrush boxBrush(highlight ? QColor("#ffd166") : QColor("#e8eef9"));
-                    view->Scene()->addRect(QRectF(x, y, cellW, cellH), QPen(QColor("#5f6c7b"), 2), boxBrush);
+                    view->addBox(x, y, cellW, cellH, arr[j], highlight);
 
                     auto *tItem = view->Scene()->addText(arr[j]);
                     tItem->setDefaultTextColor(Qt::black);
@@ -1399,6 +1399,7 @@ void MainWindow::stackBuild()
 }
 
 void MainWindow::stackPush() {
+    view->setCurrentFamily(QStringLiteral("stack"));
     bool ok = false; int v = stackValue->text().toInt(&ok);
     if(!ok) { showMessage(QStringLiteral("栈：请输入有效的值")); return; }
 
@@ -1444,18 +1445,15 @@ void MainWindow::stackPush() {
             QPen boxPen(QColor("#1e293b")); boxPen.setWidthF(1.2);
             QBrush fill(QColor("#93c5fd")), topFill(QColor("#60a5fa"));// fill：普通元素填充色；topFill：栈顶高亮色
             const int nNow = st.size();
-            const qreal innerW2 = innerW;
-            const qreal leftX2  = leftX;
-            for (int i = 0; i < nNow; ++i) {// 画出“旧栈里的每个元素块”
+            for (int i = 0; i < nNow; ++i) {
                 const bool isTop = (i == nNow - 1);
                 const qreal yTop = bottomInnerY - (i + 1) * BLOCK_H - i * GAP;
-                S->addRect(QRectF(leftX2, yTop, innerW2, BLOCK_H), boxPen, isTop ? topFill : fill);
-                auto* label = S->addText(QString::number(st.get(i)));
-                QRectF tb = label->boundingRect(); label->setDefaultTextColor(Qt::black);
-                label->setPos(leftX2 + innerW2/2 - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
+                view->addBox(leftX, yTop, innerW, BLOCK_H, QString::number(st.get(i)), isTop);
             }
-            qreal yTop = lerp(yStart, yTopBlock, t);// 计算“新入栈块”当前帧的位置：从yStart线性插值到yTopBlock
-            S->addRect(QRectF(leftX, yTop, innerW, BLOCK_H), boxPen, topFill);// 画“正在下落的新块”（始终用栈顶色）
+
+            // 新入栈块下落（视为高亮）
+            qreal yTop = lerp(yStart, yTopBlock, t);
+            view->addBox(leftX, yTop, innerW, BLOCK_H, QString::number(v), true);
             auto* label = S->addText(QString::number(v)); label->setDefaultTextColor(Qt::black);
             QRectF tb = label->boundingRect(); label->setPos(xCenter - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
             if (f==frames) onAnimSpeedChanged(animSpeedSlider->value());
@@ -1520,16 +1518,14 @@ void MainWindow::stackPop() {
 
             QPen boxPen(QColor("#1e293b")); boxPen.setWidthF(1.2);
             QBrush fill(QColor("#93c5fd")), topFill(QColor("#60a5fa"));
-            for (int i = 0; i < n-1; ++i) {// 只画“下面的 n-1 个块”（把栈顶块单独拿出来做移动）
+            for (int i = 0; i < n - 1; ++i) {
                 const bool isTop = (i == n - 2);
                 const qreal yTop = bottomInnerY - (i + 1) * BLOCK_H - i * GAP;
-                S->addRect(QRectF(leftX, yTop, innerW, BLOCK_H), boxPen, isTop ? topFill : fill);
-                auto* label = S->addText(QString::number(st.get(i)));
-                QRectF tb = label->boundingRect(); label->setDefaultTextColor(Qt::black);
-                label->setPos(leftX + innerW/2 - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
+                view->addBox(leftX, yTop, innerW, BLOCK_H, QString::number(st.get(i)), isTop);
             }
+
             qreal yTop = lerp(yTopBlock, yEnd, t);
-            S->addRect(QRectF(leftX, yTop, innerW, BLOCK_H), boxPen, topFill);// 绘制移动中的栈顶块
+            view->addBox(leftX, yTop, innerW, BLOCK_H, QString::number(topVal), true);
             auto* label = S->addText(QString::number(topVal)); label->setDefaultTextColor(Qt::black);
             QRectF tb = label->boundingRect(); label->setPos(xCenter - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
 
@@ -2424,18 +2420,28 @@ void MainWindow::avlClear() {
 
 // ===== 绘制基础 =====
 void MainWindow::drawSeqlist(const ds::Seqlist& sl){
-    view->resetScene(); view->setTitle(QStringLiteral("顺序表"));
-    const int n = sl.size(); const qreal cellW = 68, cellH = 54, gap = 14; const qreal startX = 80, startY = 180;
-    for (int i=0;i<n;++i){
-        qreal x = startX + i*(cellW+gap), y = startY;
-        view->Scene()->addRect(QRectF(x,y,cellW,cellH), QPen(QColor("#5f6c7b"), 2), QBrush(QColor("#e8eef9")));
-        auto* label = view->Scene()->addText(QString::number(sl.get(i))); QRectF tb = label->boundingRect();
-        label->setDefaultTextColor(Qt::black); label->setPos(x + (cellW - tb.width())/2, y + (cellH - tb.height())/2 - 1);
-        auto* idx = view->Scene()->addText(QString::number(i)); idx->setDefaultTextColor(Qt::darkGray); idx->setPos(x + cellW/2 - 6, y + cellH + 6);
+    view->setCurrentFamily(QStringLiteral("seq"));
+    view->resetScene();
+    view->setTitle(QStringLiteral("顺序表"));
+
+    const int n = sl.size();
+    const qreal cellW = 68, cellH = 54, gap = 14;
+    const qreal startX = 80, startY = 180;
+
+    for (int i = 0; i < n; ++i) {
+        const qreal x = startX + i * (cellW + gap);
+        const qreal y = startY;
+
+        view->addBox(x, y, cellW, cellH, QString::number(sl.get(i)), false);
+
+        auto* idx = view->Scene()->addText(QString::number(i));
+        idx->setDefaultTextColor(Qt::darkGray);
+        idx->setPos(x + cellW / 2 - 6, y + cellH + 6);
     }
 }
 
 void MainWindow::drawLinklist(const ds::Linklist& ll){
+    view->setCurrentFamily(QStringLiteral("link"));
     view->resetScene(); view->setTitle(QStringLiteral("单链表"));
     auto* p = ll.gethead();
     qreal x=150, y=220, lastx=-1;
@@ -2487,6 +2493,7 @@ void MainWindow::drawLinklist(const ds::Linklist& ll){
 }
 
 void MainWindow::drawStack(const ds::Stack& st){
+    view->setCurrentFamily(QStringLiteral("stack"));
     view->resetScene(); view->setTitle(QStringLiteral("顺序栈（U 型槽：自适应高度）"));
     QGraphicsScene* S = view->Scene();
     const qreal x0 = 380, y0 = 120, W = 300, T = 12, innerPad = 6;
@@ -2505,9 +2512,8 @@ void MainWindow::drawStack(const ds::Stack& st){
     for (int i = 0; i < n; ++i) {
         const bool  isTop = (i == n - 1);
         const qreal yTop  = bottomInnerY - (i + 1) * BLOCK_H - i * GAP;
-        S->addRect(QRectF(leftX, yTop, innerW, BLOCK_H), boxPen, isTop ? topFill : boxFill);
-        auto* label = S->addText(QString::number(st.get(i))); label->setDefaultTextColor(Qt::black);
-        QRectF tb = label->boundingRect(); label->setPos(leftX + innerW/2 - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
+        view->addBox(leftX, yTop, innerW, BLOCK_H, QString::number(st.get(i)), isTop);
+
     }
     const qreal yTopBlock = bottomInnerY - n * BLOCK_H - (n - 1) * GAP; const QPointF target(leftX + innerW/2, yTopBlock);
     auto* t = S->addText("TOP"); t->setDefaultTextColor(Qt::red); QRectF tb = t->boundingRect(); const QPointF tagPos(x0 + W + 16, yTopBlock - tb.height()/2); t->setPos(tagPos);
