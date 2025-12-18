@@ -166,6 +166,7 @@ void MainWindow::openDoc() {
             QJsonObject s = o["linkedlist"].toObject();
             link.clear();
             for (auto v : s["values"].toArray()) link.insert(link.size(), v.toInt());
+            setProperty("linkBuilt", true);
         }
         if (o.contains("stack")) {
             QJsonObject s = o["stack"].toObject();

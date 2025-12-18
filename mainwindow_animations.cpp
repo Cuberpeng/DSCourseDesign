@@ -81,8 +81,7 @@ void MainWindow::seqlistInsert(){
     const qreal startX = 80;
     const qreal startY = 180;
 
-    const int oldInterval = timer.interval();  //记录当前全局动画计时器原始间隔
-    const int animInterval = 60;
+    const int animInterval = qMax(15, timer.interval() / 7);//记录当前动画计时器间隔
 
     // 根据尾部长度控制每个“小动画”的帧数，避免元素过多时太慢
     int tail = n - pos;
@@ -231,7 +230,7 @@ void MainWindow::seqlistInsert(){
 
     // 步骤 4：真正往后端顺序表里插入 + 恢复计时器 + 画最终结果
     steps.push_back([=, this]() {
-        timer.setInterval(oldInterval);
+        onAnimSpeedChanged(animSpeedSlider->value());
         seq.insert(pos, val);
         view->resetScene();
         view->setTitle(QStringLiteral("顺序表：插入完成（pos=%1, val=%2）") .arg(pos).arg(val));
@@ -260,8 +259,7 @@ void MainWindow::seqlistErase(){
     const qreal startX = 80;
     const qreal startY = 180;
 
-    const int oldInterval = timer.interval();
-    const int animInterval = 60;
+    const int animInterval = qMax(15, timer.interval() / 7);
 
     int tail = n - 1 - pos;
     int framesShift = 10;
@@ -391,7 +389,7 @@ void MainWindow::seqlistErase(){
 
     // 步骤 4：真正删除后端元素 + 恢复计时器 + 画最终顺序表
     steps.push_back([=, this]() {
-        timer.setInterval(oldInterval);
+        onAnimSpeedChanged(animSpeedSlider->value());
         seq.erase(pos);
         view->resetScene();
         view->setTitle(QStringLiteral("顺序表：删除完成（pos=%1）").arg(pos));
@@ -1424,7 +1422,8 @@ void MainWindow::stackPush() {
         vals.push_back(st.get(i));
     }
 
-    const int frames = 10; const int oldInterval = timer.interval();
+    const int frames = 10;
+    const int animInterval = qMax(15, timer.interval() / 7);
     timer.stop(); steps.clear(); stepIndex = 0;
 
     for (int f=0; f<=frames; ++f){
@@ -1433,7 +1432,7 @@ void MainWindow::stackPush() {
                 // ★ 重播关键：每次从头播放时先还原栈
                 st.clear();
                 for (int x : vals) st.push(x);
-                timer.setInterval(60);
+                timer.setInterval(animInterval);
             }
             const qreal t = qreal(f)/frames;
             view->resetScene(); view->setTitle(QStringLiteral("栈：入栈（移动中）"));
@@ -1459,7 +1458,7 @@ void MainWindow::stackPush() {
             S->addRect(QRectF(leftX, yTop, innerW, BLOCK_H), boxPen, topFill);// 画“正在下落的新块”（始终用栈顶色）
             auto* label = S->addText(QString::number(v)); label->setDefaultTextColor(Qt::black);
             QRectF tb = label->boundingRect(); label->setPos(xCenter - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
-            if (f==frames) timer.setInterval(oldInterval);
+            if (f==frames) onAnimSpeedChanged(animSpeedSlider->value());
         });
     }
 
@@ -1497,7 +1496,8 @@ void MainWindow::stackPop() {
         vals.push_back(st.get(i));
     }
 
-    const int frames = 10; const int oldInterval = timer.interval();
+    const int frames = 10;
+    const int animInterval = qMax(15, timer.interval() / 7);
 
     timer.stop(); steps.clear(); stepIndex = 0;
 
@@ -1507,7 +1507,7 @@ void MainWindow::stackPop() {
                 // ★ 重播关键：每次从头播放时先恢复栈
                 st.clear();
                 for (int x : vals) st.push(x);
-                timer.setInterval(60);
+                timer.setInterval(animInterval);
             }
             const qreal t = qreal(f)/frames;
             view->resetScene(); view->setTitle(QStringLiteral("栈：出栈（移动中）"));
@@ -1533,7 +1533,7 @@ void MainWindow::stackPop() {
             auto* label = S->addText(QString::number(topVal)); label->setDefaultTextColor(Qt::black);
             QRectF tb = label->boundingRect(); label->setPos(xCenter - tb.width()/2, yTop + BLOCK_H/2 - tb.height()/2);
 
-            if (f==frames) timer.setInterval(oldInterval);
+            if (f==frames) onAnimSpeedChanged(animSpeedSlider->value());
         });
     }
 
@@ -2238,7 +2238,7 @@ void MainWindow::huffmanBuild() {
     });
 
     const int tweenFrames = 8;
-    const int oldInterval = timer.interval();
+    const int tweenInterval = qMax(15, timer.interval() / 7);
 
     // 逐步合并两棵最小树，加入动画
     while (cur.size() > 1) {//只要森林里还多于 1 棵树，就继续合并
@@ -2271,7 +2271,7 @@ void MainWindow::huffmanBuild() {
         for (int f = 0; f <= tweenFrames; ++f) {
             qreal t = qreal(f) / tweenFrames;
             steps.push_back([=, this]() {
-                timer.setInterval(60);
+                timer.setInterval(tweenInterval);
                 tweenTwo(before, i1, i2, t, QStringLiteral("哈夫曼树：合并中（移动）"));
             });
         }
@@ -2279,7 +2279,7 @@ void MainWindow::huffmanBuild() {
         //展示这一步合并之后的完整树
         steps.push_back([=, this]() {
             drawForestFixed(after, QStringLiteral("哈夫曼树：合并 %1 + %2 -> %3").arg(a).arg(b).arg(parent->key));
-            timer.setInterval(oldInterval);
+            onAnimSpeedChanged(animSpeedSlider->value());
         });
 
         //真正更新当前森林：用父节点替换 i1，并删除 i2

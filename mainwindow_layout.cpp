@@ -11,11 +11,10 @@
 #include <QRegularExpression>
 #include <QTime>
 
-//static inline qreal lerp(qreal a, qreal b, qreal t){ return a + (b - a) * t; }
-
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     resize(1440, 960);
     setWindowTitle(QStringLiteral("数据结构可视化"));
+    setProperty("linkBuilt", false);
 
     // 顶部：画布工具栏（包含文件操作和缩放操作）
     canvasBar = addToolBar(QStringLiteral("工具栏"));
