@@ -2654,6 +2654,8 @@ void MainWindow::drawAVL(int v, const QVector<int>& restoreKeys, int idx, int to
 
             // 暂停外层 steps 的定时器，交给 QTimeLine 播放细粒度动画
             timer.stop();
+            // GIF 导出时：标记正在进行细粒度动画（避免 playSteps 误判“已结束”提前收尾）
+            ++gifActiveTimelines_;
 
             const int frames = 18;   // 帧数越多越丝滑
             const int duration = 700;  // 动画总时长（毫秒）
@@ -2718,6 +2720,11 @@ void MainWindow::drawAVL(int v, const QVector<int>& restoreKeys, int idx, int to
             // 动画结束：恢复外层 timer（如果还有后续步骤）
             connect(tl, &QTimeLine::finished, this, [=, this]() {
                 tl->deleteLater();
+                // GIF 导出时：细粒度动画结束
+                if (gifActiveTimelines_ > 0) --gifActiveTimelines_;
+                // 如果正在导出 GIF，且此时已无后续 steps，则尝试收尾写文件
+                maybeFinishGifExport();
+
                 if (stepIndex < steps.size()) {
                     timer.start();          // 继续播放后面的步骤
                 } else {

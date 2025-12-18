@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "dsl.h"
 #include "llmclient.h"
+#include "gif.h"
 #include <QGraphicsScene>
 #include <QApplication>
 #include <QMessageBox>
@@ -24,6 +25,62 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QPointF>
+#include <type_traits>
+#include <QCloseEvent>
+#include <QKeyEvent>
+
+// 解决 gif-h 不同版本可能是 5 参数/7 参数、返回 void/bool 的差异
+namespace gifcompat {
+    template <typename F>
+    inline bool begin(F f, GifWriter* w, const char* fn, int width, int height, int delayCs) {
+        if constexpr (std::is_invocable_r_v<bool, F, GifWriter*, const char*, int, int, int, int, bool>) {
+            return f(w, fn, width, height, delayCs, 8, true);
+        } else if constexpr (std::is_invocable_r_v<void, F, GifWriter*, const char*, int, int, int, int, bool>) {
+            f(w, fn, width, height, delayCs, 8, true);
+            return true;
+        } else if constexpr (std::is_invocable_r_v<bool, F, GifWriter*, const char*, int, int, int>) {
+            return f(w, fn, width, height, delayCs);
+        } else if constexpr (std::is_invocable_r_v<void, F, GifWriter*, const char*, int, int, int>) {
+            f(w, fn, width, height, delayCs);
+            return true;
+        } else {
+            static_assert(sizeof(F) == 0, "Unsupported gif-h GifBegin signature");
+            return false;
+        }
+    }
+
+    template <typename F>
+    inline bool writeFrame(F f, GifWriter* w, const uint8_t* rgba, int width, int height, int delayCs) {
+        if constexpr (std::is_invocable_r_v<bool, F, GifWriter*, const uint8_t*, int, int, int, int, bool>) {
+            return f(w, rgba, width, height, delayCs, 8, true);
+        } else if constexpr (std::is_invocable_r_v<void, F, GifWriter*, const uint8_t*, int, int, int, int, bool>) {
+            f(w, rgba, width, height, delayCs, 8, true);
+            return true;
+        } else if constexpr (std::is_invocable_r_v<bool, F, GifWriter*, const uint8_t*, int, int, int>) {
+            return f(w, rgba, width, height, delayCs);
+        } else if constexpr (std::is_invocable_r_v<void, F, GifWriter*, const uint8_t*, int, int, int>) {
+            f(w, rgba, width, height, delayCs);
+            return true;
+        } else {
+            static_assert(sizeof(F) == 0, "Unsupported gif-h GifWriteFrame signature");
+            return false;
+        }
+    }
+}
+
+class NoCloseDialog final : public QDialog {
+public:
+    explicit NoCloseDialog(QWidget* parent=nullptr) : QDialog(parent) {}
+
+protected:
+    void closeEvent(QCloseEvent* e) override { e->ignore(); } // Alt+F4 等也无效
+    void keyPressEvent(QKeyEvent* e) override {
+        if (e->key() == Qt::Key_Escape) { e->ignore(); return; } // Esc 无效
+        QDialog::keyPressEvent(e);
+    }
+    void reject() override {} // 再兜一层：拒绝关闭
+};
+
 
 // ================== 文件保存/打开/导出 ==================
 void MainWindow::saveDoc() {
@@ -199,6 +256,171 @@ void MainWindow::openDoc() {
         onModuleChanged(moduleCombo ? moduleCombo->currentIndex() : 0);
         statusBar()->showMessage(QString("已打开（全部数据结构已恢复）：%1").arg(path));
     }
+}
+
+// ================== 导出 GIF（录制当前动画） ==================
+// 录制策略：对“左侧画布 view”的内容做定时抓帧（QTimer），因此对所有数据结构通用。
+// 只要你的动画最终都会驱动 view 重绘（当前项目是 steps + timer / AVL QTimeLine 重绘），就能被录制。
+
+void MainWindow::exportGif()
+{
+    if (gifRecording_) {
+        // 避免重复进入录制状态
+        gifCaptureTimer_.stop();
+        gifRecording_ = false;
+        gifFrames_.clear();
+        gifActiveTimelines_ = 0;
+    }
+
+    if (steps.isEmpty()) {
+        showMessage(QStringLiteral("当前没有可导出的动画（请先执行一次操作生成动画 steps）"));
+        return;
+    }
+
+    // 选择导出路径
+    const QString path = QFileDialog::getSaveFileName(
+        this,
+        QStringLiteral("导出GIF"),
+        QString(),
+        QStringLiteral("GIF 动画 (*.gif)")
+    );
+    if (path.isEmpty()) return;
+
+    // 如果正在播放，先停下，避免录制中途状态
+    if (timer.isActive()) timer.stop();
+
+    // 计算抓帧间隔：尽量跟随当前速度滑块，同时保证 AVL 旋转（QTimeLine）也足够平滑
+    // - timer.interval()：离散 steps 的节奏
+    // - animTimelineDurationMs_/18：AVL 平滑旋转的单帧节奏（见 mainwindow_animations.cpp 里 frames=18）
+    const int approxTlFrame = qMax(15, animTimelineDurationMs_ / 18);
+    gifCaptureIntervalMs_ = qBound(20, qMin(timer.interval(), approxTlFrame), 120);
+    gifCaptureTimer_.setInterval(gifCaptureIntervalMs_);
+
+    gifOutPath_ = path;
+    gifFrames_.clear();
+    gifRecording_ = true;
+
+    // 先抓一帧“起始画面”（更像录像）
+    captureGifFrame();
+
+    // ====== 显示“正在导出GIF”的提示弹窗（不可取消）======
+    if (!gifProgressDialog) {
+        gifProgressDialog = new NoCloseDialog(this);
+        gifProgressDialog->setWindowTitle(QStringLiteral("导出GIF"));
+        gifProgressDialog->setModal(true); // 导出期间禁止其它操作
+        gifProgressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false); // 不显示关闭按钮
+        gifProgressDialog->setFixedSize(280, 110);
+
+        auto* layout = new QVBoxLayout(gifProgressDialog);
+        layout->setContentsMargins(10, 10, 10, 10);
+        layout->addStretch(1);
+
+        auto* label = new QLabel(QStringLiteral("正在导出GIF，请勿进行任何操作，请稍候...\n（导出完成后将自动关闭）"), gifProgressDialog);
+        label->setObjectName("gifProgressLabel");
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+
+        layout->addStretch(1);
+    }
+
+    gifProgressDialog->show();
+    gifProgressDialog->raise();
+    gifProgressDialog->activateWindow();
+
+    // 开始抓帧 + 重播动画
+    gifCaptureTimer_.start();
+    onAnimReplay();
+
+    showMessage(QStringLiteral("开始录制GIF：%1（采样间隔 %2ms）").arg(path).arg(gifCaptureIntervalMs_));
+}
+
+void MainWindow::captureGifFrame()
+{
+    if (!gifRecording_ || !view) return;
+
+    // 防止极端情况下内存爆炸：最多保留 1200 帧
+    constexpr int kMaxFrames = 1200;
+    if (gifFrames_.size() >= kMaxFrames) {
+        showMessage(QStringLiteral("GIF 录制帧数达到上限（%1），将自动结束并导出").arg(kMaxFrames));
+        // 强制结束：停止动画与抓帧，然后按当前已录制帧导出
+        timer.stop();
+        gifCaptureTimer_.stop();
+        stepIndex = steps.size();
+        gifActiveTimelines_ = 0;
+        maybeFinishGifExport();
+        return;
+    }
+
+    QImage img = view->grab().toImage();
+    if (img.isNull()) return;
+
+    // 控制导出尺寸，避免 GIF 过大（对验收/报告更友好）
+    const int maxW = 960;
+    const int maxH = 640;
+    if (img.width() > maxW || img.height() > maxH) {
+        img = img.scaled(maxW, maxH, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
+    // gif-h 只吃 RGBA8（alpha 会被忽略），这里统一转换
+    img = img.convertToFormat(QImage::Format_RGBA8888);
+    gifFrames_.push_back(img);
+}
+
+void MainWindow::maybeFinishGifExport()
+{
+    if (!gifRecording_) return;
+
+    auto hideGifDlg = [this]() {
+        if (gifProgressDialog) gifProgressDialog->hide();
+    };
+
+    // 录制结束条件：
+    // 1) 所有 steps 已经执行完
+    // 2) 主 timer 已经停下
+    // 3) 没有 AVL 的 QTimeLine 在跑（gifActiveTimelines_==0）
+    const bool stepsDone = (stepIndex >= steps.size());
+    if (!stepsDone) return;
+    if (timer.isActive()) return;
+    if (gifActiveTimelines_ > 0) return;
+
+    gifCaptureTimer_.stop();
+    gifRecording_ = false;
+
+    if (gifFrames_.isEmpty()) {
+        showMessage(QStringLiteral("GIF 导出失败：未录制到任何帧"));
+        hideGifDlg();
+        return;
+    }
+
+    // 写 GIF（gif-h 仅支持 RGBA8 输入，alpha 会被忽略）
+    const int w = gifFrames_.front().width();
+    const int h = gifFrames_.front().height();
+    const int delayCs = qMax(1, gifCaptureIntervalMs_ / 10); // delay 单位 1/100 秒
+
+    GifWriter writer{};
+    const QByteArray fn = QFile::encodeName(gifOutPath_);
+
+    // 兼容不同版本 gif-h 的函数签名
+    const bool okBegin = gifcompat::begin(&GifBegin, &writer, fn.constData(), w, h, delayCs);
+    if (!okBegin) {
+        showMessage(QStringLiteral("GIF 导出失败：无法创建文件（路径可能包含不支持的字符，或无写权限）"));
+        hideGifDlg();
+        return;
+    }
+
+    for (QImage frame : gifFrames_) {
+        if (frame.size() != QSize(w, h)) {
+            frame = frame.scaled(w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        }
+        frame = frame.convertToFormat(QImage::Format_RGBA8888);
+        gifcompat::writeFrame(&GifWriteFrame, &writer, frame.bits(), w, h, delayCs);
+    }
+    GifEnd(&writer);
+
+    showMessage(QStringLiteral("GIF 已导出：%1（%2 帧）").arg(gifOutPath_).arg(gifFrames_.size()));
+    hideGifDlg();
+
+    gifFrames_.clear();
 }
 
 // 新增：模块切换时同步画布为对应数据结构的上一次状态（若无则显示“空”）

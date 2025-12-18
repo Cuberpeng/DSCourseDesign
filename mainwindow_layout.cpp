@@ -28,6 +28,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     // 文件操作按钮
     QAction* actOpen = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), QStringLiteral("打开"));
     QAction* actSave = canvasBar->addAction(style()->standardIcon(QStyle::SP_DialogSaveButton), QStringLiteral("保存"));
+    QAction* actExportGif = canvasBar->addAction(style()->standardIcon(QStyle::SP_FileDialogContentsView),QStringLiteral("导出GIF"));
 
     // 分隔符
     canvasBar->addSeparator();
@@ -98,6 +99,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
     // 文件操作信号
     connect(actOpen, &QAction::triggered, this, &MainWindow::openDoc);
     connect(actSave, &QAction::triggered, this, &MainWindow::saveDoc);
+    connect(actExportGif, &QAction::triggered, this, &MainWindow::exportGif);
 
     // 缩放信号
     connect(actZoomIn, &QAction::triggered, this, &MainWindow::onZoomIn);
@@ -263,6 +265,8 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent) {
 
     // 动画计时器
     connect(&timer, &QTimer::timeout, this, &MainWindow::playSteps);
+    connect(&gifCaptureTimer_, &QTimer::timeout, this, &MainWindow::captureGifFrame);
+
     // 根据当前滑块值设置初始速度
     if (animSpeedSlider) {
         onAnimSpeedChanged(animSpeedSlider->value());
@@ -330,6 +334,8 @@ void MainWindow::playSteps()
             showMessage(QStringLiteral("播放结束"));
         }
     }
+    // 如果正在导出 GIF：当“所有步骤已执行且没有细粒度动画在跑”时收尾写文件
+    maybeFinishGifExport();
     // 每执行 / 结束一次，都刷新按钮状态
     updateAnimUiState();
 }

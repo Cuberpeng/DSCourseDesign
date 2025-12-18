@@ -31,6 +31,7 @@
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QSlider>
+#include <QImage>
 
 #include "canvas.h"
 #include "seqlist.h"
@@ -106,6 +107,10 @@ private slots:
     //文件保存
     void saveDoc();
     void openDoc();
+
+    // 导出 GIF（录制当前动画）
+    void exportGif();
+    void captureGifFrame();
 
     //DSL
     void insertDSLExample();
@@ -186,6 +191,17 @@ private:
     // ★ 新增：树类细粒度动画（QTimeLine）统一用的时长，受速度滑块控制
     int animTimelineDurationMs_ = 700;
 
+    // ===== GIF 录制/导出（对所有数据结构通用：录制画布内容） =====
+    bool gifRecording_ = false;
+    QString gifOutPath_;
+    QVector<QImage> gifFrames_;
+    QTimer gifCaptureTimer_;
+    int gifCaptureIntervalMs_ = 40;      // 录制采样周期（毫秒）
+    int gifActiveTimelines_ = 0;         // 当前仍在运行的 QTimeLine 数（用于 AVL 旋转）
+
+    // 结束录制条件满足时写文件
+    void maybeFinishGifExport();
+
     // DSL/NLI 相关
     QTextEdit* dslEdit{};
     QTextEdit* llmEdit{};
@@ -198,6 +214,9 @@ private:
 
     // NLI 调用中的提示弹窗
     QDialog* llmProgressDialog{};
+
+    // GIF 导出中的提示弹窗（导出期间禁止其它操作）
+    QDialog* gifProgressDialog{};
 
 
     // 工具
