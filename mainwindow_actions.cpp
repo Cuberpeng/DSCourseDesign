@@ -310,12 +310,15 @@ void MainWindow::exportGif()
         gifProgressDialog->setModal(true); // 导出期间禁止其它操作
         gifProgressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false); // 不显示关闭按钮
         gifProgressDialog->setFixedSize(280, 110);
+        gifProgressDialog->setAttribute(Qt::WA_TransparentForMouseEvents, true); // 让弹窗不接收鼠标
+        gifProgressDialog->setFocusPolicy(Qt::NoFocus); // 可选：尽量不抢焦点
 
         auto* layout = new QVBoxLayout(gifProgressDialog);
         layout->setContentsMargins(10, 10, 10, 10);
         layout->addStretch(1);
 
         auto* label = new QLabel(QStringLiteral("正在导出GIF，请勿进行任何操作，请稍候...\n（导出完成后将自动关闭）"), gifProgressDialog);
+        label->setAttribute(Qt::WA_TransparentForMouseEvents, true);
         label->setObjectName("gifProgressLabel");
         label->setAlignment(Qt::AlignCenter);
         layout->addWidget(label);

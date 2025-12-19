@@ -137,23 +137,23 @@ QWidget* MainWindow::buildBTPage() {
     hb0->addWidget(btnBuild); hb0->addWidget(btnClear);
 
     auto* row1 = new QWidget; auto* hb1 = new QHBoxLayout(row1);
-    auto* btnPre  = new QPushButton("先序遍历"); btnPre ->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
-    auto* btnIn   = new QPushButton("中序遍历"); btnIn  ->setStyleSheet("QPushButton{background:#6366f1;color:white;}");
-    auto* btnPost = new QPushButton("后序遍历"); btnPost->setStyleSheet("QPushButton{background:#a855f7;color:white;}");
-    auto* btnLevel = new QPushButton("层序遍历"); btnLevel->setStyleSheet("QPushButton{background:#10b981;color:white;}"); // 新增按钮
+    auto* btnPre  = new QPushButton("前序周游"); btnPre ->setStyleSheet("QPushButton{background:#3b82f6;color:white;}");
+    auto* btnIn   = new QPushButton("中序周游"); btnIn  ->setStyleSheet("QPushButton{background:#6366f1;color:white;}");
+    auto* btnPost = new QPushButton("后序周游"); btnPost->setStyleSheet("QPushButton{background:#a855f7;color:white;}");
+    auto* btnLevel = new QPushButton("层序周游"); btnLevel->setStyleSheet("QPushButton{background:#10b981;color:white;}"); // 新增按钮
     hb1->addWidget(btnPre); hb1->addWidget(btnIn); hb1->addWidget(btnPost); hb1->addWidget(btnLevel);
 
     v->addWidget(wrapGroup("二叉树建立", form));
     v->addWidget(wrapGroup("二叉树操作", row0));
-    v->addWidget(wrapGroup("遍历演示", row1));
+    v->addWidget(wrapGroup("周游演示", row1));
     v->addStretch(1);
 
     connect(btnBuild,&QPushButton::clicked,this,&MainWindow::btBuild);
     connect(btnClear,&QPushButton::clicked,this,&MainWindow::btClear);
-    connect(btnPre,  &QPushButton::clicked,this,&MainWindow::btPreorder);
-    connect(btnIn,   &QPushButton::clicked,this,&MainWindow::btInorder);
-    connect(btnPost, &QPushButton::clicked,this,&MainWindow::btPostorder);
-    connect(btnLevel, &QPushButton::clicked,this,&MainWindow::btLevelorder); // 连接新按钮
+    connect(btnPre, &QPushButton::clicked,this,&MainWindow::btPreorder);
+    connect(btnIn,&QPushButton::clicked,this,&MainWindow::btInorder);
+    connect(btnPost,&QPushButton::clicked,this,&MainWindow::btPostorder);
+    connect(btnLevel,&QPushButton::clicked,this,&MainWindow::btLevelorder);
     return root;
 }
 

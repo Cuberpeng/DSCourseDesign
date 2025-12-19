@@ -1579,9 +1579,9 @@ void MainWindow::btPreorder() {
     int need = bt.preorder(nullptr, 0);//先探测遍历输出长度：传空指针和 0 容量，让后端只返回需要多少个元素
     if (need <= 0) {
         view->resetScene();
-        view->setTitle(QStringLiteral("先序遍历：空树"));
+        view->setTitle(QStringLiteral("前序周游：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("先序遍历：空树"));
+        showMessage(QStringLiteral("前序周游：空树"));
         return;
     }
 
@@ -1612,14 +1612,14 @@ void MainWindow::btPreorder() {
 
         steps.push_back([this, i, m, key, node]() {
             view->resetScene();
-            view->setTitle(QStringLiteral("先序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+            view->setTitle(QStringLiteral("前序周游：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
 
             // 告诉 drawBT：这一次只高亮这个结点
             g_btHighlightNode = node;
             drawBT(bt.root(), 400, 120, 200, 0);
             g_btHighlightNode = nullptr;
 
-            showMessage(QStringLiteral("先序遍历：访问 %1").arg(key));
+            showMessage(QStringLiteral("前序周游：访问 %1").arg(key));
         });
     }
 
@@ -1630,9 +1630,9 @@ void MainWindow::btInorder() {
     int need = bt.inorder(nullptr, 0);//先探测遍历输出长度：传空指针和 0 容量，让后端只返回需要多少个元素
     if (need <= 0) {
         view->resetScene();
-        view->setTitle(QStringLiteral("中序遍历：空树"));
+        view->setTitle(QStringLiteral("中序周游：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("中序遍历：空树"));
+        showMessage(QStringLiteral("中序周游：空树"));
         return;
     }
 
@@ -1663,13 +1663,13 @@ void MainWindow::btInorder() {
 
         steps.push_back([this, i, m, key, node]() {
             view->resetScene();
-            view->setTitle(QStringLiteral("中序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+            view->setTitle(QStringLiteral("中序周游：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
 
             g_btHighlightNode = node;
             drawBT(bt.root(), 400, 120, 200, 0);
             g_btHighlightNode = nullptr;
 
-            showMessage(QStringLiteral("中序遍历：访问 %1").arg(key));
+            showMessage(QStringLiteral("中序周游：访问 %1").arg(key));
         });
     }
 
@@ -1680,9 +1680,9 @@ void MainWindow::btPostorder() {
     int need = bt.postorder(nullptr, 0);//先探测遍历输出长度：传空指针和 0 容量，让后端只返回需要多少个元素
     if (need <= 0) {
         view->resetScene();
-        view->setTitle(QStringLiteral("后序遍历：空树"));
+        view->setTitle(QStringLiteral("后序周游：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("后序遍历：空树"));
+        showMessage(QStringLiteral("后序周游：空树"));
         return;
     }
 
@@ -1713,13 +1713,13 @@ void MainWindow::btPostorder() {
 
         steps.push_back([this, i, m, key, node]() {
             view->resetScene();
-            view->setTitle(QStringLiteral("后序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+            view->setTitle(QStringLiteral("后序周游：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
 
             g_btHighlightNode = node;
             drawBT(bt.root(), 400, 120, 200, 0);
             g_btHighlightNode = nullptr;
 
-            showMessage(QStringLiteral("后序遍历：访问 %1").arg(key));
+            showMessage(QStringLiteral("后序周游：访问 %1").arg(key));
         });
     }
 
@@ -1730,18 +1730,18 @@ void MainWindow::btLevelorder() {
     // 先检查树是否为空
     if (bt.root() == nullptr) {
         view->resetScene();
-        view->setTitle(QStringLiteral("层序遍历：空树"));
+        view->setTitle(QStringLiteral("层序周游：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("层序遍历：空树"));
+        showMessage(QStringLiteral("层序周游：空树"));
         return;
     }
 
     int need = bt.levelorder(nullptr, 0);//先探测遍历输出长度：传空指针和 0 容量，让后端只返回需要多少个元素
     if (need <= 0) {
         view->resetScene();
-        view->setTitle(QStringLiteral("层序遍历：空树"));
+        view->setTitle(QStringLiteral("层序周游：空树"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("层序遍历：空树"));
+        showMessage(QStringLiteral("层序周游：空树"));
         return;
     }
 
@@ -1785,22 +1785,22 @@ void MainWindow::btLevelorder() {
 
         steps.push_back([this, i, m, key, node]() {
             view->resetScene();
-            view->setTitle(QStringLiteral("层序遍历：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
+            view->setTitle(QStringLiteral("层序周游：访问 %1（%2/%3）").arg(key).arg(i + 1).arg(m));
 
             g_btHighlightNode = node;
             drawBT(bt.root(), 400, 120, 200, 0);
             g_btHighlightNode = nullptr;
 
-            showMessage(QStringLiteral("层序遍历：访问 %1").arg(key));
+            showMessage(QStringLiteral("层序周游：访问 %1").arg(key));
         });
     }
 
     // 结束状态
     steps.push_back([this]() {
         view->resetScene();
-        view->setTitle(QStringLiteral("层序遍历：完成"));
+        view->setTitle(QStringLiteral("层序周游：完成"));
         drawBT(bt.root(), 400, 120, 200, 0);
-        showMessage(QStringLiteral("层序遍历：完成"));
+        showMessage(QStringLiteral("层序周游：完成"));
     });
 
     timer.start();
@@ -2578,166 +2578,391 @@ void MainWindow::drawBT(ds::BTNode* root, qreal x, qreal y, qreal /*distance*/, 
 
 void MainWindow::drawAVL(int v, const QVector<int>& restoreKeys, int idx, int total) {
     // 步骤1：插入前的静态画面
-        steps.push_back([=, this]() {
-            avl.clear();
-            for (int k : restoreKeys) avl.insert(k);
-            view->resetScene();
-            view->setTitle(
-                QStringLiteral("AVL树：准备插入 %1（第 %2/%3 步）").arg(v).arg(idx + 1).arg(total)
-            );
-            drawBT(avl.root(), 400, 120, 200, 0);
-            showMessage(QStringLiteral("AVL树：准备插入 %1").arg(v));
-        });
+    steps.push_back([=, this]() {
+        avl.clear();
+        for (int k : restoreKeys) avl.insert(k);
 
-        // 步骤2：执行插入 + 若有旋转则播放“丝滑旋转动画”
-        steps.push_back([=, this]() {
-            // 小工具：根据当前树结构计算结点坐标（和 drawBT 一样的布局）
-            auto computePos = [](ds::BTNode* root, qreal baseX, qreal baseY, QHash<ds::BTNode*, QPointF>& pos) {
-                pos.clear();
-                if (!root) return;
+        // 清掉可能残留的“按指针高亮”
+        g_btHighlightNode = nullptr;
 
-                QHash<ds::BTNode*, int> xIndex;
-                QHash<ds::BTNode*, int> depth;
-                int idx = 0;
+        view->resetScene();
+        view->setTitle(
+            QStringLiteral("AVL树：准备插入 %1（第 %2/%3 步）").arg(v).arg(idx + 1).arg(total)
+        );
+        drawBT(avl.root(), 400, 120, 200, 0);
+        showMessage(QStringLiteral("AVL树：准备插入 %1").arg(v));
+    });
 
-                std::function<void(ds::BTNode*, int)> inorder =
-                    [&](ds::BTNode* p, int d) {
-                        if (!p) return;
-                        inorder(p->left,  d + 1);
-                        xIndex[p] = idx++;
-                        depth[p]  = d;
-                        inorder(p->right, d + 1);
-                    };
-                inorder(root, 0);
-                if (idx <= 0) return;
+    // 步骤2：执行插入 + 若有旋转则播放动画（LL/RR：1段；LR/RL：2段）
+    steps.push_back([=, this]() {
+        // 小工具：根据当前树结构计算结点坐标（与 drawBT 同一套布局：中序序号 + 层深）
+        auto computePos = [](ds::BTNode* root, qreal baseX, qreal baseY, QHash<ds::BTNode*, QPointF>& pos) {
+            pos.clear();
+            if (!root) return;
 
-                const qreal stepX  = 80.0;
-                const qreal levelH = 100.0;
-                const qreal mid    = ((idx - 1) * stepX) / 2.0;
+            QHash<ds::BTNode*, int> xIndex;
+            QHash<ds::BTNode*, int> depth;
+            int idx = 0;
 
-                for (auto it = xIndex.constBegin(); it != xIndex.constEnd(); ++it) {
-                    ds::BTNode* n = it.key();
-                    qreal px = baseX + it.value() * stepX - mid;
-                    qreal py = baseY + depth.value(n) * levelH;
-                    pos[n] = QPointF(px, py);
-                }
+            std::function<void(ds::BTNode*, int)> inorder =
+                [&](ds::BTNode* p, int d) {
+                    if (!p) return;
+                    inorder(p->left,  d + 1);
+                    xIndex[p] = idx++;
+                    depth[p]  = d;
+                    inorder(p->right, d + 1);
+                };
+            inorder(root, 0);
+            if (idx <= 0) return;
+
+            const qreal stepX  = 80.0;
+            const qreal levelH = 100.0;
+            const qreal mid    = ((idx - 1) * stepX) / 2.0;
+
+            for (auto it = xIndex.constBegin(); it != xIndex.constEnd(); ++it) {
+                ds::BTNode* n = it.key();
+                qreal px = baseX + it.value() * stepX - mid;
+                qreal py = baseY + depth.value(n) * levelH;
+                pos[n] = QPointF(px, py);
+            }
+        };
+
+        // ====== 旋转前形态（BST 直接插入）与 LR/RL 中间态（第1次单旋后）所需的模拟工具 ======
+        auto simBuildNode = [](int key) -> ds::BTNode* {
+            ds::BTNode* p = static_cast<ds::BTNode*>(std::malloc(sizeof(ds::BTNode)));
+            if (!p) return nullptr;
+            p->key = key;
+            p->left = p->right = nullptr;
+            return p;
+        };
+
+        std::function<ds::BTNode*(ds::BTNode*)> simClone =
+            [&](ds::BTNode* src) -> ds::BTNode* {
+                if (!src) return nullptr;
+                ds::BTNode* p = simBuildNode(src->key);
+                if (!p) return nullptr;
+                p->left  = simClone(src->left);
+                p->right = simClone(src->right);
+                return p;
             };
 
-            // 1）插入前布局
-            QHash<ds::BTNode*, QPointF> posBefore;
-            computePos(avl.root(), 400, 120, posBefore);
+        std::function<void(ds::BTNode*)> simDestroy =
+            [&](ds::BTNode* p) {
+                if (!p) return;
+                simDestroy(p->left);
+                simDestroy(p->right);
+                std::free(p);
+            };
 
-            // 2）真正插入（这里会做 LL/RR/LR/RL 旋转，并记录 rotationRecords）
-            avl.insert(v);
-            const auto& recs = avl.rotationRecords();
+        std::function<void(ds::BTNode*&, int)> simBstInsert =
+            [&](ds::BTNode*& rt, int key) {
+                if (!rt) {
+                    rt = simBuildNode(key);
+                    return;
+                }
+                if (key < rt->key) simBstInsert(rt->left, key);
+                else if (key > rt->key) simBstInsert(rt->right, key);
+            };
 
-            // 3）插入后布局
-            QHash<ds::BTNode*, QPointF> posAfter;
-            computePos(avl.root(), 400, 120, posAfter);
+        std::function<ds::BTNode*(ds::BTNode*, int)> simFindNode =
+            [&](ds::BTNode* rt, int key) -> ds::BTNode* {
+                if (!rt) return nullptr;
+                if (rt->key == key) return rt;
+                if (key < rt->key) return simFindNode(rt->left, key);
+                return simFindNode(rt->right, key);
+            };
 
-            // 4）没有失衡，直接静态显示
-            if (recs.empty()) {
-                view->resetScene();
-                view->setTitle(
-                    QStringLiteral("AVL树：插入 %1（无需旋转）").arg(v)
-                );
-                drawBT(avl.root(), 400, 120, 200, 0);
-                showMessage(
-                    QStringLiteral("AVL树：插入 %1 后仍然平衡，无需旋转").arg(v)
-                );
-                return;
+        std::function<ds::BTNode**(ds::BTNode*&, int)> simFindRef =
+            [&](ds::BTNode*& rt, int key) -> ds::BTNode** {
+                if (!rt) return nullptr;
+                if (rt->key == key) return &rt;
+                if (key < rt->key) return simFindRef(rt->left, key);
+                return simFindRef(rt->right, key);
+            };
+
+        auto simRotateLeft = [](ds::BTNode*& k2) {
+            if (!k2 || !k2->right) return;
+            ds::BTNode* k1 = k2->right;
+            k2->right = k1->left;
+            k1->left = k2;
+            k2 = k1;
+        };
+
+        auto simRotateRight = [](ds::BTNode*& k2) {
+            if (!k2 || !k2->left) return;
+            ds::BTNode* k1 = k2->left;
+            k2->left = k1->right;
+            k1->right = k2;
+            k2 = k1;
+        };
+
+        // 1）插入前布局（可留作兜底，不作为旋转动画起点）
+        QHash<ds::BTNode*, QPointF> posBefore;
+        computePos(avl.root(), 400, 120, posBefore);
+
+        // 2）克隆一份“插入前”的树，用于模拟“旋转前的 BST 直接插入形态”
+        ds::BTNode* simRoot = simClone(avl.root());
+
+        // 3）真正插入（AVL 会旋转，并记录 rotationRecords）
+        avl.insert(v);
+        const auto& recs = avl.rotationRecords();
+
+        // 4）插入后布局（最终平衡树）
+        QHash<ds::BTNode*, QPointF> posAfter;
+        computePos(avl.root(), 400, 120, posAfter);
+
+        // 把最终布局也做一个 key->pos 映射（用于动画的终点）
+        QHash<int, QPointF> posAfterKey;
+        for (auto it = posAfter.constBegin(); it != posAfter.constEnd(); ++it) {
+            posAfterKey[it.key()->key] = it.value();
+        }
+
+        // 5）没有失衡，直接静态显示
+        if (recs.empty()) {
+            if (simRoot) { simDestroy(simRoot); simRoot = nullptr; }
+
+            g_btHighlightNode = nullptr;
+
+            view->resetScene();
+            view->setTitle(QStringLiteral("AVL树：插入 %1（无需旋转）").arg(v));
+            drawBT(avl.root(), 400, 120, 200, 0);
+            showMessage(QStringLiteral("AVL树：插入 %1 后仍然平衡，无需旋转").arg(v));
+            return;
+        }
+
+        // 6）有旋转：先构造“旋转前（BST 直接插入后）”的位置映射，并先显示这一帧
+        simBstInsert(simRoot, v);
+
+        // 旋转前坐标：key -> pos
+        QHash<ds::BTNode*, QPointF> simPosInsertPtr;
+        computePos(simRoot, 400, 120, simPosInsertPtr);
+
+        QHash<int, QPointF> posInsertKey;
+        for (auto it = simPosInsertPtr.constBegin(); it != simPosInsertPtr.constEnd(); ++it) {
+            posInsertKey[it.key()->key] = it.value();
+        }
+
+        // 先展示“旋转前”的插入位置（高亮新结点）
+        g_btHighlightNode = simFindNode(simRoot, v);
+        view->resetScene();
+        view->setTitle(QStringLiteral("AVL树：插入 %1（旋转前：BST 直接插入位置）").arg(v));
+        drawBT(simRoot, 400, 120, 200, 0);
+        showMessage(QStringLiteral("AVL树：新结点 %1 先按 BST 规则插入；若失衡，将通过旋转调整").arg(v));
+
+        // 7）准备旋转信息（取本次插入记录的第1个旋转）
+        const auto& r = recs.front();
+        QString typeStr;
+        switch (r.type) {
+            case ds::AVL::RotationRecord::LL: typeStr = QStringLiteral("LL"); break;
+            case ds::AVL::RotationRecord::RR: typeStr = QStringLiteral("RR"); break;
+            case ds::AVL::RotationRecord::LR: typeStr = QStringLiteral("LR"); break;
+            case ds::AVL::RotationRecord::RL: typeStr = QStringLiteral("RL"); break;
+        }
+
+        const bool isDouble = (r.type == ds::AVL::RotationRecord::LR || r.type == ds::AVL::RotationRecord::RL);
+
+        // 8）LR/RL：计算“中间态（第1次单旋后）”的 key->pos
+        QHash<int, QPointF> posMidKey;
+        if (isDouble) {
+            const int zKey = (r.z ? r.z->key : v);
+            ds::BTNode** zRef = simFindRef(simRoot, zKey);
+            if (zRef && *zRef) {
+                if (r.type == ds::AVL::RotationRecord::LR) {
+                    // LR：第1次单旋 = 对 z->left 做左旋
+                    if ((*zRef)->left) simRotateLeft((*zRef)->left);
+                } else {
+                    // RL：第1次单旋 = 对 z->right 做右旋
+                    if ((*zRef)->right) simRotateRight((*zRef)->right);
+                }
             }
 
-            // 5）有失衡：播放从 posBefore -> posAfter 的平滑动画
-            const auto& r = recs.front();
-            QString typeStr;
-            switch (r.type) {
-                case ds::AVL::RotationRecord::LL: typeStr = QStringLiteral("LL"); break;
-                case ds::AVL::RotationRecord::RR: typeStr = QStringLiteral("RR"); break;
-                case ds::AVL::RotationRecord::LR: typeStr = QStringLiteral("LR"); break;
-                case ds::AVL::RotationRecord::RL: typeStr = QStringLiteral("RL"); break;
+            QHash<ds::BTNode*, QPointF> simPosMidPtr;
+            computePos(simRoot, 400, 120, simPosMidPtr);
+            for (auto it = simPosMidPtr.constBegin(); it != simPosMidPtr.constEnd(); ++it) {
+                posMidKey[it.key()->key] = it.value();
             }
+        }
 
-            // 暂停外层 steps 的定时器，交给 QTimeLine 播放细粒度动画
-            timer.stop();
-            // GIF 导出时：标记正在进行细粒度动画（避免 playSteps 误判“已结束”提前收尾）
-            ++gifActiveTimelines_;
+        // 模拟树用完释放
+        if (simRoot) { simDestroy(simRoot); simRoot = nullptr; }
+        g_btHighlightNode = nullptr; // 防止后续 drawBT 误高亮
 
-            const int frames = 18;   // 帧数越多越丝滑
-            const int duration = 700;  // 动画总时长（毫秒）
+        // 9）暂停外层 steps 的定时器，交给 QTimeLine 播放细粒度动画
+        timer.stop();
 
+        // GIF 导出时：LR/RL 两段动画；LL/RR 一段动画
+        gifActiveTimelines_ += (isDouble ? 2 : 1);
+
+        const int frames   = 18;
+        const int duration = animTimelineDurationMs_;
+
+        // 启动一段旋转动画：结点按 “fromKey -> toKey” 插值移动；结构用最终 AVL 树
+        auto startTimeline = [=, this](
+            const QHash<int, QPointF>& fromKey,
+            const QHash<int, QPointF>& toKey,
+            const QString& titleSuffix,
+            ds::BTNode* h1, ds::BTNode* h2, ds::BTNode* h3,
+            const QString& endMsg,
+            std::function<void()> onDone
+        ) {
             QTimeLine* tl = new QTimeLine(duration, this);
             tl->setFrameRange(0, frames);
 
-            // 每一帧：重画整棵树，结点按 posBefore -> posAfter 插值移动
             connect(tl, &QTimeLine::frameChanged, this, [=, this](int frame) {
                 qreal t = (frames == 0) ? 1.0 : qreal(frame) / frames;
 
                 view->resetScene();
-                view->setTitle(QStringLiteral("AVL树：插入 %1（%2 旋转动画 %3/%4）").arg(v).arg(typeStr).arg(frame).arg(frames));
+                view->setTitle(QStringLiteral("AVL树：插入 %1（%2 %3 %4/%5）")
+                                   .arg(v).arg(typeStr).arg(titleSuffix).arg(frame).arg(frames));
 
-                // 当前帧的坐标
-                QHash<ds::BTNode*, QPointF> posNow;// 用来存当前帧每个节点的坐标
-                for (auto it = posAfter.constBegin(); it != posAfter.constEnd(); ++it) {
-                    ds::BTNode* node = it.key();
-                    QPointF pAfter = it.value();
-                    QPointF pBefore = posBefore.contains(node) ? posBefore.value(node) : pAfter; // 新结点：从最终位置“长出来”
-                    qreal xNow = lerp(pBefore.x(), pAfter.x(), t);//当前位置 = 起点 + (终点 - 起点) * t
-                    qreal yNow = lerp(pBefore.y(), pAfter.y(), t);
-                    posNow.insert(node, QPointF(xNow, yNow));
-                }
+                // 当前帧坐标（对最终树的结点指针建立 posNow）
+                QHash<ds::BTNode*, QPointF> posNow;
 
-                // 递归函数，用来画整棵树
-                // 画边 + 点（结构用当前真正的 AVL 树，坐标用插值后的）
-                std::function<void(ds::BTNode*)> drawRec =
-                    [&](ds::BTNode* p) {
-                        if (!p) return;
-                        QPointF cp = posNow.value(p);
+                std::function<void(ds::BTNode*)> fillPos = [&](ds::BTNode* p) {
+                    if (!p) return;
 
-                        // 递归画左子树，并连线
-                        if (p->left) {
-                            QPointF cl = posNow.value(p->left);
-                            view->addEdge(QPointF(cp.x(), cp.y() + 34),
-                                          QPointF(cl.x(), cl.y() - 34));
-                            drawRec(p->left);
-                        }
-                        // 递归画右子树，并连线
-                        if (p->right) {
-                            QPointF cr = posNow.value(p->right);
-                            view->addEdge(QPointF(cp.x(), cp.y() + 34),
-                                          QPointF(cr.x(), cr.y() - 34));
-                            drawRec(p->right);
-                        }
-                        // 画节点圆圈
-                        bool hl = (p == r.z || p == r.y || p == r.x);
-                        view->addNode(cp.x(), cp.y(), QString::number(p->key), hl);
-                    };
-                // 真正开始画树（从根节点开始）
+                    QPointF pTo;
+                    if (toKey.contains(p->key)) pTo = toKey.value(p->key);
+                    else if (posAfter.contains(p)) pTo = posAfter.value(p);
+                    else pTo = QPointF(0, 0);
+
+                    QPointF pFrom = fromKey.contains(p->key) ? fromKey.value(p->key) : pTo;
+
+                    posNow.insert(p, QPointF(lerp(pFrom.x(), pTo.x(), t),
+                                            lerp(pFrom.y(), pTo.y(), t)));
+
+                    fillPos(p->left);
+                    fillPos(p->right);
+                };
+                fillPos(avl.root());
+
+                std::function<void(ds::BTNode*)> drawRec = [&](ds::BTNode* p) {
+                    if (!p) return;
+                    QPointF cp = posNow.value(p);
+
+                    if (p->left) {
+                        QPointF cl = posNow.value(p->left);
+                        view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                      QPointF(cl.x(), cl.y() - 34));
+                        drawRec(p->left);
+                    }
+                    if (p->right) {
+                        QPointF cr = posNow.value(p->right);
+                        view->addEdge(QPointF(cp.x(), cp.y() + 34),
+                                      QPointF(cr.x(), cr.y() - 34));
+                        drawRec(p->right);
+                    }
+
+                    bool hl = (p == h1 || p == h2 || p == h3);
+                    view->addNode(cp.x(), cp.y(), QString::number(p->key), hl);
+                };
                 drawRec(avl.root());
 
                 if (frame == frames) {
-                    QString msg = QStringLiteral("AVL树：插入 %1 后，结点 %2 失衡，进行了 %3 旋转").arg(v).arg(r.z ? QString::number(r.z->key) : QStringLiteral("?")).arg(typeStr);
-                    if (r.y) msg += QStringLiteral("，y = %1").arg(r.y->key);
-                    if (r.x) msg += QStringLiteral("，x = %1").arg(r.x->key);
-                    showMessage(msg);
+                    showMessage(endMsg);
                 }
             });
 
-            // 动画结束：恢复外层 timer（如果还有后续步骤）
             connect(tl, &QTimeLine::finished, this, [=, this]() {
                 tl->deleteLater();
-                // GIF 导出时：细粒度动画结束
+
+                // GIF 导出时：本段细粒度动画结束
                 if (gifActiveTimelines_ > 0) --gifActiveTimelines_;
-                // 如果正在导出 GIF，且此时已无后续 steps，则尝试收尾写文件
                 maybeFinishGifExport();
 
-                if (stepIndex < steps.size()) {
-                    timer.start();          // 继续播放后面的步骤
-                } else {
-                    showMessage(QStringLiteral("播放结束"));
-                }
+                onDone();
             });
 
             tl->start();
+        };
+
+        // 10）给用户留一小段时间看清“旋转前插入位置”，再启动旋转动画
+        QTimer::singleShot(220, this, [=, this]() {
+            if (isDouble) {
+                // LR/RL：两段动画
+
+                const QString msg1 =
+                    (r.type == ds::AVL::RotationRecord::LR)
+                        ? QStringLiteral("AVL树：%1 第1次旋转：对 y=%2 左旋（涉及 x=%3）")
+                              .arg(typeStr)
+                              .arg(r.y ? QString::number(r.y->key) : QStringLiteral("?"))
+                              .arg(r.x ? QString::number(r.x->key) : QStringLiteral("?"))
+                        : QStringLiteral("AVL树：%1 第1次旋转：对 y=%2 右旋（涉及 x=%3）")
+                              .arg(typeStr)
+                              .arg(r.y ? QString::number(r.y->key) : QStringLiteral("?"))
+                              .arg(r.x ? QString::number(r.x->key) : QStringLiteral("?"));
+
+                // 第1段：旋转前（BST 插入后） -> 中间态
+                startTimeline(
+                    posInsertKey,
+                    posMidKey,
+                    QStringLiteral("第1次旋转"),
+                    r.y, r.x, nullptr,
+                    msg1,
+                    [=, this]() {
+                        const QString msg2 =
+                            (r.type == ds::AVL::RotationRecord::LR)
+                                ? QStringLiteral("AVL树：%1 第2次旋转：对 z=%2 右旋（完成）")
+                                      .arg(typeStr)
+                                      .arg(r.z ? QString::number(r.z->key) : QStringLiteral("?"))
+                                : QStringLiteral("AVL树：%1 第2次旋转：对 z=%2 左旋（完成）")
+                                      .arg(typeStr)
+                                      .arg(r.z ? QString::number(r.z->key) : QStringLiteral("?"));
+
+                        // 第2段：中间态 -> 最终平衡态
+                        startTimeline(
+                            posMidKey,
+                            posAfterKey,
+                            QStringLiteral("第2次旋转"),
+                            r.z, r.x, nullptr,
+                            msg2,
+                            [=, this]() {
+                                // 关键：结束后重绘最终静态画面（无高亮）
+                                g_btHighlightNode = nullptr;
+                                view->resetScene();
+                                view->setTitle(QStringLiteral("AVL树：插入 %1（旋转完成）").arg(v));
+                                drawBT(avl.root(), 400, 120, 200, 0);
+
+                                if (stepIndex < steps.size()) {
+                                    timer.start();
+                                } else {
+                                    showMessage(QStringLiteral("播放结束"));
+                                }
+                            }
+                        );
+                    }
+                );
+            } else {
+                // LL/RR：一段动画（旋转前（BST 插入后） -> 最终平衡态）
+                QString msg = QStringLiteral("AVL树：插入 %1 后，结点 %2 失衡，进行了 %3 旋转")
+                                  .arg(v)
+                                  .arg(r.z ? QString::number(r.z->key) : QStringLiteral("?"))
+                                  .arg(typeStr);
+                if (r.y) msg += QStringLiteral("，y = %1").arg(r.y->key);
+                if (r.x) msg += QStringLiteral("，x = %1").arg(r.x->key);
+
+                startTimeline(
+                    posInsertKey,
+                    posAfterKey,
+                    QStringLiteral("旋转动画"),
+                    r.z, r.y, r.x,
+                    msg,
+                    [=, this]() {
+                        // 关键：结束后重绘最终静态画面（无高亮）
+                        g_btHighlightNode = nullptr;
+                        view->resetScene();
+                        view->setTitle(QStringLiteral("AVL树：插入 %1（旋转完成）").arg(v));
+                        drawBT(avl.root(), 400, 120, 200, 0);
+
+                        if (stepIndex < steps.size()) {
+                            timer.start();
+                        } else {
+                            showMessage(QStringLiteral("播放结束"));
+                        }
+                    }
+                );
+            }
         });
+    });
 }
+
